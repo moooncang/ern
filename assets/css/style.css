@@ -1,0 +1,80 @@
+:root{--paper:#f6ecd6;--paper2:#efe1c2;--ink:#2f2518;--soft:#6a563e;--gold:#a8843f;--line:#d3bd8c;--wax:#8f2020;--leather:#3a291d;color-scheme:light}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.85 "Gowun Batang",serif;word-break:keep-all;-webkit-text-size-adjust:100%}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--wax);outline-offset:3px}
+h1,h2,h3{margin:0;font-family:"Nanum Myeongjo",serif;line-height:1.35}
+h1{font-size:clamp(1.75rem,5vw,2.75rem);font-weight:800}
+h2{font-size:clamp(1.375rem,3.4vw,1.75rem);font-weight:700;margin-bottom:1.1em}
+h3{font-size:1.25rem;font-weight:700}
+p{margin:0 0 1em}
+.wrap{max-width:64rem;margin:0 auto;padding:0 16px}
+.wrap.narrow{max-width:46rem}
+.label{margin:0 0 14px;font:600 .8125rem/1.2 "Cormorant Garamond",serif;letter-spacing:.28em;text-transform:uppercase;color:var(--gold)}
+
+/* 머리·바닥 */
+.top{position:sticky;top:0;z-index:5;background:rgb(246 236 214/.94);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 16px;padding-block:8px}
+.brand{font:700 1rem "Nanum Myeongjo",serif;text-decoration:none}
+.tabs{display:flex}
+.tabs a{padding:6px 12px;text-decoration:none;border-bottom:2px solid transparent}
+.tabs a:hover{border-color:var(--line)}
+.tabs a[aria-current]{color:var(--wax);border-color:var(--wax)}
+.tabs kbd{margin-right:6px;font:600 .8125rem "Cormorant Garamond",serif;color:var(--gold)}
+.foot{padding:48px 0 64px;border-top:1px solid var(--line);text-align:center}
+.foot nav{display:flex;justify-content:center;gap:20px}
+
+/* 본문 */
+.head{padding:72px 0 48px;text-align:center}
+.head .lead{margin:14px 0 0;color:var(--soft)}
+.head .lead+p{margin-top:18px}
+.sec{padding:56px 0;border-top:1px solid var(--line)}
+.sec.end{text-align:center}
+.closing{font:400 1.25rem "Nanum Myeongjo",serif}
+dl{margin:0 0 1em}
+dt{font:700 1.0625rem "Nanum Myeongjo",serif}
+dd{margin:0 0 1.1em}
+.scroll{overflow-x:auto;margin:0 0 1em}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font:700 .9375rem "Nanum Myeongjo",serif;color:var(--soft);white-space:nowrap}
+pre{margin:0;padding:18px;background:var(--leather);color:#f1e3c4;font:.875rem/1.7 ui-monospace,Consolas,monospace;width:max-content;min-width:100%}
+.adult{display:inline-block;padding:0 9px;border:1px solid var(--wax);color:var(--wax);font:700 .875rem/1.7 "Nanum Myeongjo",serif}
+.btn{display:inline-block;padding:10px 24px;background:var(--wax);color:var(--paper);font-family:"Nanum Myeongjo",serif;text-decoration:none}
+
+/* 인물 카드 */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,26rem),1fr));gap:20px}
+.cards img,.strip img{width:100%;box-shadow:0 6px 18px rgb(58 41 29/.2)}
+.strip{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 16px 20px}
+.strip a{flex:0 0 min(82vw,30rem);scroll-snap-align:center}
+
+/* 문서 묶음 */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:16px}
+.tile{display:block;padding:24px 22px;background:var(--paper2);text-decoration:none;box-shadow:inset 0 0 0 1px var(--line),inset 0 0 0 5px var(--paper2),inset 0 0 0 6px var(--line)}
+.tile:hover{box-shadow:inset 0 0 0 1px var(--gold),inset 0 0 0 5px var(--paper2),inset 0 0 0 6px var(--gold)}
+.tile p:last-child{margin:8px 0 0;color:var(--soft);font-size:.9375rem;line-height:1.7}
+
+/* 입장 — 봉인된 서임장 */
+.cover{min-height:100svh;display:grid;place-items:center;padding:24px 16px 72px;background:var(--paper) url(../../images/crest.jpg) center/cover no-repeat}
+.writ{position:relative;width:min(100%,34rem);padding:48px 28px 88px;text-align:center;background:rgb(246 236 214/.95);box-shadow:inset 0 0 0 6px var(--paper),inset 0 0 0 7px var(--line),0 18px 40px rgb(58 41 29/.22)}
+.writ h1{font-size:clamp(1.5rem,5vw,2rem)}
+.writ-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows 1.1s ease .45s}
+.writ-body>div{overflow:hidden}
+.writ-body p{margin:18px 0 0}
+.open .writ-body{grid-template-rows:1fr}
+.blank{display:inline-block;width:7em;margin-left:.4em;border-bottom:1px solid var(--ink)}
+.hint{margin:26px 0 0;color:var(--soft);font-size:.9375rem}
+.hint .b,.open .hint .a{display:none}
+.open .hint .b{display:inline}
+.seal{position:absolute;left:50%;bottom:-46px;width:96px;height:96px;margin-left:-48px;filter:drop-shadow(0 4px 6px rgb(58 20 20/.35));transition:transform .2s}
+.seal:hover{transform:scale(1.05)}
+.seal svg{position:absolute;inset:0;width:100%;height:100%;transition:transform .7s cubic-bezier(.3,.7,.2,1),opacity .6s .15s}
+.seal .l{clip-path:polygon(0 0,54% 0,46% 22%,57% 40%,44% 58%,55% 78%,48% 100%,0 100%)}
+.seal .r{clip-path:polygon(54% 0,100% 0,100% 100%,48% 100%,55% 78%,44% 58%,57% 40%,46% 22%)}
+.open .seal .l{transform:translate(-24px,10px) rotate(-14deg);opacity:0}
+.open .seal .r{transform:translate(24px,12px) rotate(12deg);opacity:0}
+
+@media (max-width:520px){.writ .label{letter-spacing:.14em}.tabs kbd{display:none}.tabs a{padding-inline:9px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}html{scroll-behavior:auto}}
