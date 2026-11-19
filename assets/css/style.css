@@ -321,6 +321,8 @@ pre .mine{color:#f0b08a;font-weight:700}
 .mode-pane{max-width:44rem;margin:56px auto 0;text-align:center;animation:settle .6s var(--ease)}
 .mode-pane h2{font-size:clamp(2rem,5vw,3rem);margin-bottom:.5em}
 .mode-pane p{font:400 1.1875rem/1.8 "Nanum Myeongjo",serif}
+.mode-pane .lv{margin-top:1.4em;padding-top:1.2em;border-top:1px solid var(--line);font:400 1rem/1.8 "Gowun Batang",serif;color:var(--soft)}
+.mode-pane .lv b{display:block;font:700 .8125rem/1 "Nanum Myeongjo",serif;letter-spacing:.2em;color:var(--wax);margin-bottom:.7em}
 .note{display:grid;gap:16px;margin-top:1.6em}
 .note label{display:grid;grid-template-columns:5.5em 1fr;align-items:baseline;gap:12px}
 .note label span{font:700 1rem "Nanum Myeongjo",serif}

@@ -345,7 +345,7 @@ def home():
 
     deeds = sec("세 가지 출발", "BEGINNINGS", '<div class="deeds">' + "".join(
         f'<a class="deed" href="start.html#{k}"><svg class="mark" aria-hidden="true"><use href="#wax"/></svg>'
-        f'<h3>{e(t)}</h3><span class="en">{en}</span><p>{e(a)}</p></a>' for k, t, en, a, _ in d.모드) + "</div>", narrow=False)
+        f'<h3>{e(t)}</h3><span class="en">{en}</span><p>{e(a)}</p></a>' for k, t, en, a, _, _ in d.모드) + "</div>", narrow=False)
 
     end = (f'<section class="sec end"><div class="wrap"><p class="closing" data-rv><span data-domain-or="{e(d.홈_맺음)}">'
            f'{e(d.홈_맺음)}</span></p>{crack_button()}</div></section>')
@@ -444,10 +444,11 @@ def start():
     slots = "".join(
         f'<button type="button" role="tab" class="slot" data-m="{k}" aria-selected="{"true" if i == 0 else "false"}">'
         f'<svg class="mark" aria-hidden="true"><use href="#wax"/></svg><b>{e(t)}</b><span class="en">{en}</span></button>'
-        for i, (k, t, en, _, _) in enumerate(d.모드))
+        for i, (k, t, en, *_) in enumerate(d.모드))
     panes = "".join(
         f'<article class="mode-pane" id="{k}" data-m="{k}" data-name="{e(t)}" role="tabpanel"{"" if i == 0 else " hidden"}>'
-        f'<h2>{e(t)}</h2><p>{e(a)}</p><p>{e(b)}</p></article>' for i, (k, t, _, a, b) in enumerate(d.모드))
+        f'<h2>{e(t)}</h2><p>{e(a)}</p><p>{e(b)}</p><p class="lv"><b>난이도</b>{e(lv)}</p></article>'
+        for i, (k, t, _, a, b, lv) in enumerate(d.모드))
     modes = f'<section class="modes" data-modes><div class="wrap"><div class="slots" role="tablist" aria-label="시작 모드">{slots}</div>{panes}</div></section>'
     fields = "".join(f'<label><span>{e(t)}</span><input data-n="{e(t)}" placeholder="{e(ph)}" autocomplete="off"></label>'
                      for t, ph in d.노트_칸)
