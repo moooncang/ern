@@ -9,26 +9,42 @@
 <meta property="og:description" content="변경의 신임 영주가 되어 영지를 키우고, 가신과 이웃과 값을 따지는 정통 판타지 영지물.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#f6ecd6">
+<script>(function(r){r.className='js';var s;try{s=localStorage.getItem('ern-season')}catch(e){}if(!s){var m=new Date().getMonth();s=m<2||m>10?'winter':m<5?'spring':m<8?'summer':'autumn'}r.dataset.season=s})(document.documentElement)</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body class="cover">
-
-<main>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="wax" viewBox="0 0 100 100">
+<body class="cover" data-default-domain="에른">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="wax" viewBox="0 0 100 100">
 <path fill="#8f2020" d="M50 3c9-2 15 5 23 7s17 2 20 11-2 15 0 23 6 16 2 24-13 8-18 15-8 14-17 15-14-6-22-7-18 1-23-7 0-16-3-24-9-14-6-23 12-10 18-16S41 5 50 3z"/>
 <circle cx="50" cy="50" r="32" fill="#a12a26"/><circle cx="50" cy="50" r="32" fill="none" stroke="#6f1616" stroke-width="1.5"/>
 <path fill="#7a1a1a" d="M50 24c6 4 8 9 5 13 7-1 11 4 7 10 7 0 9 7 3 12 5 3 4 10-3 12 1 6-5 10-12 8-7 2-13-2-12-8-7-2-8-9-3-12-6-5-4-12 3-12-4-6 0-11 7-10-3-4-1-9 5-13z"/>
 <path stroke="#a12a26" stroke-width="1.6" stroke-linecap="round" fill="none" d="M50 31v46M50 44l-7-5M50 44l7-5M50 56l-9-5M50 56l9-5M50 67l-7-4M50 67l7-4"/>
-</symbol></svg>
-<div class="writ">
-  <p class="label">ROYAL WRIT · KINGDOM OF ORTEN</p>
+<path fill="#fff" opacity=".14" d="M24 36c5-12 16-19 28-19-9 4-17 11-22 22z"/>
+</symbol>
+<g id="ico" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+<symbol id="i-spring" viewBox="0 0 24 24"><path d="M12 21v-9M12 12c0-4-3-6-7-6 0 4 3 6 7 6zM12 14c0-3 2.5-5 6-5 0 3-2.5 5-6 5z"/></symbol>
+<symbol id="i-summer" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/></symbol>
+<symbol id="i-autumn" viewBox="0 0 24 24"><path d="M12 21V6M12 6l-2-3M12 6l2-3M12 10l-4-3M12 10l4-3M12 14l-4-3M12 14l4-3M12 18l-4-3M12 18l4-3"/></symbol>
+<symbol id="i-winter" viewBox="0 0 24 24"><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9M12 6l-2-2M12 6l2-2M12 18l-2 2M12 18l2 2"/></symbol>
+<symbol id="i-next" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+</g>
+<filter id="wob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter>
+</defs></svg>
+<canvas class="air" aria-hidden="true"></canvas>
+<div class="cover-tools"><button class="snd" type="button" aria-pressed="true" aria-label="효과음 (M)" title="효과음 (M)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3l4-3.5v12l-4-3.5H4z"/><path class="w" d="M14.5 9a4 4 0 0 1 0 6M17 6.5a7.5 7.5 0 0 1 0 11"/><path class="x" d="M15 9.5l5 5m0-5l-5 5"/></svg></button></div>
+<main>
+
+<div class="writ" data-writ>
   <h1>변경의 신임 영주가 되었다</h1>
-  <div class="writ-body"><div><p>오르텐의 왕은 이 문서를 지닌 자에게 왕국 동쪽 끝, 에른 변경의 땅을 봉토로 내린다.</p><p>받은 자는 가을 수확 뒤 공납을 바치고, 소집이 있으면 병력을 낸다.</p><p>영지의 이름 <span class="blank"></span></p></div></div>
-  <p class="hint"><span class="a">인장을 눌러 봉인을 뗍니다</span><span class="b">한 번 더 누르면 들어갑니다</span></p>
-  <a class="seal" href="home.html" data-seal aria-label="봉인을 떼고 들어가기"><svg class="l"><use href="#wax"/></svg><svg class="r"><use href="#wax"/></svg></a>
+  <p class="en">ROYAL WRIT · KINGDOM OF ORTEN</p>
+  <div class="writ-body"><div><p class="ln">오르텐의 왕은 이 문서를 지닌 자에게 왕국 동쪽 끝, 에른 변경의 땅을 봉토로 내린다.</p><p class="ln">받은 자는 가을 수확 뒤 공납을 바치고, 소집이 있으면 병력을 낸다.</p>
+    <p class="ln sign"><label for="dn">영지의 이름</label><input id="dn" data-domain-input maxlength="12" placeholder="에른" autocomplete="off" spellcheck="false" enterkeyhint="go"></p>
+    <p class="ln"><a class="btn" href="home.html" data-enter>봉토를 받는다</a></p></div></div>
+  <p class="hint">인장을 눌러 봉인을 뗍니다</p>
+  <a class="seal" href="home.html" data-seal aria-label="봉인을 떼고 서임장 펼치기"><span class="bits" aria-hidden="true"><i style="--a:8deg;--r:78px;--s:0.9"></i><i style="--a:52deg;--r:96px;--s:0.6"></i><i style="--a:97deg;--r:70px;--s:1"></i><i style="--a:141deg;--r:104px;--s:0.7"></i><i style="--a:186deg;--r:82px;--s:0.8"></i><i style="--a:228deg;--r:98px;--s:0.6"></i><i style="--a:263deg;--r:74px;--s:1"></i><i style="--a:312deg;--r:90px;--s:0.7"></i><i style="--a:338deg;--r:110px;--s:0.5"></i></span><svg class="l" aria-hidden="true"><use href="#wax"/></svg><svg class="r" aria-hidden="true"><use href="#wax"/></svg></a>
 </div>
 </main>
 

@@ -1,22 +1,410 @@
-const seal = document.querySelector('[data-seal]');
-
-if (seal) {
-  // 첫 누름: 봉인이 갈라지고 서임장이 펼쳐진다. 두 번째 누름(또는 6초 뒤): 입장
-  const go = () => { location.href = seal.href; };
-  const act = (e) => {
-    if (e.type === 'keydown' && (e.target === seal || e.metaKey || e.ctrlKey || e.altKey || e.key === 'Tab' || e.key === 'Shift')) return;
-    e.preventDefault();
-    if (document.body.classList.contains('open')) return go();
-    document.body.classList.add('open');
-    setTimeout(go, 6000);
+/* 변경의 신임 영주가 되었다 — 사이트 동작 */
+(() => {
+  const d = document, root = d.documentElement;
+  const $ = (s, r = d) => r.querySelector(s);
+  const $$ = (s, r = d) => [...r.querySelectorAll(s)];
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
   };
-  document.addEventListener('click', act);
-  document.addEventListener('keydown', act);
-} else {
-  // 숫자 키 1~4로 메뉴 이동
-  document.addEventListener('keydown', (e) => {
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
-    const a = document.querySelectorAll('.tabs a')[e.key - 1];
-    if (a) location.href = a.href;
+  const typing = () => /INPUT|TEXTAREA|SELECT/.test(d.activeElement ? d.activeElement.tagName : '');
+  const isCover = d.body.classList.contains('cover');
+
+  /* ── 효과음: 파일 없이 Web Audio로 만든다. 첫 조작 뒤에만 울리고, 끄면 기억한다 ── */
+  const sfx = (() => {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    let ctx, out, hiss, on = store.get('ern-sfx') !== 'off';
+    const last = {};
+    function wake() {
+      if (!AC || !on) return;
+      if (!ctx) {
+        ctx = new AC(); out = ctx.createGain(); out.gain.value = .7; out.connect(ctx.destination);
+        hiss = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+        const ch = hiss.getChannelData(0);
+        for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+      }
+      if (ctx.state === 'suspended') ctx.resume();
+    }
+    ['pointerdown', 'keydown'].forEach(t => addEventListener(t, wake, { capture: true, passive: true }));
+    function env(g, t, peak, dur) {
+      g.gain.setValueAtTime(.0001, t);
+      g.gain.exponentialRampToValueAtTime(peak, t + .008);
+      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    }
+    function noise(dur, peak, type, f, f2, q, at) {
+      const t = ctx.currentTime + (at || 0), s = ctx.createBufferSource(), flt = ctx.createBiquadFilter(), g = ctx.createGain();
+      s.buffer = hiss; s.loop = true; flt.type = type; flt.Q.value = q || .7; flt.frequency.setValueAtTime(f, t);
+      if (f2) flt.frequency.exponentialRampToValueAtTime(f2, t + dur);
+      env(g, t, peak, dur); s.connect(flt); flt.connect(g); g.connect(out);
+      s.start(t, Math.random() * .5); s.stop(t + dur + .05);
+    }
+    function tone(f, dur, peak, type, f2, at) {
+      const t = ctx.currentTime + (at || 0), o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
+      if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+      env(g, t, peak, dur); o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + .05);
+    }
+    const lib = {
+      tick: () => noise(.035, .05, 'highpass', 3600),                       // 깃펜 끝
+      page: () => noise(.24, .16, 'bandpass', 1500, 520, .6),               // 종이 넘김
+      stamp: () => { tone(96, .2, .5, 'sine', 44); noise(.07, .22, 'lowpass', 800); },   // 도장
+      crack: () => { noise(.09, .4, 'highpass', 2200); tone(170, .28, .35, 'triangle', 58); noise(.5, .1, 'bandpass', 1100, 320, .6, .06); },  // 밀랍 깨짐
+      quill: () => { for (let i = 0; i < 5; i++) noise(.09, .04, 'bandpass', 2400 + Math.random() * 900, 1800, 2.5, i * .11 + Math.random() * .03); },  // 글씨
+      chime: () => { tone(784, 1.1, .05); tone(1175, 1.4, .035, 'sine', 0, .05); },  // 계절 바뀜
+    };
+    function play(n, gap) {
+      if (!on || !ctx || d.hidden) return;
+      const now = performance.now();
+      if (now - (last[n] || 0) < (gap == null ? 60 : gap)) return;
+      last[n] = now;
+      if (ctx.state === 'running') lib[n]();
+      else if (navigator.userActivation && navigator.userActivation.isActive) ctx.resume().then(lib[n]);
+    }
+    function paint() { $$('.snd').forEach(b => b.setAttribute('aria-pressed', on)); }
+    function toggle() {
+      on = !on; store.set('ern-sfx', on ? 'on' : 'off'); paint();
+      if (on) { wake(); play('stamp'); }
+    }
+    $$('.snd').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); toggle(); }));
+    paint();
+    if (fine) d.addEventListener('mouseover', e => {
+      const t = e.target.closest && e.target.closest('.tabs a, .btn, .ro, .deed, .slot, .season, .edict, .rg-list button, .face-tabs button, .g-ticks button, .dial button, .fg, .tilt');
+      if (t && !t.contains(e.relatedTarget)) play('tick', 70);
+    });
+    d.addEventListener('click', e => {
+      const t = e.target.closest && e.target.closest('.tabs a, .foot a, .brand, .btn, .deed, .tilt, .fg, .rep, .prof-nav a, .fief');
+      if (t && !t.matches('[data-enter], [data-copy]')) play('page');
+    });
+    return { play, toggle };
+  })();
+
+  /* ── 공기: 계절마다 다른 것이 떠다닌다(입장 화면은 금빛 먼지) ── */
+  const air = (() => {
+    const cv = $('.air');
+    if (!cv || reduce) return { reset() {} };
+    const g = cv.getContext('2d'), dpr = Math.min(devicePixelRatio || 1, 2);
+    const KIND = {
+      spring: { n: 22, col: '196,112,128', vy: [.25, .7], vx: [-.2, .5], size: [3, 6], shape: 'petal' },
+      summer: { n: 18, col: '168,132,63', vy: [-.35, -.08], vx: [-.2, .2], size: [1.2, 2.6], shape: 'dot' },
+      autumn: { n: 20, col: '176,96,38', vy: [.4, 1], vx: [-.4, .7], size: [4, 8], shape: 'leaf' },
+      winter: { n: 34, col: '110,132,156', vy: [.3, .9], vx: [-.2, .3], size: [1.2, 3], shape: 'dot' },
+      dust: { n: 28, col: '168,132,63', vy: [-.22, -.05], vx: [-.1, .12], size: [.8, 2.2], shape: 'dot' },
+    };
+    let W = 0, H = 0, ps = [], kind, raf = 0;
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    function size() { W = cv.width = innerWidth * dpr; H = cv.height = innerHeight * dpr; }
+    function make(k, anywhere) {
+      return { x: rnd(0, W), y: anywhere ? rnd(0, H) : (k.vy[0] > 0 ? -20 : H + 20), vx: rnd(k.vx[0], k.vx[1]) * dpr, vy: rnd(k.vy[0], k.vy[1]) * dpr,
+        s: rnd(k.size[0], k.size[1]) * dpr, rot: rnd(0, 6.28), vr: rnd(-.02, .02), ph: rnd(0, 6.28), a: rnd(.22, .6) };
+    }
+    function reset() {
+      kind = KIND[isCover ? 'dust' : root.dataset.season] || KIND.autumn;
+      const count = Math.round(kind.n * Math.min(1, innerWidth / 900 + .35));
+      ps = Array.from({ length: count }, () => make(kind, true));
+    }
+    function frame() {
+      raf = requestAnimationFrame(frame);
+      g.clearRect(0, 0, W, H);
+      for (const p of ps) {
+        p.ph += .012; p.rot += p.vr; p.x += p.vx + Math.sin(p.ph) * .35 * dpr; p.y += p.vy;
+        if (p.y > H + 24 || p.y < -24 || p.x > W + 24 || p.x < -24) Object.assign(p, make(kind, false));
+        g.save(); g.translate(p.x, p.y); g.rotate(p.rot);
+        g.fillStyle = `rgba(${kind.col},${p.a * (kind.shape === 'dot' ? .7 + .3 * Math.sin(p.ph * 3) : 1)})`;
+        g.beginPath();
+        if (kind.shape === 'dot') g.arc(0, 0, p.s, 0, 6.28);
+        else if (kind.shape === 'petal') g.ellipse(0, 0, p.s, p.s * .55, 0, 0, 6.28);
+        else { g.moveTo(-p.s, 0); g.quadraticCurveTo(0, -p.s * .7, p.s, 0); g.quadraticCurveTo(0, p.s * .7, -p.s, 0); }
+        g.fill(); g.restore();
+      }
+    }
+    size(); reset(); frame();
+    addEventListener('resize', () => { size(); reset(); });
+    d.addEventListener('visibilitychange', () => { cancelAnimationFrame(raf); if (!d.hidden) frame(); });
+    return { reset };
+  })();
+
+  /* ── 영지 이름: 입장 화면·시작 쪽에서 적으면 사이트 전체에 쓰인다 ── */
+  const DEF = d.body.dataset.defaultDomain || '';
+  const getName = () => (store.get('ern-domain') || '').trim().slice(0, 12);
+  function paintName() {
+    const nm = getName();
+    $$('[data-domain]').forEach(el => { el.textContent = nm || DEF; });
+    $$('[data-domain-or]').forEach(el => { el.textContent = nm ? `${nm}의 장부는 아직 비어 있습니다.` : el.dataset.domainOr; });
+    root.classList.toggle('named', !!nm);
+  }
+  $$('[data-domain-input]').forEach(inp => {
+    inp.value = getName();
+    inp.addEventListener('input', () => { store.set('ern-domain', inp.value.trim()); paintName(); d.dispatchEvent(new Event('ern:change')); });
   });
-}
+  paintName();
+
+  /* ── 계절 ── */
+  function setSeason(s, user) {
+    root.dataset.season = s;
+    $$('button[data-season]').forEach(b => b.setAttribute('aria-pressed', b.dataset.season === s));
+    if (user) { store.set('ern-season', s); sfx.play('chime', 0); air.reset(); }
+  }
+  $$('button[data-season]').forEach(b => b.addEventListener('click', () => setSeason(b.dataset.season, true)));
+  setSeason(root.dataset.season);
+
+  /* ── 등장 ── */
+  const rv = $$('[data-rv]');
+  if ('IntersectionObserver' in window && !reduce) {
+    const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }),
+      { rootMargin: '0px 0px -7% 0px' });
+    rv.forEach(el => io.observe(el));
+  } else rv.forEach(el => el.classList.add('in'));
+  function onceVisible(el, fn) {
+    if (!('IntersectionObserver' in window)) return fn();
+    const io = new IntersectionObserver(es => { if (es[0].isIntersecting) { io.disconnect(); fn(); } }, { threshold: .45 });
+    io.observe(el);
+  }
+
+  /* ── 숫자 키로 메뉴 이동, M으로 소리 ── */
+  d.addEventListener('keydown', e => {
+    if (isCover || typing() || e.metaKey || e.ctrlKey || e.altKey) return;
+    const a = $$('.tabs a')[e.key - 1];
+    if (a) { sfx.play('page'); location.href = a.href; return; }
+    if (e.key === 'm' || e.key === 'M') sfx.toggle();
+  });
+
+  /* ── 입장: 봉인을 떼면 서임장이 펼쳐지고, 한 줄씩 적힌다 ── */
+  const writ = $('[data-writ]');
+  if (writ) {
+    const seal = $('[data-seal]'), inp = $('[data-domain-input]', writ), enter = $('[data-enter]', writ), lines = $$('.ln', writ);
+    let state = 'idle';
+    const open = () => {
+      if (state !== 'idle') return;
+      state = 'open'; d.body.classList.add('open'); sfx.play('crack');
+      lines.forEach((ln, i) => setTimeout(() => { ln.classList.add('on'); if (i < 2) sfx.play('quill', 0); }, reduce ? 0 : 900 + i * 850));
+      setTimeout(() => { if (state === 'open') state = 'ready'; if (fine) inp.focus({ preventScroll: true }); }, reduce ? 0 : 900 + lines.length * 850);
+    };
+    const go = () => {
+      if (state === 'go' || state === 'idle') return;
+      state = 'go'; sfx.play('stamp'); d.body.classList.add('go');
+      setTimeout(() => { location.href = enter.href; }, reduce ? 0 : 650);
+    };
+    seal.addEventListener('click', e => { e.preventDefault(); open(); });
+    enter.addEventListener('click', e => { e.preventDefault(); go(); });
+    d.addEventListener('keydown', e => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.key === 'Tab' || e.key === 'Shift') return;
+      if (state === 'idle') { if (e.target !== seal && !e.target.closest('.snd')) { e.preventDefault(); open(); } }
+      else if (e.key === 'Enter' && e.target !== enter) { e.preventDefault(); go(); }
+    });
+    addEventListener('pageshow', e => { if (e.persisted) { d.body.classList.remove('go'); state = 'ready'; } });
+  }
+
+  /* ── home: 첫 화면 인물 띠가 마우스를 따라 살짝 움직인다 ── */
+  const hero = $('[data-hero]');
+  if (hero && fine && !reduce) hero.addEventListener('pointermove', e => {
+    hero.style.setProperty('--mx', (e.clientX / innerWidth * 2 - 1).toFixed(3));
+  });
+
+  /* ── home: 인물 카드 기울기 ── */
+  if (fine && !reduce) $$('.tilt').forEach(t => {
+    t.addEventListener('pointermove', e => {
+      const r = t.getBoundingClientRect();
+      t.style.setProperty('--ry', ((e.clientX - r.left) / r.width - .5) * 12 + 'deg');
+      t.style.setProperty('--rx', (.5 - (e.clientY - r.top) / r.height) * 10 + 'deg');
+    });
+    t.addEventListener('pointerleave', () => { t.style.removeProperty('--rx'); t.style.removeProperty('--ry'); });
+  });
+
+  /* ── home: 자라는 영지 ── */
+  const grow = $('[data-grow]');
+  if (grow) {
+    const st = JSON.parse(grow.dataset.stages), range = $('[data-g-range]', grow), groups = $$('.st', grow), pops = $$('[data-g-pop]', grow);
+    let cur = -1, shown = 0, raf = 0, touched = false;
+    function count(to) {
+      cancelAnimationFrame(raf);
+      const from = shown, t0 = performance.now(), dur = reduce ? 0 : 700;
+      (function step(t) {
+        const p = dur ? Math.min(1, (t - t0) / dur) : 1;
+        shown = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+        pops.forEach(el => { el.textContent = shown.toLocaleString('ko-KR'); });
+        if (p < 1) raf = requestAnimationFrame(step);
+      })(t0);
+    }
+    function set(i, user) {
+      i = +i; if (i === cur) return;
+      cur = i; range.value = i; grow.style.setProperty('--p', i / (st.length - 1));
+      groups.forEach(gp => gp.classList.toggle('on', +gp.dataset.s <= i));
+      $$('[data-g-name]', grow).forEach(el => { el.textContent = st[i][0]; });
+      $('[data-g-fac]', grow).textContent = st[i][2];
+      $('[data-g-cap]', grow).textContent = i === st.length - 1 ? ' 이상' : '까지';
+      $$('[data-g]', grow).forEach(b => { +b.dataset.g === i ? b.setAttribute('aria-current', 'true') : b.removeAttribute('aria-current'); });
+      count(st[i][1]);
+      if (user) { touched = true; sfx.play(i >= 3 ? 'stamp' : 'page'); }
+    }
+    range.addEventListener('input', () => set(range.value, true));
+    $$('[data-g]', grow).forEach(b => b.addEventListener('click', () => set(b.dataset.g, true)));
+    set(0);
+    /* 처음 보일 때 한 번, 개척지에서 마을까지 자라는 모습을 보여 준다 */
+    if (!reduce) onceVisible(grow, () => [1, 2].forEach((i, k) => setTimeout(() => { if (!touched) set(i); }, 900 + k * 1300)));
+  }
+
+  /* ── home: 네 세력 — 결정을 누르면 깃발이 오르내린다 ── */
+  const est = $('[data-est]');
+  if (est) {
+    const ed = JSON.parse(est.dataset.edicts), lv = JSON.parse(est.dataset.levels), out = $('[data-est-out]', est), base = out.textContent;
+    const paint = () => {
+      const on = $$('.edict[aria-pressed="true"]', est).map(b => b.dataset.e);
+      $$('.est-col', est).forEach(c => {
+        const v = on.reduce((s, k) => s + (ed[k].fx[c.dataset.k] || 0), 2);
+        c.style.setProperty('--lv', v); $('[data-lv]', c).textContent = lv[v];
+        c.dataset.dir = v > 2 ? 'up' : v < 2 ? 'down' : '';
+      });
+      out.textContent = on.length ? on.map(k => ed[k].out).join(' ') : base;
+    };
+    $$('.edict', est).forEach(b => b.addEventListener('click', () => {
+      b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true'); sfx.play('stamp', 0); paint();
+    }));
+  }
+
+  /* 그림을 다 받은 뒤에 바꿔 끼운다 */
+  function swap(img, src, alt, still) {
+    img.classList.add('out');
+    const im = new Image();
+    im.onload = im.onerror = () => { if (!still()) return; img.src = src; if (alt != null) img.alt = alt; img.classList.remove('out'); };
+    im.src = src;
+  }
+
+  /* ── 인물: 고르는 화면 ── */
+  const sel = $('[data-select]');
+  if (sel) {
+    const img = $('[data-sel-img]', sel), ros = $$('.ro', sel), link = $('[data-f-link]', sel), F = {};
+    $$('[data-f]', sel).forEach(el => { F[el.dataset.f] = el; });
+    let cur = null;
+    function pick(a, quiet) {
+      if (!a || a === cur) return;
+      const c = JSON.parse(a.dataset.c);
+      if (cur) cur.classList.remove('on');
+      a.classList.add('on'); cur = a;
+      Object.keys(F).forEach(k => { F[k].textContent = c[k]; });
+      link.href = a.href;
+      if (!quiet) { sfx.play('page', 90); sel.classList.remove('swap'); void sel.offsetWidth; sel.classList.add('swap'); }
+      swap(img, c.img, null, () => cur === a);
+    }
+    ros.forEach(a => {
+      a.addEventListener('pointerdown', () => { a._was = a === cur; });
+      a.addEventListener('mouseenter', () => { if (fine) pick(a); });
+      a.addEventListener('focus', () => pick(a));
+      /* 손가락으로는 첫 누름이 고르기, 고른 것을 다시 누르면 기록으로 간다 */
+      a.addEventListener('click', e => { if (!fine && a._was === false) { e.preventDefault(); pick(a); } });
+    });
+    $$('.sel-f button', sel).forEach(b => b.addEventListener('click', () => {
+      $$('.sel-f button', sel).forEach(x => x.setAttribute('aria-selected', x === b));
+      $$('.roster > li', sel).forEach(li => { li.hidden = b.dataset.f !== 'all' && li.dataset.g !== b.dataset.f; });
+      pick($('.roster > li:not([hidden]) .ro', sel));
+    }));
+    sel.addEventListener('keydown', e => {
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      const list = $$('.roster > li:not([hidden]) .ro', sel);
+      let i = list.indexOf(d.activeElement); if (i < 0) i = list.indexOf(cur);
+      const nx = list[(i + (e.key === 'ArrowDown' ? 1 : list.length - 1)) % list.length];
+      if (nx) { nx.focus(); e.preventDefault(); }
+    });
+    pick(d.getElementById(location.hash.slice(1)) || ros[0], true);
+  }
+
+  /* ── 인물 상세: 표정 ── */
+  const faces = $('[data-faces]');
+  if (faces) {
+    const img = $('[data-face]', faces), bs = $$('.face-tabs button', faces);
+    let cur = bs[0];
+    const show = b => {
+      if (b === cur) return;
+      cur = b; bs.forEach(x => x.setAttribute('aria-pressed', x === b)); sfx.play('page', 90);
+      swap(img, b.dataset.src, b.dataset.alt, () => cur === b);
+    };
+    bs.forEach(b => b.addEventListener('click', () => show(b)));
+    d.addEventListener('keydown', e => {
+      if (typing() || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { show(bs[(bs.indexOf(cur) + (e.key === 'ArrowRight' ? 1 : bs.length - 1)) % bs.length]); e.preventDefault(); }
+      const nav = e.key === 'q' || e.key === 'Q' ? $('[data-prev]') : e.key === 'e' || e.key === 'E' ? $('[data-next]') : null;
+      if (nav) location.href = nav.href;
+    });
+    /* 한가할 때 나머지 표정을 미리 받아 둔다 */
+    const saver = navigator.connection && navigator.connection.saveData;
+    if (!saver) (window.requestIdleCallback || setTimeout)(() => bs.forEach(b => { new Image().src = b.dataset.src; }), { timeout: 3000 });
+  }
+
+  /* ── 세계: 약도에서 지역을 고른다 ── */
+  const atlas = $('[data-atlas]');
+  if (atlas) {
+    const keys = $$('.rg-list button', atlas).map(b => b.dataset.r);
+    let cur = '';
+    function go(k, user) {
+      if (k === cur || keys.indexOf(k) < 0) return;
+      cur = k;
+      $$('[data-r]', atlas).forEach(el => {
+        const on = el.dataset.r === k;
+        if (el.matches('.rg-info')) el.hidden = !on;
+        else if (el.matches('button')) on ? el.setAttribute('aria-current', 'true') : el.removeAttribute('aria-current');
+        else el.classList.toggle('on', on);
+      });
+      if (user) { sfx.play('page'); history.replaceState(null, '', '#' + k); }
+    }
+    atlas.addEventListener('click', e => {
+      const t = e.target.closest('[data-r]');
+      if (t && !t.matches('.rg-info')) go(t.dataset.r, true);
+    });
+    atlas.addEventListener('keydown', e => {
+      const rg = e.target.closest('.rg');
+      if (rg && (e.key === 'Enter' || e.key === ' ')) { go(rg.dataset.r, true); e.preventDefault(); return; }
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      go(keys[(keys.indexOf(cur) + (e.key === 'ArrowDown' ? 1 : keys.length - 1)) % keys.length], true); e.preventDefault();
+    });
+    go(keys.indexOf(location.hash.slice(1)) >= 0 ? location.hash.slice(1) : keys[0]);
+  }
+
+  /* ── 영지: 시세표에서 수량을 눌러 셈한다 ── */
+  const tally = $('[data-tally]');
+  if (tally) {
+    const coin = v => [[Math.floor(v / 100), '금화'], [Math.floor(v % 100 / 10), '은화'], [v % 10, '동화']]
+      .filter(p => p[0]).map(p => p[0].toLocaleString('ko-KR') + p[1]).join(' ') || '0동화';
+    const sum = () => {
+      let t = 0;
+      $$('tbody tr', tally).forEach(r => { const q = +$('output', r).textContent; t += q * r.dataset.v; r.classList.toggle('has', q > 0); });
+      $('[data-total]', tally).textContent = coin(t);
+    };
+    tally.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.hasAttribute('data-reset')) $$('tbody output', tally).forEach(o => { o.textContent = 0; });
+      else { const o = $('output', b.parentNode); o.textContent = Math.max(0, Math.min(999, +o.textContent + +b.dataset.d)); }
+      sfx.play('tick', 0); sum();
+    });
+  }
+
+  /* ── 시작: 모드 고르기와 유저노트 초안 ── */
+  const modes = $('[data-modes]');
+  let modeName = '';
+  if (modes) {
+    const slots = $$('.slot', modes), panes = $$('.mode-pane', modes);
+    const set = (k, user) => {
+      slots.forEach(b => b.setAttribute('aria-selected', b.dataset.m === k));
+      panes.forEach(p => { p.hidden = p.dataset.m !== k; if (!p.hidden) modeName = p.dataset.name; });
+      if (user) { sfx.play('stamp', 0); history.replaceState(null, '', '#' + k); }
+      d.dispatchEvent(new Event('ern:change'));
+    };
+    slots.forEach(b => b.addEventListener('click', () => set(b.dataset.m, true)));
+    const h = location.hash.slice(1);
+    set(panes.some(p => p.dataset.m === h) ? h : panes[0].dataset.m);
+  }
+  const note = $('[data-note]');
+  if (note) {
+    const out = $('[data-note-out]', note), said = $('[data-copied]', note);
+    const draw = () => {
+      const rows = [['시작 모드', modeName], ['영지 이름', getName() || DEF]].concat($$('[data-n]', note).map(i => [i.dataset.n, i.value.trim()]));
+      out.textContent = rows.filter(r => r[1]).map(r => `[${r[0]}] ${r[1]}`).join('\n');
+    };
+    note.addEventListener('input', draw); d.addEventListener('ern:change', draw); draw();
+    $('[data-copy]', note).addEventListener('click', () => {
+      const fail = () => { said.textContent = '복사하지 못했습니다. 위 글을 직접 선택해 복사해 주십시오.'; };
+      if (!navigator.clipboard) return fail();
+      navigator.clipboard.writeText(out.textContent).then(() => { said.textContent = '복사했습니다.'; sfx.play('stamp', 0); }, fail);
+    });
+  }
+})();
