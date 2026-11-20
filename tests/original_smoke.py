@@ -116,7 +116,11 @@ def check_browser(browser, base, mobile=False, motion="reduce", viewport=None):
     assert page.locator(".frieze .fg img").evaluate_all("els => els.map(el => el.getAttribute('src'))") == [f"images/fig/{code}.jpg" for code in FIGURES]
     expect(page.locator(".frieze .fg img")).to_have_count(6)
     expect(page.locator(".deck .tilt")).to_have_count(12)
-    assert page.locator(".tabs a").evaluate_all("els => els.map(el => el.getAttribute('href'))") == ["world.html", "domain.html", "characters.html", "start.html"]
+    assert page.locator(".tabs a:not([data-music-nav])").evaluate_all("els => els.map(el => el.getAttribute('href'))") == ["world.html", "domain.html", "characters.html", "start.html"]
+    expect(page.locator(".tabs a[data-music-nav]")).to_have_count(1)
+    expect(page.locator(".tabs a[data-music-nav]")).to_have_attribute("href", "music.html")
+    assert page.locator(".tabs a").nth(4).get_attribute("data-music-nav") is not None
+    assert page.locator(".tabs a").count() == 5
     passed("six original hero figures in order, twelve cards, original navigation")
 
     page.locator('.dial [data-season="spring"]').click()

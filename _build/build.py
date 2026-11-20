@@ -7,6 +7,7 @@ from hashlib import sha256
 from pathlib import Path
 
 import data as d
+from music_data import TRACKS
 from engraving import town_details, atlas_details
 from map_art import illustrated_map, region_art
 from town_art import town_art
@@ -47,6 +48,9 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
     tabs = "".join(
         '<a href="{}{}"{}><kbd>{}</kbd>{}</a>'.format(pre, h, ' aria-current="page"' if h == 파일 else "", i, e(t))
         for i, (h, t) in enumerate(d.메뉴, 1))
+    tabs += (f'<a href="{pre}music.html" data-music-nav'
+             + (' aria-current="page"' if 파일 == "music.html" else '')
+             + '><kbd>5</kbd>음악</a>')
     dial = "".join(
         f'<button type="button" data-season="{k}" aria-pressed="false" aria-label="{e(t)}" title="{e(t)}">{ico(k)}</button>'
         for k, t, _, _ in d.계절)
@@ -62,6 +66,7 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
         f'<span data-domain>{e(d.기본_영지명)}</span></a>'
         f'<div class="dial" role="group" aria-label="계절">{dial}</div>{snd}</div></div></header>')
     foot = "".join(f'<a href="{pre}{h}">{e(t)}</a>' for h, t in d.메뉴)
+    foot += f'<a href="{pre}music.html" data-music-nav>음악</a>'
     bottom = "" if cover else (
         f'<footer class="foot"><div class="wrap"><svg class="mark" aria-hidden="true"><use href="#wax"/></svg>'
         f'<p class="en">{e(d.영문)}</p><nav aria-label="바닥글">{foot}</nav></div></footer>')
@@ -71,6 +76,11 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
     scene_scripts = "" if cover else "\n".join(
         f'<script src="{asset_url("assets/js/" + name + ".js", pre)}"></script>'
         for name in ("scenes", "scenes-pages", "scenes-atlas"))
+    music_data = json.dumps({
+        "pageUrl": pre + "music.html",
+        "tracks": [{**track, "src": pre + track["src"],
+                    "cover": pre + track["cover"] if track["cover"] else None} for track in TRACKS],
+    }, ensure_ascii=False).replace("<", "\\u003c")
     return f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -104,6 +114,7 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 <link rel="stylesheet" href="{asset_url('assets/css/finish-pages.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/finish-atlas.css', pre)}">
 {scene_styles}
+<link rel="stylesheet" href="{asset_url('assets/css/music.css', pre)}">
 </head>
 <body{' class="cover"' if cover else ''} data-default-domain="{e(d.기본_영지명)}">
 {SPRITE.replace("@@ASSET_ROOT@@", pre)}
@@ -116,6 +127,9 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 <script src="{asset_url('assets/js/main.js', pre)}"></script>
 <script src="{asset_url('assets/js/visual.js', pre)}"></script>
 {scene_scripts}
+<script type="application/json" id="music-data">{music_data}</script>
+<script src="{asset_url('assets/js/music.js', pre)}"></script>
+<script src="{asset_url('assets/js/music-ui.js', pre)}"></script>
 </body>
 </html>
 """
@@ -539,9 +553,43 @@ def start():
                  + sec("안내", "NOTICE", f"<p>{e(d.안내)}</p>{crack_button()}"))
 
 
+def music():
+    def duration(seconds):
+        seconds = round(seconds)
+        return f"{seconds // 60}:{seconds % 60:02d}"
+
+    first = TRACKS[0]
+    cover = (f'<img data-music-cover src="{e(first["cover"])}" alt="{e(first["title"])} 표지" width="1920" height="1080" fetchpriority="high">'
+             if first["cover"] else '<img data-music-cover hidden alt="" width="1920" height="1080">')
+    choices = "".join(
+        f'<button type="button" class="music-track" data-music-track="{track["id"]}" aria-pressed="{"true" if index == 0 else "false"}">'
+        + (f'<img src="{e(track["cover"])}" alt="" width="1920" height="1080" loading="lazy" decoding="async">'
+           if track["cover"] else f'<span class="music-track-placeholder" aria-hidden="true">{e(track["title"])}</span>')
+        + f'<b>{e(track["title"])}</b><span data-music-track-duration="{track["id"]}">{duration(track["duration"])}</span></button>'
+        for index, track in enumerate(TRACKS))
+    fallback = "".join(
+        f'<section><h2>{e(track["title"])}</h2><audio controls preload="none" src="{e(track["src"])}" aria-label="{e(track["title"])}">'
+        f'<a href="{e(track["src"])}">{e(track["title"])}</a></audio></section>' for track in TRACKS)
+    content = f'''<section class="music-page" data-music-page data-music-ui>
+<div class="music-stage">
+<div class="music-art">{cover}<span class="music-art-fallback" aria-hidden="true"{" hidden" if first["cover"] else ""}>{e(first["title"])}</span></div>
+<div class="music-console">
+<header class="hd"><h1>음악</h1><span class="en">SOUNDTRACK</span></header>
+<h2 data-music-title>{e(first["title"])}</h2>
+<div class="music-transport"><button type="button" data-music-prev aria-label="이전 곡">이전 곡</button><button type="button" data-music-toggle>재생</button><button type="button" data-music-next aria-label="다음 곡">다음 곡</button></div>
+<label class="music-seek"><span class="sr-only">재생 위치</span><input type="range" data-music-seek min="0" max="1000" step="1" value="0"><span data-music-current>0:00</span><span data-music-duration>{duration(first["duration"])}</span></label>
+<label class="music-volume">음량<input type="range" data-music-volume min="0" max="100" step="1" value="40"></label>
+<p data-music-status role="status"></p>
+</div></div>
+<div class="music-tracks" role="group" aria-label="곡 선택">{choices}</div>
+<noscript><div class="music-fallback">{fallback}</div></noscript>
+</section>'''
+    return shell("music.html", "음악", content)
+
+
 def main():
     out = {"index.html": index(), "home.html": home(), "characters.html": characters(),
-           "world.html": world(), "domain.html": domain(), "start.html": start()}
+           "world.html": world(), "domain.html": domain(), "start.html": start(), "music.html": music()}
     out.update({f'char/{c["코드"]}.html': character(i) for i, c in enumerate(d.인물)})
     (ROOT / "char").mkdir(exist_ok=True)
     for name, html in out.items():
@@ -560,6 +608,10 @@ def main():
     for c in d.인물:
         refs |= {ROOT / f'images/c/{c["코드"]}/{k}.jpg' for k in [1] + [k for k, _ in d.표정]}
         refs.add(ROOT / f'images/card/{c["코드"]}.jpg')
+    for track in TRACKS:
+        refs.add(ROOT / track["src"])
+        if track["cover"]:
+            refs.add(ROOT / track["cover"])
     missing = sorted(str(p) for p in refs if not p.exists())
     assert not missing, "없는 파일:\n" + "\n".join(missing)
     assert coin(1500) == "15금화" and coin(342) == "3금화 4은화 2동화" and coin(0) == "0동화"

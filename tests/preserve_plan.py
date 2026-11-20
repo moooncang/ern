@@ -7,6 +7,8 @@ and SVG interiors are allowed across the site. Original body copy, link
 destinations, form controls, and source facts remain protected.
 The four explicitly approved lord's margin notes are validated separately;
 only their exact text may be excluded from the original content digest.
+The authorized fifth music link is likewise audited before exclusion; no
+original content or link fingerprint is replaced for this addition.
 """
 from hashlib import sha256
 from html.parser import HTMLParser
@@ -108,7 +110,7 @@ BASELINE = {
 
 
 class BodySignature(HTMLParser):
-    def __init__(self, exclude_lord_notes=False):
+    def __init__(self, exclude_lord_notes=False, exclude_music_nav=False):
         super().__init__(convert_charrefs=True)
         self.in_body = False
         self.svg_depth = 0
@@ -118,6 +120,8 @@ class BodySignature(HTMLParser):
         self.elements = []
         self.exclude_lord_notes = exclude_lord_notes
         self.note_depth = 0
+        self.exclude_music_nav = exclude_music_nav
+        self.music_depth = 0
 
     def handle_starttag(self, tag, attrs):
         if tag == "script":
@@ -126,6 +130,14 @@ class BodySignature(HTMLParser):
             self.in_body = True
         if not self.in_body:
             return
+        if self.exclude_music_nav:
+            if self.music_depth:
+                if tag not in VOID_TAGS:
+                    self.music_depth += 1
+                return
+            if "data-music-nav" in dict(attrs):
+                self.music_depth = 1
+                return
         if self.exclude_lord_notes:
             if self.note_depth and tag not in VOID_TAGS:
                 self.note_depth += 1
@@ -145,6 +157,9 @@ class BodySignature(HTMLParser):
     def handle_endtag(self, tag):
         if not self.in_body:
             return
+        if self.music_depth:
+            self.music_depth -= 1
+            return
         if self.note_depth:
             self.note_depth -= 1
         if self.svg_depth:
@@ -160,13 +175,152 @@ class BodySignature(HTMLParser):
             self.in_body = False
 
     def handle_startendtag(self, tag, attrs):
-        if self.in_body and not self.svg_depth:
+        if self.in_body and not self.svg_depth and not self.music_depth:
             self.elements.append((tag, dict(attrs)))
             self.structure.append(["empty", tag, sorted(attrs)])
 
     def handle_data(self, data):
-        if self.in_body and not self.svg_depth and not self.script_depth and not self.note_depth:
+        if self.in_body and not self.svg_depth and not self.script_depth and not self.note_depth and not self.music_depth:
             self.words.append(data)
+
+
+class MusicNavAudit(HTMLParser):
+    """Only a verified fifth link in each original navigation may be omitted."""
+
+    def __init__(self, page):
+        super().__init__(convert_charrefs=True)
+        self.page = page
+        self.prefix = "../" if page.startswith("char/") else ""
+        self.stack = []
+        self.active = None
+        self.links = []
+        self.navs = []
+        self.headers = []
+        self.footers = []
+        self.errors = []
+
+    def handle_starttag(self, tag, attrs):
+        # Browsers retain the first duplicate attribute, while dict(attrs)
+        # retains the last. Do not let those interpretations diverge here.
+        values = {}
+        duplicate = False
+        for key, value in attrs:
+            if key in values:
+                duplicate = True
+            else:
+                values[key] = value
+        classes = (values.get("class") or "").split()
+        entry = {"tag": tag, "attrs": values, "links": []}
+        inside_body = any(node["tag"] == "body" for node in self.stack)
+        if tag == "header" and "top" in classes:
+            self.headers.append(entry)
+        if tag == "footer" and "foot" in classes:
+            self.footers.append(entry)
+        if tag == "nav":
+            header = any(node in self.headers for node in self.stack)
+            footer = any(node in self.footers for node in self.stack)
+            entry["kind"] = "header" if header and "tabs" in classes else "footer" if footer else None
+            if entry["kind"]:
+                self.navs.append(entry)
+        if duplicate and (self.active is not None or "data-music-nav" in values or tag in ("header", "footer", "nav")):
+            self.errors.append("music navigation must not rely on duplicate attributes")
+        if tag == "a" and self.stack and self.stack[-1]["tag"] == "nav":
+            self.stack[-1]["links"].append(entry)
+        marked = "data-music-nav" in values
+        if marked:
+            if self.active is not None:
+                self.errors.append("music links must not be nested")
+            else:
+                parent = self.stack[-1] if self.stack else None
+                kind = parent.get("kind") if parent and parent["tag"] == "nav" else None
+                self.active = {"entry": entry, "nav": parent, "kind": kind, "text": [], "kbd": [], "open": [tag]}
+                self.links.append(self.active)
+                if tag != "a" or not inside_body or kind not in ("header", "footer"):
+                    self.errors.append("music link must be a direct anchor in the original header/footer navigation")
+                allowed = {"href", "data-music-nav"}
+                if self.page == "music.html" and kind == "header":
+                    allowed.add("aria-current")
+                    if values.get("aria-current") != "page":
+                        self.errors.append("music page must mark its header music link as current")
+                if set(values) != allowed or values.get("data-music-nav") not in (None, ""):
+                    self.errors.append("music link has unapproved attributes or labels")
+                if values.get("href") != self.prefix + "music.html":
+                    self.errors.append("music link must keep its exact relative music.html destination")
+        elif self.active is not None:
+            if tag != "kbd" or values or self.active["kind"] != "header" or self.active["open"] != ["a"]:
+                self.errors.append("music link may contain only its single unadorned header kbd")
+            if tag == "kbd":
+                self.active["kbd"].append([])
+            if tag not in VOID_TAGS:
+                self.active["open"].append(tag)
+        if tag not in VOID_TAGS:
+            self.stack.append(entry)
+
+    def handle_endtag(self, tag):
+        if self.active is not None:
+            opened = self.active["open"]
+            if not opened or opened[-1] != tag:
+                self.errors.append("music link markup must be properly nested and closed")
+            else:
+                opened.pop()
+                if not opened:
+                    self.active = None
+        if self.stack and self.stack[-1]["tag"] == tag:
+            self.stack.pop()
+        else:
+            # Ancestor recovery never grants a malformed marked link exclusion:
+            # the explicit active-link stack above already records that error.
+            for index in range(len(self.stack) - 1, -1, -1):
+                if self.stack[index]["tag"] == tag:
+                    del self.stack[index:]
+                    break
+
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs)
+        if tag not in VOID_TAGS:
+            self.handle_endtag(tag)
+
+    def handle_data(self, data):
+        if self.active is None:
+            return
+        if self.active["open"][-1] == "kbd" and self.active["kbd"]:
+            self.active["kbd"][-1].append(data)
+        else:
+            self.active["text"].append(data)
+
+    def validate(self):
+        if self.active is not None:
+            self.errors.append("music link is not closed")
+        if self.page == "index.html":
+            if self.links:
+                self.errors.append("the original cover must not gain music navigation links")
+            return self.errors
+        if len(self.headers) != 1 or len(self.footers) != 1:
+            self.errors.append("music additions require the original single header and footer")
+        expected = [self.prefix + path for path in ("world.html", "domain.html", "characters.html", "start.html", "music.html")]
+        for kind in ("header", "footer"):
+            navs = [nav for nav in self.navs if nav["kind"] == kind]
+            links = [link for link in self.links if link["kind"] == kind]
+            if len(navs) != 1 or len(links) != 1:
+                self.errors.append(f"expected exactly one {kind} music link in the original navigation")
+                continue
+            nav, link = navs[0], links[0]
+            if link["nav"] is not nav or [item["attrs"].get("href") for item in nav["links"]] != expected:
+                self.errors.append(f"{kind} music link must be fifth after the four original links")
+            if "".join(link["text"]).strip() != "음악":
+                self.errors.append("music link text must be exactly 음악")
+            keys = ["".join(parts).strip() for parts in link["kbd"]]
+            if keys != (["5"] if kind == "header" else []):
+                self.errors.append("only the header music link may contain its exact single 5 shortcut")
+        if len(self.links) != 2:
+            self.errors.append("only the two authorized music navigation additions are allowed")
+        return self.errors
+
+
+def music_nav_contracts(html, page):
+    parser = MusicNavAudit(page)
+    parser.feed(html)
+    return parser.validate()
 
 
 class LordNoteAudit(HTMLParser):
@@ -238,8 +392,8 @@ def lord_note_contracts(html, page):
     return parser.errors
 
 
-def signatures(html, exclude_lord_notes=False):
-    parser = BodySignature(exclude_lord_notes=exclude_lord_notes)
+def signatures(html, exclude_lord_notes=False, exclude_music_nav=False):
+    parser = BodySignature(exclude_lord_notes=exclude_lord_notes, exclude_music_nav=exclude_music_nav)
     parser.feed(html)
     text = " ".join(" ".join(parser.words).split())
     control_keys = {
@@ -310,8 +464,10 @@ def main():
         html = path.read_text(encoding="utf-8")
         note_errors = lord_note_contracts(html, name)
         failures.extend(f"{name}: {message}" for message in note_errors)
+        music_errors = music_nav_contracts(html, name)
+        failures.extend(f"{name}: {message}" for message in music_errors)
         # Invalid notes are never granted an exclusion from the original hash.
-        actual = signatures(html, exclude_lord_notes=not note_errors)
+        actual = signatures(html, exclude_lord_notes=not note_errors, exclude_music_nav=not music_errors)
         for part in ("content", "semantic"):
             if actual[part] != expected[part]:
                 failures.append(f"{name}: original body {part} changed")
@@ -320,9 +476,14 @@ def main():
     actual_pages = {p.relative_to(ROOT).as_posix() for p in ROOT.glob("*.html")} | {
         p.relative_to(ROOT).as_posix() for p in (ROOT / "char").glob("*.html")
     }
-    unexpected = sorted(actual_pages - BASELINE["pages"].keys())
+    unexpected = sorted(actual_pages - BASELINE["pages"].keys() - {"music.html"})
     if unexpected:
         failures.append(f"Unexpected pages: {', '.join(unexpected)}")
+    music_page = ROOT / "music.html"
+    if not music_page.is_file():
+        failures.append("music.html: authorized music page missing")
+    else:
+        failures.extend(f"music.html: {message}" for message in music_nav_contracts(music_page.read_text(encoding="utf-8"), "music.html"))
     for name, expected in BASELINE["protected"].items():
         path = ROOT / name
         if not path.is_file() or sha256(path.read_bytes()).hexdigest() != expected:
@@ -336,6 +497,7 @@ def main():
     print("PASS: new layouts, wrappers, artwork, and SVG interiors are allowed; entry seal/name/home semantics remain intact.")
     print("PASS: original PLAN.md and _build/data.py source facts are byte-for-byte unchanged.")
     print("PASS: exactly three home and one world margin notes match the authorized text and are noninteractive.")
+    print("PASS: only the audited fifth music links and music.html are added; original fingerprints are unchanged.")
     return 0
 
 
