@@ -111,6 +111,8 @@ class BodySignature(HTMLParser):
         self.elements = []
 
     def handle_starttag(self, tag, attrs):
+        if tag == "script":
+            attrs = [(key, value.split("?")[0] if key == "src" and value else value) for key, value in attrs]
         if tag == "body":
             self.in_body = True
         if not self.in_body:

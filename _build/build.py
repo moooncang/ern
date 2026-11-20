@@ -3,12 +3,17 @@ import json
 import random
 import re
 from html import escape as e
+from hashlib import sha256
 from pathlib import Path
 
 import data as d
 from engraving import town_details, atlas_details
 
 ROOT = Path(__file__).resolve().parent.parent
+def asset_url(path, pre=""):
+    """A changed stylesheet or script must not reuse a prior deployment's cache."""
+    return f"{pre}{path}?v={sha256((ROOT / path).read_bytes()).hexdigest()[:12]}"
+
 BY = {c["코드"]: c for c in d.인물}
 BOOT = ("(function(r){r.className='js';var s;try{s=localStorage.getItem('ern-season')}catch(e){}"
         "if(!s){var m=new Date().getMonth();s=m<2||m>10?'winter':m<5?'spring':m<8?'summer':'autumn'}"
@@ -70,11 +75,11 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#f6ecd6">
 <script>{BOOT}</script>
-<link rel="stylesheet" href="{pre}assets/css/fonts.css">
-<link rel="stylesheet" href="{pre}assets/css/style.css">
-<link rel="stylesheet" href="{pre}assets/css/materials.css">
-<link rel="stylesheet" href="{pre}assets/css/craft.css">
-<link rel="stylesheet" href="{pre}assets/css/entry.css">
+<link rel="stylesheet" href="{asset_url('assets/css/fonts.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/style.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/materials.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/craft.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/entry.css', pre)}">
 </head>
 <body{' class="cover"' if cover else ''} data-default-domain="{e(d.기본_영지명)}">
 {SPRITE.replace("@@ASSET_ROOT@@", pre)}
@@ -84,7 +89,7 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 {본문}
 </main>
 {bottom}
-<script src="{pre}assets/js/main.js"></script>
+<script src="{asset_url('assets/js/main.js', pre)}"></script>
 </body>
 </html>
 """
@@ -486,7 +491,7 @@ def main():
                 refs.add((stylesheet.parent / target.split("#")[0]).resolve())
     for name, html in out.items():
         base = (ROOT / name).parent
-        refs |= {(base / m).resolve() for m in re.findall(r'(?:href|src)="([^"#:]+)"', html)}
+        refs |= {(base / m.split('?')[0]).resolve() for m in re.findall(r'(?:href|src)="([^"#:]+)"', html)}
     for c in d.인물:
         refs |= {ROOT / f'images/c/{c["코드"]}/{k}.jpg' for k in [1] + [k for k, _ in d.표정]}
         refs.add(ROOT / f'images/card/{c["코드"]}.jpg')
