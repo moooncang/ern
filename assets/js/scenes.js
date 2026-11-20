@@ -121,6 +121,10 @@
       { opacity: .2, transform: 'rotate(-7deg) scale(.93)' },
       { opacity: 1, transform: 'rotate(0deg) scale(1)' }
     ], { duration: 720 });
+    if (previous) animate($('.specimen-leaf', specimenStage), [
+      { opacity: .3, transform: 'translate(22px, 12px) rotate(3deg)' },
+      { opacity: 1, transform: 'translate(0, 0) rotate(-7deg)' }
+    ], { duration: 650 });
   }
   if (specimenStage) {
     showSeason();

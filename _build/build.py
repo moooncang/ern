@@ -369,7 +369,9 @@ def home():
         f'<a class="fg" href="char/{k}.html" style="--i:{i}"><img src="images/fig/{k}.jpg" alt="" width="720" height="1080" '
         f'decoding="async"{" fetchpriority=high" if i in (2, 3) else ""}>{plate(BY[k])}</a>'
         for i, k in enumerate(d.홈_인물))
-    hero = (f'<section class="hero scene-frontispiece" data-hero><div class="hero-t"><h1>{e(d.제목)}</h1>'
+    hero = (f'<section class="hero scene-frontispiece" data-hero>'
+            '<span class="desk-study hero-divider" aria-hidden="true"></span><span class="desk-study hero-pen" aria-hidden="true"></span>'
+            f'<div class="hero-t"><h1>{e(d.제목)}</h1>'
             f'<p class="en">{e(d.영문)}</p><p class="genre">{e(d.장르)} <span class="adult">19+</span></p>'
             f'{crack_button()}</div><div class="frieze">{figs}</div></section>')
     writ = ('<section class="sec say"><div class="wrap narrow">'
@@ -407,7 +409,7 @@ def home():
     people = (f'<section class="sec scene-household"><div class="wrap">{hd("사람들", "HOUSEHOLD")}</div>'
               f'<div class="deck" tabindex="0" role="region" aria-label="인물 카드">{deck}</div></section>')
 
-    specimens = '<div class="season-observation" aria-hidden="true">' + "".join(
+    specimens = '<div class="season-observation" aria-hidden="true"><span class="specimen-leaf"></span>' + "".join(
         f'<span class="season-study" data-specimen="{k}"></span>' for k, _, _, _ in d.계절) + '</div>'
     seasons = sec("사계", "SEASONS", '<div class="almanac">' + specimens + '<div class="seasons">' + "".join(
         f'<button type="button" class="season" data-season="{k}" aria-pressed="false">{ico(k)}<b>{e(t)}</b>'

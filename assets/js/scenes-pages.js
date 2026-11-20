@@ -34,6 +34,23 @@
   addEventListener('pagehide', cancelMotion);
   doc.addEventListener('visibilitychange', () => { if (doc.hidden) cancelMotion(); });
 
+  // A decorative mat shares the image's grid cell; the original image is never cropped.
+  $$('.select .sel-stage, .prof .prof-hero').forEach(stage => {
+    const picture = $(':scope > img', stage);
+    if (!picture) return;
+    const mount = doc.createElement('span');
+    mount.className = 'scene-art-mount';
+    mount.setAttribute('aria-hidden', 'true');
+    stage.append(mount);
+    const fit = () => {
+      if (picture.naturalWidth && picture.naturalHeight) {
+        mount.style.setProperty('--portrait-ratio', `${picture.naturalWidth} / ${picture.naturalHeight}`);
+      }
+    };
+    picture.addEventListener('load', fit);
+    fit();
+  });
+
   // All content is visible without this observer. Only entering motion is enhanced.
   const entries = $$('.prof .prof-hero img, .prof .prof-hero .plate, .prof .prof-lead, .prof .rec, .prof .faces, .tally, .modes .slots, [data-note]');
   if ('IntersectionObserver' in window) {
@@ -44,10 +61,11 @@
         node.classList.add('scene-in');
         entryObserver.unobserve(node);
         if (node.contains(doc.activeElement)) return;
-        play(node, [
-          { opacity: .3, transform: 'translateY(30px)' },
+        const hasControls = node.querySelector('a, button, input');
+        play(node, hasControls ? [{ opacity: .45 }, { opacity: 1 }] : [
+          { opacity: .3, transform: 'translateY(24px)' },
           { opacity: 1, transform: 'translateY(0)' }
-        ], { duration: 800 });
+        ], { duration: 720 });
       });
     }, { threshold: .08, rootMargin: '0px 0px -7% 0px' });
     entries.forEach(node => entryObserver.observe(node));
@@ -112,9 +130,13 @@
       if (next === selected) return;
       selected = next;
       play($('.sel-info', roster), [
-        { opacity: .55, transform: 'translateY(10px)' },
-        { opacity: 1, transform: 'translateY(0)' }
+        { opacity: .55 },
+        { opacity: 1 }
       ], { duration: 440 });
+      if (next !== doc.activeElement) play(next, [
+        { outline: '1px solid #d5b67e', outlineOffset: '3px' },
+        { outline: '1px solid transparent', outlineOffset: '3px' }
+      ], { duration: 580 });
     }).observe($('.roster', roster), { subtree: true, attributes: true, attributeFilter: ['class'] });
   }
 
@@ -149,9 +171,9 @@
         if (values.get(output) === output.textContent) return;
         values.set(output, output.textContent);
         play(output, [
-          { opacity: .45, transform: 'translateY(-6px)' },
-          { opacity: 1, transform: 'translateY(0)' }
-        ], { duration: 330 });
+          { opacity: .45, boxShadow: '0 3px 0 #b47c52' },
+          { opacity: 1, boxShadow: '0 3px 0 transparent' }
+        ], { duration: 550 });
       });
     }).observe(tally, { childList: true, characterData: true, subtree: true });
   }
