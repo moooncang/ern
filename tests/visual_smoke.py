@@ -98,6 +98,12 @@ def check_visual(browser, base, width, motion):
         expect(following).to_be_disabled()
         expect(counter).to_have_text("12 / 12")
         expect(previous).to_be_enabled()
+        previous.click()
+        expect(counter).to_have_text("11 / 12")
+        expect(following).to_be_enabled()
+        following.click()
+        expect(counter).to_have_text("12 / 12")
+        expect(following).to_be_disabled()
         assert_no_overflow(page, f"{label}: deck end")
 
         page.locator('[data-g="4"]').click()

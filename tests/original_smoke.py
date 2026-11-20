@@ -51,10 +51,11 @@ def check_http(base):
     print(f"PASS: {len(paths)} local pages/assets return nonempty HTTP 200", flush=True)
 
 
-def check_browser(browser, base, mobile=False, motion="reduce"):
-    mode = ("mobile" if mobile else "desktop") + f", {motion} motion"
+def check_browser(browser, base, mobile=False, motion="reduce", viewport=None):
+    viewport = viewport or {"width": 390 if mobile else 1440, "height": 844 if mobile else 1000}
+    mode = ("mobile" if mobile else "desktop") + f", {viewport['width']}px, {motion} motion"
     context = browser.new_context(
-        viewport={"width": 390 if mobile else 1440, "height": 844 if mobile else 1000},
+        viewport=viewport,
         is_mobile=mobile, has_touch=mobile, reduced_motion=motion,
         permissions=["clipboard-read", "clipboard-write"],
     )
@@ -100,6 +101,7 @@ def check_browser(browser, base, mobile=False, motion="reduce"):
     page.locator("[data-enter]").click()
     page.wait_for_url("**/home.html")
     expect(page.locator("[data-domain]").first).to_have_text("검증영지")
+    expect(page.locator("[data-domain-or]")).to_have_text("검증영지의 장부는 아직 비어 있습니다.")
     passed("original seal → writ → name → home entry flow")
 
     assert page.locator(".frieze .fg").evaluate_all("els => els.map(el => el.getAttribute('href'))") == [f"char/{code}.html" for code in FIGURES]
@@ -114,6 +116,15 @@ def check_browser(browser, base, mobile=False, motion="reduce"):
     expect(page.locator("html")).to_have_attribute("data-season", "spring")
     expect(page.locator('.dial [data-season="spring"]')).to_have_attribute("aria-pressed", "true")
     passed("season selection and persistence")
+
+    sound = page.locator(".snd")
+    sound_before = sound.get_attribute("aria-pressed")
+    sound.click()
+    expect(sound).to_have_attribute("aria-pressed", "false" if sound_before == "true" else "true")
+    page.keyboard.press("m")
+    expect(sound).to_have_attribute("aria-pressed", sound_before)
+    assert page.evaluate("localStorage.getItem('ern-sfx')") == ("on" if sound_before == "true" else "off")
+    passed("sound icon, keyboard shortcut, and saved preference")
 
     page.locator("[data-g-range]").fill("4")
     expect(page.locator("[data-g-name]").first).to_have_text("도시")

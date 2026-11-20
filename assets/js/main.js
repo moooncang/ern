@@ -83,7 +83,7 @@
   /* ── 공기: 계절마다 다른 것이 떠다닌다(입장 화면은 금빛 먼지) ── */
   const air = (() => {
     const cv = $('.air');
-    if (!cv || reduce) return { reset() {} };
+    if (!cv || reduce || !isCover) return { reset() {} };
     const g = cv.getContext('2d'), dpr = Math.min(devicePixelRatio || 1, 2);
     const KIND = {
       spring: { n: 22, col: '196,112,128', vy: [.25, .7], vx: [-.2, .5], size: [3, 6], shape: 'petal' },

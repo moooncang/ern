@@ -1,0 +1,10 @@
+/* ERN Margin Pen: renamed Nanum Pen Script subset. SIL OFL 1.1.
+   Copyright and provenance: ../fonts/margin-pen/OFL.txt and README.md. */
+@font-face {
+  font-family: 'ERN Margin Pen';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/margin-pen/ern-margin-pen.woff2') format('woff2');
+  unicode-range: U+0020-007E, U+AC00, U+AC04, U+ACF3, U+ACF5, U+ACFC, U+AE08, U+B0A9, U+B530, U+B77D, U+B85C, U+B9AC, U+BA74, U+BAAB, U+BB3C, U+BC18, U+BC1C, U+BD80, U+C11C, U+C138, U+C62C, U+C6B0, U+C740, U+C744, U+C774, U+C778, U+CABD, U+CD0C, U+D130, U+D1B5, U+D589, U+D655;
+}

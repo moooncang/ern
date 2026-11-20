@@ -5,6 +5,8 @@ Baselines were captured from commit bceb51b. No Git history, packages, or server
 are needed to run this check. New wrappers, layouts, classes, decorative images,
 and SVG interiors are allowed across the site. Original body copy, link
 destinations, form controls, and source facts remain protected.
+The four explicitly approved lord's margin notes are validated separately;
+only their exact text may be excluded from the original content digest.
 """
 from hashlib import sha256
 from html.parser import HTMLParser
@@ -14,6 +16,13 @@ import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+
+# User-authorized additions; the original page fingerprints remain unchanged.
+LORD_NOTES = {
+    "home.html": ("우물과 곳간부터 확인.", "세금을 올리면 촌락이 반발.", "가을 공납 몫은 따로."),
+    "world.html": ("서쪽 통행세 확인.",),
+}
+VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
 
 # Original bceb51b fingerprints; update only for an explicitly approved redesign.
 BASELINE = {
@@ -99,7 +108,7 @@ BASELINE = {
 
 
 class BodySignature(HTMLParser):
-    def __init__(self):
+    def __init__(self, exclude_lord_notes=False):
         super().__init__(convert_charrefs=True)
         self.in_body = False
         self.svg_depth = 0
@@ -107,6 +116,8 @@ class BodySignature(HTMLParser):
         self.structure = []
         self.words = []
         self.elements = []
+        self.exclude_lord_notes = exclude_lord_notes
+        self.note_depth = 0
 
     def handle_starttag(self, tag, attrs):
         if tag == "script":
@@ -115,6 +126,11 @@ class BodySignature(HTMLParser):
             self.in_body = True
         if not self.in_body:
             return
+        if self.exclude_lord_notes:
+            if self.note_depth and tag not in VOID_TAGS:
+                self.note_depth += 1
+            elif "data-lord-note" in dict(attrs):
+                self.note_depth = 1
         if self.svg_depth:
             if tag == "svg":
                 self.svg_depth += 1
@@ -129,6 +145,8 @@ class BodySignature(HTMLParser):
     def handle_endtag(self, tag):
         if not self.in_body:
             return
+        if self.note_depth:
+            self.note_depth -= 1
         if self.svg_depth:
             if tag == "svg":
                 self.svg_depth -= 1
@@ -147,12 +165,81 @@ class BodySignature(HTMLParser):
             self.structure.append(["empty", tag, sorted(attrs)])
 
     def handle_data(self, data):
-        if self.in_body and not self.svg_depth and not self.script_depth:
+        if self.in_body and not self.svg_depth and not self.script_depth and not self.note_depth:
             self.words.append(data)
 
 
-def signatures(html):
-    parser = BodySignature()
+class LordNoteAudit(HTMLParser):
+    """Validate additions before the content parser is allowed to omit them."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.in_body = False
+        self.active = None
+        self.open_tags = []
+        self.notes = []
+        self.errors = []
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == "body":
+            self.in_body = True
+        if "data-lord-note" in attrs:
+            if self.active is not None:
+                self.errors.append("lord notes may not contain another lord note")
+            else:
+                self.active = []
+                self.notes.append(self.active)
+                if tag != "aside" or not self.in_body:
+                    self.errors.append("lord notes must be aside elements inside the body")
+        if self.active is None:
+            return
+        # Formatting spans are permitted, but these additions must not acquire
+        # controls, hidden script/style text, or additional accessible labels.
+        if tag not in ("aside", "span"):
+            self.errors.append(f"lord note contains unexpected <{tag}>")
+        forbidden = {"tabindex", "contenteditable", "accesskey", "autofocus", "href", "role",
+                     "aria-label", "aria-labelledby", "aria-describedby", "title", "alt"}
+        if forbidden.intersection(attrs) or any(key.startswith("on") for key in attrs):
+            self.errors.append("lord notes must be noninteractive and contain no additional labels")
+        if tag not in VOID_TAGS:
+            self.open_tags.append(tag)
+
+    def handle_endtag(self, tag):
+        if self.active is not None:
+            if not self.open_tags or self.open_tags[-1] != tag:
+                self.errors.append("lord note markup must be properly closed")
+            if self.open_tags:
+                self.open_tags.pop()
+            if not self.open_tags:
+                self.active = None
+        if tag == "body":
+            self.in_body = False
+
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs)
+        if tag not in VOID_TAGS:
+            self.handle_endtag(tag)
+
+    def handle_data(self, data):
+        if self.active is not None:
+            self.active.append(data)
+
+
+def lord_note_contracts(html, page):
+    parser = LordNoteAudit()
+    parser.feed(html)
+    if parser.active is not None:
+        parser.errors.append("lord note is not closed")
+    actual = ["".join(parts).strip() for parts in parser.notes]
+    expected = LORD_NOTES.get(page, ())
+    if sorted(actual) != sorted(expected):
+        parser.errors.append(f"expected only the {len(expected)} exact authorized lord notes; found {actual!r}")
+    return parser.errors
+
+
+def signatures(html, exclude_lord_notes=False):
+    parser = BodySignature(exclude_lord_notes=exclude_lord_notes)
     parser.feed(html)
     text = " ".join(" ".join(parser.words).split())
     control_keys = {
@@ -221,7 +308,10 @@ def main():
             failures.append(f"{name}: original page missing")
             continue
         html = path.read_text(encoding="utf-8")
-        actual = signatures(html)
+        note_errors = lord_note_contracts(html, name)
+        failures.extend(f"{name}: {message}" for message in note_errors)
+        # Invalid notes are never granted an exclusion from the original hash.
+        actual = signatures(html, exclude_lord_notes=not note_errors)
         for part in ("content", "semantic"):
             if actual[part] != expected[part]:
                 failures.append(f"{name}: original body {part} changed")
@@ -245,6 +335,7 @@ def main():
     print("PASS: all 18 pages preserve original copy, semantic link destinations, and input/control contracts.")
     print("PASS: new layouts, wrappers, artwork, and SVG interiors are allowed; entry seal/name/home semantics remain intact.")
     print("PASS: original PLAN.md and _build/data.py source facts are byte-for-byte unchanged.")
+    print("PASS: exactly three home and one world margin notes match the authorized text and are noninteractive.")
     return 0
 
 

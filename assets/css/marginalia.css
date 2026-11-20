@@ -1,0 +1,51 @@
+/* Four requested notes in the lord's hand; original interface copy is unchanged. */
+.lord-note {
+  position: relative;
+  display: table;
+  max-width: 270px;
+  margin: 22px 0 5px;
+  color: #7a4e31;
+  font: 400 26px/1.35 'ERN Margin Pen', 'Gowun Batang', cursive;
+  letter-spacing: -.025em;
+  word-break: keep-all;
+  transform: rotate(-2deg);
+  transform-origin: left center;
+}
+.lord-note span {
+  padding-bottom: 3px;
+  background: linear-gradient(178deg, transparent 83%, rgb(110 79 59 / .2) 84% 87%, transparent 88%);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.lord-note::after {
+  content: '';
+  position: absolute;
+  left: -52px;
+  top: 1px;
+  width: 43px;
+  height: 34px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 42'%3E%3Cg fill='none' stroke='%23765843' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M54 7c-7 19-24 27-45 18M18 19l-10 6 7 9'/%3E%3Cpath opacity='.4' d='M52 7c-7 17-22 24-40 19'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+  pointer-events: none;
+}
+.g-info .note-growth { margin: 25px 0 0 12px; }
+.est-ctl .note-estates { justify-self: end; margin: 19px 5px 0 38px; transform: rotate(1.4deg); }
+.est-ctl .note-estates::after { top: -6px; transform: rotate(22deg); }
+.season-foot { display: flex; justify-content: space-between; align-items: center; gap: 20px 60px; margin-top: 14px; }
+.season-foot .after { max-width: 760px; margin: 0; }
+.season-foot .note-seasons { flex: none; margin: 13px 12px 0 44px; transform: rotate(-2.7deg); }
+.season-foot .note-seasons::after { top: -18px; transform: rotate(55deg); }
+.map-wrap .note-map { margin: -3px 24px 22px 64px; font-size: 25px; }
+.map-wrap .note-map::after { left: -44px; top: -18px; transform: rotate(100deg); }
+@media (max-width: 900px) {
+  .season-foot { flex-wrap: wrap; gap: 7px; }
+  .season-foot .note-seasons { margin-left: auto; margin-right: 16px; }
+}
+@media (max-width: 720px) {
+  .lord-note { font-size: 23px; line-height: 1.25; max-width: 230px; }
+  .g-info .note-growth { margin: 7px 0 0 3px; font-size: 22px; }
+  .g-info .note-growth::after { left: -36px; width: 28px; height: 25px; top: 6px; }
+  .est-ctl .note-estates { margin-top: 13px; }
+  .season-foot .note-seasons { margin-top: 15px; }
+  .map-wrap .note-map { margin: 0 16px 18px 51px; font-size: 23px; }
+  .map-wrap .note-map::after { left: -35px; width: 31px; }
+}

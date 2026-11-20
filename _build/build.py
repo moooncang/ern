@@ -88,6 +88,13 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 <link rel="stylesheet" href="{asset_url('assets/css/entry.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/manuscript.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/visual.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/interface-fonts.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/margin-font.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/modern.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/symbols.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/map-modern.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/interface-pages.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/marginalia.css', pre)}">
 </head>
 <body{' class="cover"' if cover else ''} data-default-domain="{e(d.기본_영지명)}">
 {SPRITE.replace("@@ASSET_ROOT@@", pre)}
@@ -139,6 +146,11 @@ def hd(제목, 영문, tag="h2", cls=""):
     """소제목 줄: 한글 제목 — 금선 — 영문"""
     return (f'<header class="hd {cls}" data-rv><{tag}>{e(제목)}</{tag}><i></i>'
             f'<span class="en">{e(영문)}</span></header>')
+
+
+def lord_note(text, cls):
+    """Four explicitly requested marginal notes; the original body copy stays intact."""
+    return f'<aside class="lord-note {cls}" data-lord-note><span>{e(text)}</span></aside>'
 
 
 def page_head(영문, 제목, 머리말):
@@ -358,7 +370,8 @@ def home():
     grow = sec("영지 단계", "THE STAGES", f"""<div class="grow" data-grow data-stages="{stages}">
 {town_art()}
 <div class="g-info" aria-live="polite"><p class="g-name" data-g-name>{e(d.단계[0][0])}</p>
-<p class="g-pop">인구 <b data-g-pop>{d.단계[0][1]}</b><span data-g-cap>까지</span></p><p class="g-fac" data-g-fac>{e(d.단계[0][3])}</p></div>
+<p class="g-pop">인구 <b data-g-pop>{d.단계[0][1]}</b><span data-g-cap>까지</span></p><p class="g-fac" data-g-fac>{e(d.단계[0][3])}</p>
+{lord_note("우물과 곳간부터 확인.", "note-growth")}</div>
 <div class="g-ctl"><input type="range" min="0" max="{len(d.단계) - 1}" step="1" value="0" aria-label="영지 단계" data-g-range><ol class="g-ticks">{ticks}</ol></div>
 <p class="g-win"><span>[영지]</span> <span data-domain>{e(d.기본_영지명)}</span> · <span data-g-name>{e(d.단계[0][0])}</span> | 인구 <span data-g-pop>{d.단계[0][1]}</span></p>
 </div>""", "grow-sec", narrow=False)
@@ -373,7 +386,8 @@ def home():
     ed_data = e(json.dumps({k: {"out": o, "fx": fx} for k, _, o, fx in d.칙령}, ensure_ascii=False))
     est = sec("네 세력", "FOUR ESTATES", f"""<div class="est" data-est data-edicts="{ed_data}" data-levels="{e(json.dumps(d.태도, ensure_ascii=False))}">
 <div class="est-board"><ol class="est-rows" aria-hidden="true">{rows}</ol><div class="est-cols">{cols}</div></div>
-<div class="est-ctl"><p>결정을 눌러 보십시오.</p>{edicts}<p class="est-out" aria-live="polite" data-est-out>큰 결정은 대개 한쪽을 올리고 다른 쪽을 깎습니다.</p></div>
+<div class="est-ctl"><p>결정을 눌러 보십시오.</p>{edicts}<p class="est-out" aria-live="polite" data-est-out>큰 결정은 대개 한쪽을 올리고 다른 쪽을 깎습니다.</p>
+{lord_note("세금을 올리면 촌락이 반발.", "note-estates")}</div>
 </div>""", narrow=False)
 
     deck = "".join(
@@ -386,7 +400,8 @@ def home():
     seasons = sec("사계", "SEASONS", '<div class="seasons">' + "".join(
         f'<button type="button" class="season" data-season="{k}" aria-pressed="false">{ico(k)}<b>{e(t)}</b>'
         f'<span class="en">{en}</span><span class="s-d">{e(x)}</span></button>' for k, t, en, x in d.계절)
-        + f"</div><p class='after'>{e(d.계절_글)} 계절을 누르면 이 사이트의 계절이 바뀝니다.</p>", narrow=False)
+        + f"</div><div class='season-foot'><p class='after'>{e(d.계절_글)} 계절을 누르면 이 사이트의 계절이 바뀝니다.</p>"
+        + lord_note("가을 공납 몫은 따로.", "note-seasons") + "</div>", narrow=False)
 
     deeds = sec("세 가지 출발", "BEGINNINGS", '<div class="deeds">' + "".join(
         f'<a class="deed" href="start.html#{k}"><svg class="mark" aria-hidden="true"><use href="#wax"/></svg>'
@@ -456,7 +471,8 @@ def world():
         who = (f'<a class="rep" href="char/{rep}.html">{plate(BY[rep])}{ico("next")}</a>' if rep else "")
         infos += (f'<article class="rg-info" data-r="{k}"{"" if k == "home" else " hidden"}>{region_art(k)}<h2>{name}</h2>'
                   f'<p class="dir">{e(방위)}</p><p>{e(설명)}</p>{who}</article>')
-    atlas = (f'<section class="atlas" data-atlas><div class="wrap"><div class="map-wrap">{illustrated_map(atlas_svg())}</div>'
+    atlas = (f'<section class="atlas" data-atlas><div class="wrap"><div class="map-wrap">{illustrated_map(atlas_svg())}'
+             f'{lord_note("서쪽 통행세 확인.", "note-map")}</div>'
              f'<div class="atlas-side"><ol class="rg-list">{btns}</ol><div aria-live="polite">{infos}</div></div></div></section>')
     return shell("world.html", d.세계_머리[1], page_head(*d.세계_머리) + atlas
                  + "".join(sec(t, en, blocks(bs)) for en, t, bs in d.세계))

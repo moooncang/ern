@@ -1,0 +1,66 @@
+/* Modern strategic overview: six compact symbols and the original live routes. */
+.atlas .map-wrap{
+  padding:0;border:1px solid var(--line);border-radius:2px;
+  background:#f5f3eb;box-shadow:none;overflow:hidden;
+}
+.map-modern{background:#f5f3eb;border-radius:2px}
+.map-modern .map-field{fill:#f5f3eb}
+.map-modern .map-contours{fill:none;stroke:#9c9687;stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round;opacity:.17}
+.map-modern .gl,.map-modern>.frame,.map-modern .atlas-engraving,
+.map-modern .compass circle,.map-modern .compass path,.map-modern .pulse{display:none}
+.map-modern .compass text{
+  fill:#969285;font-family:inherit;font-size:15px;font-weight:600;letter-spacing:.12em;
+}
+.map-modern .modern-north{fill:none;stroke:#969285;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.map-modern .node-halo{fill:transparent;stroke:transparent;stroke-width:1.4;transition:fill .2s,stroke .2s}
+.map-modern .region-marker.on .node-halo{fill:#eee5d6;stroke:#d8c3a4}
+.map-modern .region-symbol-art{pointer-events:none}
+.map-modern .lb{
+  font-family:inherit;font-size:22px;font-weight:600;letter-spacing:0;fill:#393b35;
+  stroke:#f5f3eb;stroke-width:6px;paint-order:stroke;stroke-linejoin:round;
+}
+.map-modern .lb[data-domain]{font-size:min(22px,calc(210px / var(--domain-length,2)))}
+.map-modern .rg.on .lb,.map-modern .rg:hover .lb,.map-modern .rg:focus-visible .lb{fill:#a74e3e}
+.map-modern .note{fill:#929084;font-family:inherit;font-size:15px;stroke:#f5f3eb;stroke-width:4px;paint-order:stroke}
+.map-modern .road,.map-modern .road-end{fill:none;stroke:#b6b1a2;stroke-width:1.5;opacity:.8}
+.map-modern .road{stroke-dasharray:3 6}
+.map-modern .route{stroke:#b45b46;stroke-width:2.2;filter:none}
+.map-modern .rg:hover .hit{fill:rgb(198 161 102/.045);stroke:none}
+.map-modern .rg:focus-visible .hit{stroke:#b45b46;stroke-width:1.8;fill:rgb(198 161 102/.07)}
+.atlas .atlas-side{min-width:0}
+.atlas-side .rg-list{gap:8px;margin-bottom:22px}
+.atlas-side .rg-list button{
+  min-height:58px;padding:12px 14px;border:1px solid var(--line);border-radius:2px;
+  background:transparent;box-shadow:none;color:#373a33;gap:5px;
+}
+.atlas-side .rg-list button b{font-family:inherit;font-size:.88rem;font-weight:600;line-height:1.45}
+.atlas-side .rg-list button small{font-size:.7rem;color:#8b887d}
+.atlas-side .rg-list button:hover{background:#eeece3}
+.atlas-side .rg-list button[aria-current]{border-color:var(--wax);background:rgb(140 54 48/.07);color:var(--wax);box-shadow:none}
+.atlas-side .rg-list button[aria-current] small{color:var(--wax)}
+.atlas-side .rg-info{
+  display:grid;grid-template-columns:minmax(0,1fr) 76px;column-gap:12px;
+  padding:24px;border:1px solid var(--line);border-radius:2px;background:#faf8f2;box-shadow:none;
+}
+.atlas-side .rg-info[hidden]{display:none}
+.region-symbol{grid-column:2;grid-row:1/3;width:76px;height:76px;margin:-6px -7px 0 0;align-self:start}
+.region-symbol>.region-symbol-art{display:block;width:100%;height:100%}
+.atlas-side .rg-info h2{grid-column:1;grid-row:1;font-family:inherit;font-size:1.65rem;font-weight:600;line-height:1.45;overflow-wrap:anywhere;margin:0}
+.atlas-side .rg-info .dir{grid-column:1;grid-row:2;margin:5px 0 18px;font-family:inherit;font-size:.78rem;color:#8c8575;line-height:1.6}
+.atlas-side .rg-info>p:not(.dir){grid-column:1/-1;margin:0;font-size:.93rem;line-height:1.9;color:#67665c}
+.atlas-side .rg-info>.rep{grid-column:1/-1;max-width:100%;margin-top:20px}
+.atlas-side .rg-info .plate{max-width:calc(100% - 24px)}
+@media(min-width:961px){
+  .atlas .map-wrap{position:sticky;top:calc(var(--craft-header,76px) + 26px)}
+}
+@media(max-width:720px){
+  .atlas .map-wrap,.map-modern{border-radius:2px}
+  .map-modern .lb{font-size:28px;stroke-width:8px}
+  .map-modern .lb[data-domain]{font-size:min(28px,calc(210px / var(--domain-length,2)))}
+  .map-modern .note{font-size:18px}
+  .map-modern .route{stroke-width:3}
+  .atlas-side .rg-list button{min-height:62px;padding:10px 12px}
+  .atlas-side .rg-list button b{font-size:.82rem}
+  .atlas-side .rg-info{padding:22px}
+  .atlas-side .rg-info h2{font-size:1.55rem}
+}

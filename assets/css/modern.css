@@ -1,0 +1,186 @@
+/* Original words and game structure, with quieter surfaces and small ink studies. */
+:root { --font-ui: 'Pretendard Variable', system-ui, sans-serif; }
+body:not(.cover) {
+  --paper: #f4efe3; --paper2: #eae3d4; --paper3: #dfd4bf;
+  --ink: #34312b; --soft: #777064; --gold: #98886c; --gold-ink: #74664f;
+  --line: #d6cdbd; --wax: #8c3630; --wax2: #702b26;
+  font: 400 1rem/1.7 var(--font-ui);
+  background-color: var(--paper);
+  background-image: linear-gradient(rgb(247 242 231 / .94), rgb(247 242 231 / .94)), url(../../images/ui/parchment.webp);
+  background-size: auto, 640px;
+}
+body:not(.cover) .air { display: none; }
+body:not(.cover) h1, body:not(.cover) h2 { font-family: 'Nanum Myeongjo', serif; letter-spacing: -.045em; }
+body:not(.cover) h3, body:not(.cover) button, body:not(.cover) input,
+body:not(.cover) dt, body:not(.cover) .en, body:not(.cover) kbd { font-family: var(--font-ui); }
+body:not(.cover) .en { font-weight: 500; font-size: .66rem; letter-spacing: .13em; color: var(--soft); }
+body:not(.cover) :focus-visible { outline: 2px solid var(--wax); outline-offset: 5px; }
+body:not(.cover) .wrap { max-width: 76rem; padding-inline: clamp(22px, 4vw, 48px); }
+body:not(.cover) .wrap.narrow { max-width: 52rem; }
+
+/* A light navigation rail. The original season and sound controls remain. */
+.top { background: rgb(247 243 234 / .96); border-bottom: 1px solid var(--line); box-shadow: none; background-image: none; backdrop-filter: blur(12px); }
+.top .wrap { max-width: 88rem; min-height: 74px; padding-block: 10px; column-gap: 22px; }
+.brand { font: 700 .88rem/1.5 var(--font-ui); gap: 9px; }
+.brand .mark { width: 25px; height: 25px; filter: none; }
+.tabs { gap: 2px; }
+.tabs a { min-height: 40px; padding: 8px 13px; font-size: .86rem; font-weight: 500; }
+.tabs kbd { display: none; }
+.tabs a:hover { color: var(--wax); border-bottom-color: transparent; }
+.tab-ribbon { height: 1px; }
+.tab-ribbon::after { display: none; }
+.reading-progress { bottom: -1px; height: 1px; background: var(--wax); opacity: .65; }
+.top.has-scrolled { box-shadow: 0 5px 15px rgb(45 38 27 / .04); }
+.fief { font: 500 .75rem/1.7 var(--font-ui); border-bottom: 0; color: var(--soft); }
+.tools { gap: 13px; }
+
+/* Character artwork anchors the opening; ornament does not compete with it. */
+.hero { min-height: 0; gap: 20px; background: transparent; border-bottom: 1px solid var(--line); align-content: start; }
+.hero::before, .hero::after { display: none; }
+.hero-t { padding: clamp(48px, 6vw, 84px) 28px 20px; }
+.hero h1 { font-size: clamp(2.8rem, 5.8vw, 5rem); line-height: 1.3; max-width: 18em; margin: auto; text-shadow: none; font-weight: 800; }
+.hero .en { margin-top: 20px; font-size: .68rem; letter-spacing: .3em; }
+.hero .genre { font-size: .8rem; color: var(--soft); margin: 15px 0 0; }
+.adult { font: 500 .7rem/1.6 var(--font-ui); border-color: rgb(140 54 48 / .45); padding: 0 5px; margin-left: 8px; transform: none; }
+.frieze { --fw: min(16.2vw, 220px); padding: 12px 12px 0; flex-wrap: nowrap; }
+.fg:nth-child(2n) { top: 0; }
+.fg img { mask-image: linear-gradient(#000 76%, transparent 100%); }
+.fg .plate { bottom: 9%; }
+.frieze:hover .fg:not(:hover) { opacity: .88; }
+body:not(.cover) .plate { color: var(--ink); background: rgb(247 242 231 / .94); background-image: none; padding: 9px 16px; border: 1px solid rgb(128 113 88 / .3); border-radius: 1px; box-shadow: none; text-shadow: none; font-family: var(--font-ui); }
+body:not(.cover) .plate small { font-size: .64rem; color: var(--soft); font-weight: 400; }
+body:not(.cover) .plate b, body:not(.cover) .plate h1 { color: var(--ink); font-family: var(--font-ui); font-size: .9rem; }
+
+/* All original introductory sentences stay, without the oversized quote styling. */
+body:has(.hero) main > .say { padding: 35px 0; border-top: 0; }
+body:has(.hero) .say > .wrap.narrow { max-width: 76rem; padding: 0 clamp(22px, 4vw, 48px); border: 0; display: grid; grid-template-columns: .9fr 1.2fr 1.15fr; gap: 32px; }
+.say p, .say p:first-child, .say p:not(:first-child) { font: 400 .86rem/1.85 var(--font-ui); color: var(--soft); letter-spacing: 0; margin: 0; max-width: none; }
+.say p:first-child { color: var(--ink); }
+.say p:first-child::first-letter { font-size: inherit; font-weight: inherit; color: inherit; }
+body:not(.cover) main > .sec { padding-block: 66px; }
+body:not(.cover) main > .sec + .sec { border-top-color: var(--line); }
+body:not(.cover) .head { padding: 58px 0 32px; }
+.head > .wrap { max-width: 76rem; }
+.head .hd.big { display: flex; align-items: center; margin-bottom: 17px; gap: 22px; }
+.head .hd.big h1 { font-size: clamp(2.3rem, 4vw, 3.2rem); line-height: 1.3; }
+.head .hd.big .en { font-size: .65rem; padding: 0; }
+.head .lead { font-size: .94rem; line-height: 1.8; }
+body:has(.atlas) main > .sec > .wrap.narrow { max-width: 76rem; grid-template-columns: 200px minmax(0, 1fr); gap: 38px; }
+body:has(.atlas) main > .sec > .wrap.narrow > .hd h2 { font-size: 1.6rem; }
+body:has(.atlas) main > .sec > .wrap.narrow > .hd .en { font-size: .62rem; }
+body:has(.hero) .sec > .wrap, body:has(.hero) .grow-sec > .wrap { max-width: 76rem; }
+.hd, body:has(.hero) .sec > .wrap > .hd { gap: 20px; align-items: center; margin-bottom: 30px; justify-content: space-between; }
+.hd h2, body:has(.hero) .sec > .wrap > .hd h2 { font-size: clamp(1.75rem, 2.8vw, 2.35rem); line-height: 1.35; }
+.hd i { display: none; }
+.hd .en, body:has(.hero) .sec > .wrap > .hd .en { font: 500 .64rem/1.4 var(--font-ui); letter-spacing: .14em; max-width: 40%; }
+body:has(.hero) .sec:has(.est), body:has(.hero) .sec:has(.deck), body:has(.hero) .sec:has(.seasons), body:has(.hero) .sec:has(.deeds) { background: transparent; padding-block: 66px; }
+
+/* Growth is a compact playable sketch, rather than a full architectural panorama. */
+.grow { grid-template-columns: minmax(220px, 1.1fr) minmax(0, 1fr); align-items: center; gap: 26px 58px; padding: 35px 42px 26px; background: linear-gradient(rgb(248 239 218 / .88), rgb(247 237 215 / .88)), url(../../images/ui/parchment.webp) center / 640px; border: 1px solid var(--line); box-shadow: none; }
+.town.town-art { grid-column: 1; grid-row: 1; width: min(100%, 360px); aspect-ratio: 1; height: auto; padding: 0; margin: 0 auto; border: 0; overflow: hidden; isolation: auto; }
+.town-art > .st { position: absolute; inset: 0; width: 100%; height: 100%; background-image: url(../../images/modern/growth-pen.webp); background-size: 300% 200%; background-position: var(--sketch-x) var(--sketch-y); background-repeat: no-repeat; opacity: 0; transform: translateY(4px); transition: opacity .25s, transform .35s ease; }
+.town-art > .st.on { opacity: 1; transform: none; }
+.town-art > .st.on:has(~ .st.on) { opacity: 0; }
+/* The next study's finial just touches this sprite cell's bottom margin. */
+.town-art > .st[data-s="2"] { clip-path: inset(0 0 3%); }
+.g-info { grid-column: 2; grid-row: 1; padding: 0; align-self: center; }
+.g-name { font: 700 clamp(2rem, 4.5vw, 3rem)/1.25 'Nanum Myeongjo', serif; letter-spacing: -.04em; }
+.g-pop { font: 400 .8rem/1.6 var(--font-ui); margin: 15px 0 0; }
+.g-pop b { font: 500 clamp(2rem, 4vw, 3.3rem)/1.2 var(--font-ui); letter-spacing: -.04em; margin-inline: 10px 4px; }
+.g-fac { font-size: .85rem; color: var(--soft); margin-top: 13px; }
+.g-ctl { grid-column: 1 / -1; grid-row: 2; padding: 15px 0 0; margin: 0; border-top: 1px solid var(--line); }
+.g-ctl input { height: 30px; }
+.g-ctl input::-webkit-slider-thumb { width: 18px; height: 18px; border: 4px solid var(--paper); background: var(--wax); box-shadow: 0 0 0 1px var(--wax); }
+.g-ctl input::-moz-range-thumb { width: 10px; height: 10px; border: 4px solid var(--paper); background: var(--wax); box-shadow: 0 0 0 1px var(--wax); }
+.g-ticks button { font: 500 .78rem/1.5 var(--font-ui); min-height: 36px; }
+.g-win { grid-column: 1 / -1; grid-row: 3; align-self: auto; justify-self: end; max-width: none; margin: -8px 0 0; padding: 0; font: 400 .68rem/1.6 var(--font-ui); background: none; box-shadow: none; color: var(--soft); text-shadow: none; }
+.g-win span:first-child { color: var(--soft); }
+
+/* Original portrait cards remain the gallery, with quiet navigation. */
+.deck { gap: 20px; padding: 10px max(22px, calc((100vw - 1120px) / 2)) 25px; scroll-padding-inline: max(22px, calc((100vw - 1120px) / 2)); }
+.deck { padding-right: max(22px, calc(100% - min(82vw, 28rem) - max(22px, calc((100vw - 1120px) / 2)))); }
+.deck .tilt { flex-basis: min(82vw, 28rem); rotate: 0deg; scroll-snap-align: start; }
+.deck .tilt:nth-child(n) { rotate: 0deg; }
+.deck .tilt img { outline: none; border: 1px solid var(--line); box-shadow: none; }
+.deck .tilt:hover img { box-shadow: 0 8px 20px rgb(50 43 31 / .08); }
+.deck-tools { gap: 14px; margin-top: 0; }
+.deck-tools::before { background: var(--line); }
+.deck-tools button { width: 40px; height: 40px; background: transparent; border-color: var(--line); border-radius: 1px; }
+.deck-count { font: 400 .74rem var(--font-ui); letter-spacing: .04em; }
+
+/* Start choices read as choices. The small pen marks are supplied by interface-pages.css. */
+.deeds { gap: 18px; }
+.deed { display: grid; justify-items: start; text-align: left; grid-template-rows: auto auto auto 1fr; padding: 24px; gap: 8px; min-height: 0; border: 1px solid var(--line); background: rgb(255 253 247 / .35); background-image: none; box-shadow: none; }
+.deed h3 { font: 600 1.35rem/1.4 var(--font-ui); letter-spacing: -.02em; }
+.deed .en { font: 400 .6rem/1.4 var(--font-ui); letter-spacing: .13em; }
+.deed p { margin-top: 12px; font: 400 .84rem/1.8 var(--font-ui); }
+.deed .mark { display: none; }
+.deed:hover { transform: translateY(-3px); border-color: var(--wax); box-shadow: 0 7px 17px rgb(50 43 31 / .05); }
+body:has(.hero) main > .sec.end { padding-block: 25px; }
+.sec.end > .wrap { max-width: 76rem; min-height: 0; padding: 0 clamp(22px, 4vw, 48px); background: none; border: 0; box-shadow: none; text-align: left; }
+.sec.end > .wrap::after, .sec.end > .wrap::before { display: none; }
+.sec.end .closing { margin: 0; font: 400 .78rem/1.7 var(--font-ui); color: var(--soft); }
+.foot { padding: 30px 0; border-top: 1px solid var(--line); background: none; text-align: left; }
+.foot > .wrap { display: flex; justify-content: space-between; align-items: center; gap: 25px; }
+.foot .mark { display: none; }
+.foot .en { margin: 0; font-size: .63rem; letter-spacing: .15em; }
+.foot nav { margin: 0; gap: 25px; }
+.foot nav a { font: 400 .78rem/1.6 var(--font-ui); text-decoration: none; color: var(--soft); }
+body:not(.cover) .btn { font: 500 .88rem/1.5 var(--font-ui); min-height: 44px; padding: 12px 20px; border: 1px solid var(--wax); border-radius: 1px; background: var(--wax); background-image: none; box-shadow: none; }
+body:not(.cover) .btn:hover { background: var(--wax2); box-shadow: none; transform: translateY(-1px); }
+.after { font: 400 .8rem/1.8 var(--font-ui); }
+.stage-thumb { display: none; }
+
+@media (max-width: 1120px) { .top .wrap { column-gap: 18px; } .tabs { gap: 12px; } }
+@media (max-width: 720px) {
+  body:not(.cover) .head { padding: 38px 0 26px; }
+  .head .hd.big h1 { font-size: 2.35rem; }
+  body:not(.cover) main > .sec, body:has(.hero) .sec:has(.est), body:has(.hero) .sec:has(.deck), body:has(.hero) .sec:has(.seasons), body:has(.hero) .sec:has(.deeds) { padding-block: 43px; }
+  .hero { gap: 12px; }
+  .hero-t { padding: 40px 23px 18px; }
+  .hero h1 { font-size: clamp(2rem, 7vw, 3rem); line-height: 1.4; max-width: 13em; }
+  .hero .en { font-size: .58rem; letter-spacing: .23em; margin-top: 14px; }
+  .hero .genre { font-size: .7rem; line-height: 1.8; margin-top: 12px; }
+  .frieze { --fw: 31.5vw; flex-wrap: wrap; padding-inline: 0; }
+  body:not(.cover) .fg .plate { padding: 5px 8px; }
+  body:not(.cover) .fg .plate b { font-size: .64rem; }
+  .fg .plate { bottom: 7%; }
+  body:has(.hero) main > .say { padding: 25px 0; }
+  body:has(.hero) .say > .wrap.narrow { display: block; }
+  .say p, .say p:first-child, .say p:not(:first-child) { font-size: .8rem; line-height: 1.8; }
+  .say p + p { margin-top: 10px; }
+  .hd, body:has(.hero) .sec > .wrap > .hd { gap: 16px; margin-bottom: 23px; }
+  .hd h2, body:has(.hero) .sec > .wrap > .hd h2 { font-size: 1.75rem; }
+  .hd .en, body:has(.hero) .sec > .wrap > .hd .en { font-size: .55rem; }
+  .grow { grid-template-columns: minmax(0, 1fr); padding: 20px 18px 17px; gap: 21px; }
+  .town.town-art { grid-column: 1; grid-row: 1; width: min(100%, 280px); max-width: none; }
+  .g-info { grid-column: 1; grid-row: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 7px 18px; align-items: center; }
+  .g-info .g-name { grid-column: 1; grid-row: 1; }
+  .g-info .g-pop { grid-column: 2; grid-row: 1; margin-top: 0; text-align: right; }
+  .g-info .g-fac { grid-column: 1; grid-row: 2; }
+  .g-info .note-growth { grid-column: 2; grid-row: 2; margin: 7px 0 0; justify-self: end; }
+  .g-ctl { grid-column: 1; grid-row: 3; }
+  .g-win { grid-column: 1; grid-row: 4; }
+  .g-name { font-size: 1.8rem; }
+  .g-pop { font-size: .7rem; margin-top: 10px; }
+  .g-pop b { font-size: 1.6rem; margin-left: 3px; }
+  .g-fac { font-size: .7rem; margin-top: 9px; line-height: 1.7; }
+  .g-ticks button { font-size: .65rem; }
+  .g-win { justify-self: start; font-size: .59rem; line-height: 1.8; }
+  .deeds { gap: 13px; max-width: none; }
+  .deed { padding: 22px; }
+  .deed p { font-size: .8rem; margin-top: 5px; }
+  .deed h3 { font-size: 1.25rem; }
+  .foot > .wrap { flex-wrap: wrap; gap: 18px; }
+  .foot nav { gap: 23px; }
+}
+@media (max-width: 380px) {
+  .grow { gap: 20px; padding-inline: 14px; }
+  .g-info { column-gap: 12px; }
+  .g-name { font-size: 1.65rem; }
+  .g-pop b { font-size: 1.4rem; }
+  .g-ticks button { font-size: .61rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .town-art > .st, .deed { transition: none; transform: none; }
+}
