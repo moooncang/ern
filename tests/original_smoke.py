@@ -25,6 +25,20 @@ ENTRY_VIEWPORTS = [(903, 1195), (1440, 900), (390, 844), (320, 640), (844, 390)]
 MOTION_VIEWPORTS = list(ENTRY_VIEWPORTS)
 
 
+def assert_no_overflow(page, label):
+    if page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"):
+        return
+    offenders = page.evaluate("""() => [...document.querySelectorAll('body *')]
+        .filter(el => {
+            const rect = el.getBoundingClientRect();
+            return rect.width && rect.right > innerWidth + 1;
+        }).slice(0, 10).map(el => ({
+            tag: el.tagName, class: el.getAttribute('class'),
+            right: Math.round(el.getBoundingClientRect().right),
+        }))""")
+    raise AssertionError(f"Horizontal overflow ({label}): {offenders}")
+
+
 def check_http(base):
     paths = [ROOT / name for name in PAGES]
     for directory in ("assets", "images"):
@@ -37,11 +51,11 @@ def check_http(base):
     print(f"PASS: {len(paths)} local pages/assets return nonempty HTTP 200", flush=True)
 
 
-def check_browser(browser, base, mobile=False):
-    mode = "mobile" if mobile else "desktop"
+def check_browser(browser, base, mobile=False, motion="reduce"):
+    mode = ("mobile" if mobile else "desktop") + f", {motion} motion"
     context = browser.new_context(
         viewport={"width": 390 if mobile else 1440, "height": 844 if mobile else 1000},
-        is_mobile=mobile, has_touch=mobile, reduced_motion="reduce",
+        is_mobile=mobile, has_touch=mobile, reduced_motion=motion,
         permissions=["clipboard-read", "clipboard-write"],
     )
     page = context.new_page()
@@ -63,8 +77,15 @@ def check_browser(browser, base, mobile=False):
 
     for path in PAGES:
         go(path)
+        page.evaluate("document.fonts.ready")
         assert page.title() and page.locator("main").inner_text().strip(), path
-        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), f"Overflow: {path}"
+        assert_no_overflow(page, f"{mode}: {path}")
+        if path != "index.html":
+            # Visit the foot of long pages so lazy artwork and scroll-triggered
+            # decoration also participate in the overflow/resource checks.
+            page.evaluate("scrollTo(0, document.documentElement.scrollHeight)")
+            page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
+            assert_no_overflow(page, f"{mode}: {path} after scroll")
     passed("all 18 original pages load without horizontal overflow")
 
     go("index.html")
@@ -73,7 +94,9 @@ def check_browser(browser, base, mobile=False):
     if page.locator("[data-seal]").evaluate("el => el.tagName") == "A":
         assert page.locator("[data-seal]").get_attribute("href") == "home.html"
     page.locator("[data-seal]").click()
+    expect(page.locator("[data-writ]")).to_have_attribute("data-state", "ready", timeout=15000)
     page.locator("[data-domain-input]").fill("검증영지")
+    expect(page.locator("[data-domain-input]")).to_have_value("검증영지")
     page.locator("[data-enter]").click()
     page.wait_for_url("**/home.html")
     expect(page.locator("[data-domain]").first).to_have_text("검증영지")
@@ -435,8 +458,9 @@ def main():
         browser = p.chromium.launch(**options)
         try:
             if not args.entry_only and not args.writing_only:
-                check_browser(browser, base)
-                check_browser(browser, base, mobile=True)
+                for motion in ("reduce", "no-preference"):
+                    check_browser(browser, base, motion=motion)
+                    check_browser(browser, base, mobile=True, motion=motion)
             if not args.entry_only:
                 for viewport in MOTION_VIEWPORTS:
                     normal_motion(browser, base, viewport, ready_resize_to=(390, 844) if viewport == (903, 1195) else None)

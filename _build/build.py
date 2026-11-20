@@ -86,6 +86,8 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 <link rel="stylesheet" href="{asset_url('assets/css/map-art.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/town-art.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/entry.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/manuscript.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/visual.css', pre)}">
 </head>
 <body{' class="cover"' if cover else ''} data-default-domain="{e(d.기본_영지명)}">
 {SPRITE.replace("@@ASSET_ROOT@@", pre)}
@@ -96,6 +98,7 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 </main>
 {bottom}
 <script src="{asset_url('assets/js/main.js', pre)}"></script>
+<script src="{asset_url('assets/js/visual.js', pre)}"></script>
 </body>
 </html>
 """

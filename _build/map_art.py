@@ -16,6 +16,9 @@ def illustrated_map(svg):
     end = svg.index(">") + 1
     art = ('<image class="survey-art" href="images/atelier/map-survey.webp" '
            'x="0" y="0" width="900" height="560" preserveAspectRatio="none" '
+           'aria-hidden="true" pointer-events="none"/>'
+           '<image class="survey-compass" href="images/atelier/compass-graphite.webp" '
+           'x="48" y="48" width="96" height="96" '
            'aria-hidden="true" pointer-events="none"/>')
     return svg[:end] + art + svg[end:]
 

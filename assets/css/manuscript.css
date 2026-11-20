@@ -1,0 +1,287 @@
+/* 연필로 그린 도판과 활자로 엮은 봉토 기록.
+   원문의 순서·문장·선택 동작을 보존하며 각 장의 크기와 여백을 달리한다. */
+:root {
+  --drawing-paper: #f7f2e7;
+  --pencil: #5c5142;
+  --pencil-line: rgb(92 81 66 / .3);
+  --folio-art: url(../../images/atelier/folio-pencil.webp);
+}
+
+/* 장의 시작은 제목을 크게 읽고, 얇은 괘선 뒤에서 본문이 시작되게 한다. */
+body:not(.cover) .head { padding-block: clamp(56px, 8vw, 120px) 45px; }
+.head > .wrap { max-width: 80rem; }
+.head .hd.big {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 25px 32px;
+  margin-bottom: 27px;
+}
+.head .hd.big h1 { font-size: clamp(3.5rem, 8.5vw, 7.2rem); letter-spacing: -.065em; line-height: 1.14; }
+.head .hd.big .en { max-width: none; font-size: clamp(.8rem, 1.6vw, 1.15rem); padding-bottom: 9px; }
+.head .hd.big i { grid-column: 1 / -1; grid-row: 2; width: 100%; height: 4px; background: linear-gradient(var(--ink) 0 1px, transparent 1px 3px, var(--pencil-line) 3px); }
+.head .hd.big i::before, .head .hd.big i::after { display: none; }
+.head .lead { max-width: 45rem; font-size: 1.1rem; }
+body:not(.cover) main > .sec { padding-block: clamp(62px, 8vw, 112px); }
+body:not(.cover) main > .sec + .sec { border-top-color: var(--pencil-line); }
+.hd { align-items: end; }
+.hd h2 { letter-spacing: -.035em; }
+.hd .en { color: var(--pencil); }
+.hd i { background: linear-gradient(90deg, var(--pencil), var(--line)); }
+.hd i::before, .hd i::after { border-color: var(--pencil); }
+
+/* 홈: 서임장의 짧은 본문, 펼친 도면, 명부, 시작 서류가 각기 다른 장면이 된다. */
+body:has(.hero) .sec > .wrap { max-width: 80rem; }
+body:has(.hero) .sec > .wrap > .hd { margin-bottom: clamp(32px, 4vw, 55px); gap: 28px; }
+body:has(.hero) .sec > .wrap > .hd h2 { font-size: clamp(2.3rem, 4.5vw, 4rem); line-height: 1.25; }
+body:has(.hero) .sec > .wrap > .hd .en { font-size: .95rem; letter-spacing: .24em; }
+body:has(.hero) .sec > .wrap > .hd i { align-self: end; margin-bottom: 16px; }
+body:has(.hero) main > .say { padding-block: clamp(75px, 11vw, 155px); border-top: 1px solid var(--pencil-line); }
+body:has(.hero) .say > .wrap.narrow { max-width: 64rem; padding-left: clamp(35px, 7vw, 100px); border-left: 1px solid var(--gold); }
+.say p { max-width: 44rem; }
+.say p:first-child { font-size: clamp(1.8rem, 3.2vw, 2.65rem); line-height: 1.65; letter-spacing: -.035em; margin-bottom: 1.1em; }
+.say p:not(:first-child) { font-size: clamp(1.05rem, 1.8vw, 1.3rem); line-height: 1.95; color: var(--soft); }
+.say p:first-child::first-letter { font-size: 1.3em; }
+body:has(.hero) .grow-sec > .wrap { max-width: 88rem; }
+.grow {
+  padding: clamp(18px, 3.4vw, 46px);
+  border: 1px solid var(--pencil);
+  background: rgb(255 252 242 / .48);
+  box-shadow: 7px 8px 0 -1px var(--paper), 7px 8px 0 0 var(--pencil-line);
+  gap: 30px 35px;
+}
+.g-info { padding-left: 2px; }
+.g-name { font-size: clamp(2.8rem, 6vw, 5rem); letter-spacing: -.055em; }
+.g-pop { margin-top: 15px; }
+.g-pop b { font-size: 2rem; }
+.g-fac { font-size: 1rem; }
+.g-ctl { padding-top: 18px; border-top: 1px solid var(--pencil-line); }
+.g-ticks button { padding-block: 8px; }
+body:has(.hero) .sec:has(.est) { background: rgb(227 208 166 / .14); }
+body:has(.hero) .sec:has(.deck) { padding-bottom: 85px; background: rgb(255 252 242 / .24); }
+.deck {
+  gap: 40px;
+  padding: 15px max(26px, calc((100vw - 76rem) / 2)) 48px;
+  scroll-padding-inline: max(26px, calc((100vw - 76rem) / 2));
+}
+.tilt { flex-basis: min(85vw, 37rem); }
+.tilt img { outline: 1px solid var(--pencil); outline-offset: 7px; box-shadow: 0 11px 18px rgb(58 41 29 / .13); }
+.tilt:hover img { box-shadow: 0 16px 28px rgb(58 41 29 / .2); }
+body:has(.hero) .sec:has(.seasons) { padding-block: clamp(75px, 8vw, 125px); }
+body:has(.hero) .sec:has(.deeds) { background: rgb(227 208 166 / .18); padding-bottom: 125px; }
+
+/* 세 개의 출발: 금박 렌더 대신 손으로 관찰해 그린 물건 도판. */
+.deeds, .slots { gap: clamp(20px, 3vw, 42px); }
+.deed, .slot {
+  background-color: var(--drawing-paper);
+  background-image: var(--folio-art);
+  background-size: 100% 100%;
+  box-shadow: 0 2px 2px rgb(58 41 29 / .1), 0 10px 20px rgb(58 41 29 / .09);
+  padding-inline: clamp(25px, 2.6vw, 38px);
+  padding-bottom: 58px;
+}
+.deed::before, .slot::before {
+  background-image: url(../../images/atelier/mode-triptych-pencil.webp);
+  background-position: var(--mode-position) 50%;
+  background-size: 300% auto;
+  mix-blend-mode: multiply;
+  filter: none;
+  opacity: 1;
+  width: calc(100% + 32px);
+  margin: 15px -16px 5px;
+  aspect-ratio: 1.05;
+  mask-image: linear-gradient(transparent, #000 7% 84%, transparent);
+}
+.deed h3 { font-size: clamp(1.8rem, 2.8vw, 2.35rem); letter-spacing: -.04em; }
+.deed .en, .slot .en { color: var(--pencil); font-size: .76rem; }
+.deed p { margin-top: 15px; font-size: 1rem; line-height: 1.9; }
+.deed:hover, .slot:hover { box-shadow: 0 2px 2px rgb(58 41 29 / .13), 0 16px 25px rgb(58 41 29 / .16); }
+.slot { padding-bottom: 43px; }
+.slot b { font-size: clamp(1.55rem, 3vw, 2.25rem); }
+.slot[aria-selected=false]::before { filter: none; opacity: .8; }
+.slot[aria-selected=true] { outline: 1px solid var(--wax); outline-offset: 6px; box-shadow: 0 3px 0 rgb(92 81 66 / .15), 0 14px 23px rgb(58 41 29 / .13); }
+.slot[aria-selected=true] b { color: var(--wax); }
+.modes > .wrap { max-width: 80rem; }
+.mode-pane { max-width: 61rem; margin: 90px auto 0; padding-top: 34px; border-top: 1px solid var(--pencil); }
+.mode-pane h2 { font-size: clamp(2.1rem, 3.5vw, 3.4rem); letter-spacing: -.04em; margin-bottom: 25px; }
+.mode-pane p { font-size: 1.1rem; }
+.mode-pane .lv { margin-top: 25px; padding: 22px 26px; background: rgb(255 252 242 / .4); border: 1px solid var(--pencil-line); box-shadow: 4px 4px 0 -1px var(--paper), 4px 4px 0 var(--pencil-line); }
+
+/* 단색 연필화가 붙은 시세 장부. 금액과 수량은 원래의 실제 표이다. */
+.tally::before { background-image: url(../../images/atelier/coins-ledger-pencil.webp); mix-blend-mode: multiply; border-bottom-color: var(--pencil-line); }
+body:not(.cover) main .scroll:has(table) {
+  background-color: var(--drawing-paper);
+  background-image: none;
+  border: 22px solid transparent;
+  border-image-source: var(--folio-art);
+  border-image-slice: 135 fill;
+  border-image-repeat: stretch;
+  padding: 6px;
+  box-shadow: 5px 6px 0 -1px var(--paper), 5px 6px 0 var(--pencil-line);
+}
+body:not(.cover) main .scroll table { background: transparent; }
+body:not(.cover) main .scroll thead th { background: rgb(92 81 66 / .055); color: var(--ink); padding-block: 17px; border-bottom-color: var(--pencil); }
+body:not(.cover) main .scroll td { border-bottom-color: rgb(92 81 66 / .18); }
+body:not(.cover) main .scroll tbody tr:nth-child(even) { background: rgb(92 81 66 / .025); }
+body:not(.cover) main .tally.scroll { padding: 0 6px 6px; }
+.tally::before { width: calc(100% + 12px); margin: 0 -6px 17px; aspect-ratio: 3; }
+.tally tfoot { background: rgb(92 81 66 / .04); }
+.tally tr.has { background: rgb(168 132 63 / .1) !important; }
+.qty button { background: rgb(255 252 242 / .6); border: 1px solid var(--pencil-line); box-shadow: 0 2px 0 rgb(92 81 66 / .12); }
+.qty button:hover { background: var(--ink); color: var(--paper); }
+.stage-thumb { width: 115px; mix-blend-mode: multiply; border-color: var(--pencil-line); box-shadow: none; }
+.season-thumb { mix-blend-mode: multiply; box-shadow: none; }
+
+/* 메모와 명부는 가볍게 눌린 연필 테두리를 가진 낱장이다. */
+.note, .sel-info, .prof > .wrap.narrow > .rec {
+  border-image-source: var(--folio-art);
+  border-image-slice: 135 fill;
+  box-shadow: 0 2px 1px rgb(58 41 29 / .07), 0 11px 22px rgb(58 41 29 / .08);
+}
+.note { border-width: 34px; padding: 20px 14px 23px; gap: 27px; }
+.note label span { color: var(--pencil); }
+.note input { border-bottom: 1px solid var(--pencil); background: rgb(255 255 255 / .18); }
+.note input:focus { background: rgb(255 255 255 / .36); outline-color: var(--pencil); }
+.sel-info { border-width: 24px; }
+.sel-info .rec { border-color: var(--pencil-line); }
+.sel-stage::after, .prof-hero::after, .face-stage::after { border-image-source: var(--folio-art); border-image-slice: 125; }
+.sel-side { background: rgb(255 252 242 / .18); }
+.sel-side .hd.big { gap: 15px; }
+.sel-side .hd.big h1 { font-size: clamp(3.3rem, 5vw, 5rem); letter-spacing: -.05em; }
+.sel-side .hd .en { font-size: .7rem; }
+.sel-f { border-bottom: 1px solid var(--pencil-line); }
+.sel-f button { letter-spacing: .02em; }
+.ro { border-bottom-color: var(--pencil-line); }
+.ro.on { background: rgb(255 252 242 / .65); box-shadow: inset 3px 0 0 var(--wax); }
+.ro-portrait { border-color: var(--pencil); box-shadow: 2px 2px 0 rgb(92 81 66 / .16); }
+.prof-lead { font-size: clamp(1.2rem, 2vw, 1.55rem); letter-spacing: -.025em; }
+.prof > .wrap.narrow > .rec { margin-top: 38px; margin-bottom: 100px; }
+.prof .face-stage { box-shadow: 6px 7px 0 -1px var(--paper), 6px 7px 0 var(--pencil-line); }
+.prof-nav > a:nth-child(2) { border-color: var(--pencil-line); }
+.face-tabs button { background-image: none; background-color: rgb(255 252 242 / .35); box-shadow: inset 0 0 0 1px var(--pencil-line); }
+.face-tabs button[aria-pressed=true] { background-image: none; box-shadow: inset 0 0 0 1px var(--wax2); }
+
+/* 붉은 밀랍은 클릭 가능한 곳의 강조색으로 남긴다. */
+body:not(.cover) .btn { border-color: var(--wax2); box-shadow: inset 0 0 0 3px var(--wax), inset 0 0 0 4px rgb(246 236 214 / .35), 0 3px 0 var(--wax2), 0 6px 9px rgb(58 20 20 / .12); }
+body:not(.cover) .btn:hover { box-shadow: inset 0 0 0 3px #a02626, inset 0 0 0 4px rgb(246 236 214 / .5), 0 4px 0 var(--wax2), 0 10px 14px rgb(58 20 20 / .16); }
+.top { box-shadow: 0 3px 0 var(--paper), 0 4px 0 var(--pencil-line); }
+.top .wrap { max-width: 88rem; }
+.tabs a { font-weight: 700; }
+.tabs kbd { border: 1px solid var(--pencil-line); min-width: 20px; height: 20px; display: inline-grid; place-items: center; line-height: 1; margin-right: 7px; }
+.foot { border-top-color: var(--pencil); padding-block: 74px 68px; }
+.foot .en { font-size: .9rem; letter-spacing: .32em; }
+.foot nav { margin-top: 23px; gap: 32px; }
+.foot nav a { font-size: 1rem; }
+.sec.end > .wrap { max-width: 960px; padding: 95px 75px; min-height: 320px; gap: 28px; background-image: var(--folio-art); }
+.sec.end .closing { font-size: clamp(1.5rem, 2.9vw, 2.25rem); }
+
+@media (min-width: 1100px) {
+  /* 긴 규칙과 안내는 큰 장 제목 옆에 읽기 좋은 폭의 본문을 둔다. */
+  body:not(:has(.hero)) main > .sec > .wrap.narrow {
+    max-width: 80rem;
+    display: grid;
+    grid-template-columns: 245px minmax(0, 1fr);
+    column-gap: 60px;
+    align-items: start;
+  }
+  body:not(:has(.hero)) main > .sec > .wrap.narrow > * { grid-column: 2; }
+  body:not(:has(.hero)) main > .sec > .wrap.narrow > .hd {
+    grid-column: 1;
+    grid-row: 1 / span 30;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    margin-bottom: 0;
+    align-content: start;
+  }
+  body:not(:has(.hero)) main > .sec > .wrap.narrow > .hd h2 { font-size: 2.8rem; line-height: 1.35; }
+  body:not(:has(.hero)) main > .sec > .wrap.narrow > .hd i { grid-row: 1; width: 52px; height: 3px; background: var(--ink); }
+  body:not(:has(.hero)) main > .sec > .wrap.narrow > .hd i::before,
+  body:not(:has(.hero)) main > .sec > .wrap.narrow > .hd i::after { display: none; }
+  body:not(:has(.hero)) main > .sec > .wrap.narrow > .hd .en { max-width: none; font-size: .9rem; }
+  .mode-pane:not([hidden]) { display: grid; grid-template-columns: 230px minmax(0, 1fr); column-gap: 42px; }
+  .mode-pane h2 { grid-column: 1; grid-row: 1 / span 3; }
+  .mode-pane p { grid-column: 2; }
+}
+@media (max-width: 960px) {
+  .head .hd.big { gap: 20px; }
+  .head .hd.big .en { font-size: .8rem; }
+  .sel-side .hd.big h1 { font-size: 4.5rem; }
+  .deed p { font-size: .92rem; }
+  .deed, .slot { padding-inline: 23px; }
+  .note { border-width: 29px; padding-inline: 9px; }
+}
+@media (max-width: 720px) {
+  body:not(.cover) .head { padding-block: 48px 34px; }
+  .head .hd.big { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .head .hd.big h1 { font-size: clamp(3.5rem, 14vw, 5rem); }
+  .head .hd.big .en { grid-row: 2; padding: 0; font-size: .75rem; letter-spacing: .25em; }
+  .head .hd.big i { grid-row: 3; margin-top: 4px; }
+  .head .lead { font-size: 1rem; line-height: 1.9; }
+  body:not(.cover) main > .sec { padding-block: 58px; }
+  body:has(.hero) .sec > .wrap > .hd { gap: 16px; margin-bottom: 30px; }
+  body:has(.hero) .sec > .wrap > .hd h2 { font-size: clamp(2rem, 7vw, 2.6rem); }
+  body:has(.hero) .sec > .wrap > .hd .en { font-size: .65rem; max-width: 34%; letter-spacing: .15em; }
+  body:has(.hero) .sec > .wrap > .hd i { margin-bottom: 11px; }
+  body:has(.hero) main > .say { padding: 70px 22px; }
+  body:has(.hero) .say > .wrap.narrow { padding: 0 0 0 25px; }
+  .say p:first-child { font-size: 1.75rem; line-height: 1.7; }
+  .say p:not(:first-child) { font-size: 1.05rem; line-height: 1.95; }
+  .grow { padding: 18px; gap: 24px; box-shadow: 4px 5px 0 -1px var(--paper), 4px 5px 0 var(--pencil-line); }
+  .g-name { font-size: 3.1rem; }
+  .g-pop { margin-top: 13px; }
+  .g-pop b { font-size: 1.6rem; }
+  .g-fac { font-size: .92rem; }
+  .g-ctl { padding-top: 15px; }
+  .deck { gap: 27px; padding-inline: 26px; scroll-padding-inline: 26px; padding-bottom: 36px; }
+  .tilt img { outline-offset: 5px; }
+  body:has(.hero) .sec:has(.deck) { padding-bottom: 42px; }
+  body:has(.hero) .sec:has(.deeds) { padding-bottom: 85px; }
+  .deeds { max-width: 480px; gap: 49px; }
+  .deed { padding-inline: 34px; padding-bottom: 50px; }
+  .deed::before { aspect-ratio: 1.35; margin-top: 12px; }
+  .deed h3 { font-size: 2rem; }
+  .deed p { font-size: .98rem; }
+  .slots { gap: 14px; }
+  .slot { padding: 0 8px 33px; gap: 7px; }
+  .slot::before { width: calc(100% + 10px); margin: 9px -5px 0; aspect-ratio: .95; }
+  .slot b { font-size: 1.12rem; }
+  .slot .en { font-size: .53rem; letter-spacing: .06em; }
+  .slot[aria-selected=true] { outline-offset: 3px; }
+  .mode-pane { margin-top: 65px; padding-top: 28px; }
+  .mode-pane h2 { font-size: 2.4rem; margin-bottom: 22px; }
+  .mode-pane p { font-size: 1rem; }
+  .mode-pane .lv { padding: 19px 20px; font-size: .94rem; }
+  body:not(.cover) main .scroll:has(table) { padding: 1px; border-width: 12px; box-shadow: 3px 4px 0 -1px var(--paper), 3px 4px 0 var(--pencil-line); }
+  body:not(.cover) main .tally.scroll { padding: 0 1px 1px; }
+  .tally::before { width: calc(100% + 2px); margin: 0 -1px 10px; aspect-ratio: 2.7; }
+  body:not(.cover) main .scroll th, body:not(.cover) main .scroll td { padding-inline: 8px; }
+  .stage-thumb { width: 68px; }
+  .note { border-width: 24px; padding: 13px 3px 16px; gap: 23px; }
+  .sel-side .hd.big h1 { font-size: 3.4rem; }
+  .sel-info { border-width: 23px; }
+  .prof > .wrap.narrow > .rec { margin-bottom: 65px; }
+  .prof-lead { font-size: 1.2rem; }
+  .tabs kbd { display: none; }
+  .foot { padding-block: 62px 48px; }
+  .foot .en { font-size: .72rem; }
+  .foot nav { gap: 26px; }
+  .foot nav a { font-size: .92rem; }
+  .sec.end > .wrap { padding: 72px 32px; min-height: 270px; gap: 25px; }
+  .sec.end .closing { font-size: 1.45rem; }
+}
+@media (max-width: 380px) {
+  .head .hd.big h1 { font-size: 3.4rem; }
+  .slot b { font-size: .98rem; }
+  .slot .en { font-size: .46rem; }
+  .slots { gap: 11px; }
+  .deed { padding-inline: 29px; }
+  .deed::before { aspect-ratio: 1.2; }
+  body:not(.cover) main .tally th, body:not(.cover) main .tally td { padding-inline: 5px; }
+  .note { border-width: 20px; }
+  .sel-side .hd.big h1 { font-size: 3rem; }
+  .sec.end > .wrap { padding-inline: 27px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .deed, .slot, .tilt { transition: none; }
+}

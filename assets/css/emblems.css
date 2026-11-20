@@ -59,8 +59,8 @@
 .est-col small { margin-top: 7px; }
 .est-rows { font-size: .85rem; }
 
-/* The illustrations lead each existing season button, never obscure its text. */
-.seasons { gap: 22px; }
+/* Pencil studies sit on the page without painted frames. */
+.seasons { gap: 26px; }
 .season {
   position: relative;
   display: grid;
@@ -68,10 +68,10 @@
   align-content: start;
   justify-items: start;
   gap: 7px 10px;
-  padding: 12px 12px 24px;
-  background: linear-gradient(rgb(246 236 214 / .83), rgb(239 225 194 / .9)), url(../../images/ui/parchment.webp);
+  padding: 14px 12px 27px;
+  background: linear-gradient(rgb(251 242 224 / .55), rgb(246 236 214 / .3)), url(../../images/ui/parchment.webp);
   background-size: auto, 512px 512px;
-  box-shadow: inset 0 0 0 1px var(--gold), inset 0 0 0 5px var(--paper), inset 0 0 0 6px var(--line), 0 9px 18px rgb(58 41 29 / .1);
+  box-shadow: inset 0 0 0 1px rgb(164 138 89 / .36), 0 7px 18px rgb(58 41 29 / .04);
   transition: transform .45s var(--ease), box-shadow .35s;
 }
 .season::before {
@@ -81,24 +81,33 @@
   grid-row: 1;
   width: 100%;
   aspect-ratio: 1;
-  margin-bottom: 14px;
-  background: var(--season-art) center / cover no-repeat;
-  box-shadow: 0 3px 8px rgb(58 41 29 / .16);
+  margin-bottom: 20px;
+  background: var(--season-art) center / contain no-repeat;
+  box-shadow: none;
+  mix-blend-mode: multiply;
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent), linear-gradient(0deg, transparent, #000 7%, #000 93%, transparent);
+  mask-composite: intersect;
   transition: filter .35s;
 }
 .season[data-season="spring"] { --season-art: url(../../images/atelier/season-spring.webp); }
 .season[data-season="summer"] { --season-art: url(../../images/atelier/season-summer.webp); }
 .season[data-season="autumn"] { --season-art: url(../../images/atelier/season-autumn.webp); }
 .season[data-season="winter"] { --season-art: url(../../images/atelier/season-winter.webp); }
+[data-season="spring"] { --season-medallion: url(../../images/ui/season-spring-medallion.webp); }
+[data-season="summer"] { --season-medallion: url(../../images/ui/season-summer-medallion.webp); }
+[data-season="autumn"] { --season-medallion: url(../../images/ui/season-autumn-medallion.webp); }
+[data-season="winter"] { --season-medallion: url(../../images/ui/season-winter-medallion.webp); }
 .season .ico {
   grid-column: 2;
   grid-row: 2;
   align-self: center;
   justify-self: end;
-  width: 27px;
-  height: 27px;
-  margin: 0 9px 0 0;
+  width: 32px;
+  height: 32px;
+  margin: 0 8px 0 0;
+  background: var(--season-medallion) center / contain no-repeat;
 }
+.season .ico > use { display: none; }
 .season b { grid-column: 1; grid-row: 2; margin: 0 0 3px 10px; font-size: 1.65rem; }
 .season .en { grid-column: 1 / -1; grid-row: 3; margin: 0 10px; font-size: .71rem; }
 .season .s-d { grid-column: 1 / -1; grid-row: 4; margin: 8px 10px 0; padding-right: 24px; font-size: .86rem; line-height: 1.8; }
@@ -116,18 +125,63 @@
   transition: opacity .3s, transform .35s var(--ease);
   pointer-events: none;
 }
-.season:hover::before { filter: brightness(1.035); }
+.season:hover::before { filter: contrast(1.03); }
 .season[aria-pressed="true"] {
-  background: linear-gradient(rgb(246 236 214 / .83), rgb(239 225 194 / .9)), url(../../images/ui/parchment.webp);
-  box-shadow: inset 0 0 0 2px var(--season), inset 0 0 0 5px var(--paper), inset 0 0 0 6px var(--season), 0 14px 26px rgb(58 41 29 / .18);
+  background: linear-gradient(rgb(251 242 224 / .55), rgb(246 236 214 / .3)), url(../../images/ui/parchment.webp);
+  box-shadow: inset 0 0 0 1px var(--season), 0 2px 0 var(--season), 0 12px 24px rgb(58 41 29 / .09);
 }
 .season[aria-pressed="true"]::after { opacity: 1; transform: scale(1) rotate(-12deg); }
+
+/* Engraved almanac tokens retain the original accessible season controls. */
+.dial { gap: 4px; padding-right: 12px; }
+.dial button { position: relative; width: 44px; height: 44px; padding: 0; background: transparent; box-shadow: none; }
+.dial button .ico { display: none; }
+.dial button::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  background: var(--season-medallion) center / contain no-repeat;
+  filter: drop-shadow(0 1px 1px rgb(58 41 29 / .2));
+  transition: transform .3s var(--ease), filter .3s;
+}
+.dial button::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: calc(50% - 2px);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--wax);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.dial button:hover, .dial button[aria-pressed="true"] { background: transparent; box-shadow: none; }
+.dial button:hover::before { transform: translateY(-2px) rotate(-4deg); }
+.dial button[aria-pressed="true"]::before { transform: translateY(-2px); filter: drop-shadow(0 2px 2px rgb(58 41 29 / .3)); }
+.dial button[aria-pressed="true"]::after { opacity: 1; }
+.snd {
+  border: 1px solid rgb(142 111 58 / .6);
+  background: radial-gradient(circle at 35% 25%, #fff6df, #e5d2a9);
+  box-shadow: inset 0 0 0 2px var(--paper), inset 0 0 0 3px rgb(142 111 58 / .3), 0 2px 3px rgb(58 41 29 / .1);
+}
+.top .snd { width: 36px; height: 36px; margin-inline: 4px; }
+.snd .ico { width: 21px; height: 21px; color: #5e4828; stroke-width: 1.6; }
+.snd:hover { background: #f5e7c9; }
 @media (min-width: 800px) { .seasons { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 799px) {
   .seasons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .season::before { aspect-ratio: 1.15; }
+  .season::before { aspect-ratio: 1; }
 }
 @media (max-width: 540px) {
+  .top .wrap { grid-template-columns: minmax(0, 1fr); row-gap: 4px; padding-block: 13px 17px; }
+  .top .brand { grid-column: 1; grid-row: 1; margin-bottom: 2px; }
+  .top .tabs { grid-column: 1; grid-row: 2; justify-self: center; margin-left: 0; }
+  .top .tabs a { padding-inline: 15px; }
+  .top .tools { grid-column: 1; grid-row: 3; justify-self: center; gap: 9px; }
+  .top .dial { padding-right: 11px; gap: 5px; }
+  .top .dial button { width: 44px; height: 44px; }
+  .top .snd { width: 36px; height: 36px; margin-inline: 4px; }
   .est { --row: 58px; }
   .est-board { grid-template-columns: 24px minmax(0, 1fr); gap: 0 8px; padding: 74px 10px 23px; }
   .est-col { grid-template-rows: calc(var(--row) * 5 + 24px) auto auto; }
@@ -142,11 +196,11 @@
   .est-col em { font-size: .78rem; margin-top: 7px; }
   .seasons { gap: 17px 12px; }
   .season { padding: 8px 8px 22px; gap: 5px 8px; }
-  .season::before { margin-bottom: 11px; aspect-ratio: 1; }
+  .season::before { margin-bottom: 15px; aspect-ratio: 1; }
   .season b { font-size: 1.4rem; margin-left: 6px; }
-  .season .ico { width: 23px; height: 23px; margin-right: 5px; }
+  .season .ico { width: 28px; height: 28px; margin-right: 5px; }
   .season .en { font-size: .62rem; margin-inline: 6px; letter-spacing: .18em; }
   .season .s-d { font-size: .75rem; line-height: 1.85; margin-inline: 6px; padding-right: 18px; }
   .season::after { width: 24px; height: 24px; right: 11px; bottom: 15px; }
 }
-@media (prefers-reduced-motion: reduce) { .pennant, .pennant b, .season, .season::after { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .pennant, .pennant b, .season, .season::after, .dial button::before { transition: none; } }
