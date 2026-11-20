@@ -89,7 +89,6 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 <link rel="stylesheet" href="{asset_url('assets/css/manuscript.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/visual.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/interface-fonts.css', pre)}">
-<link rel="stylesheet" href="{asset_url('assets/css/margin-font.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/modern.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/symbols.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/map-modern.css', pre)}">

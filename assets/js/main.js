@@ -372,7 +372,11 @@
     function set(i, user) {
       i = +i; if (i === cur) return;
       cur = i; range.value = i; grow.style.setProperty('--p', i / (st.length - 1));
-      groups.forEach(gp => gp.classList.toggle('on', +gp.dataset.s <= i));
+      groups.forEach(gp => {
+        const stage = +gp.dataset.s;
+        gp.classList.toggle('on', stage <= i);
+        if (stage === i && gp.dataset.caption) $('.town', grow).setAttribute('aria-label', gp.dataset.caption);
+      });
       $$('[data-g-name]', grow).forEach(el => { el.textContent = st[i][0]; });
       $('[data-g-fac]', grow).textContent = st[i][2];
       $('[data-g-cap]', grow).textContent = i === st.length - 1 ? ' 이상' : '까지';

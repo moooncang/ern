@@ -1,51 +1,47 @@
-/* Four requested notes in the lord's hand; original interface copy is unchanged. */
+/* Image-generated pen notes. The original sentences remain accessible text. */
 .lord-note {
   position: relative;
-  display: table;
-  max-width: 270px;
+  display: block;
+  width: 270px;
+  max-width: 100%;
+  aspect-ratio: var(--note-ratio);
   margin: 22px 0 5px;
-  color: #7a4e31;
-  font: 400 26px/1.35 'ERN Margin Pen', 'Gowun Batang', cursive;
-  letter-spacing: -.025em;
-  word-break: keep-all;
-  transform: rotate(-2deg);
-  transform-origin: left center;
+  background-image: url(../../images/ui/lord-notes-handwritten.webp);
+  background-size: var(--note-size);
+  background-position: var(--note-position);
+  background-repeat: no-repeat;
 }
 .lord-note span {
-  padding-bottom: 3px;
-  background: linear-gradient(178deg, transparent 83%, rgb(110 79 59 / .2) 84% 87%, transparent 88%);
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-}
-.lord-note::after {
-  content: '';
   position: absolute;
-  left: -52px;
-  top: 1px;
-  width: 43px;
-  height: 34px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 42'%3E%3Cg fill='none' stroke='%23765843' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M54 7c-7 19-24 27-45 18M18 19l-10 6 7 9'/%3E%3Cpath opacity='.4' d='M52 7c-7 17-22 24-40 19'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
-  pointer-events: none;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
-.g-info .note-growth { margin: 25px 0 0 12px; }
-.est-ctl .note-estates { justify-self: end; margin: 19px 5px 0 38px; transform: rotate(1.4deg); }
-.est-ctl .note-estates::after { top: -6px; transform: rotate(22deg); }
-.season-foot { display: flex; justify-content: space-between; align-items: center; gap: 20px 60px; margin-top: 14px; }
+.lord-note::before, .lord-note::after { content: none; }
+/* Crop each cell's transparent margin while retaining its hand-drawn arrows. */
+.note-growth { --note-ratio: 687 / 269; --note-size: 223.581% 285.502%; --note-position: 5.771% 14.629%; }
+.note-estates { --note-ratio: 606 / 274; --note-size: 253.465% 280.292%; --note-position: 94.194% 17.409%; }
+.note-seasons { --note-ratio: 665 / 230; --note-size: 230.977% 333.913%; --note-position: 7.233% 91.636%; }
+.note-map { --note-ratio: 648 / 298; --note-size: 237.037% 257.718%; --note-position: 94.482% 87.872%; }
+.g-info .note-growth { margin: 24px 0 0; }
+.est-ctl .note-estates { justify-self: end; margin: 20px 0 0; }
+.season-foot { display: flex; justify-content: space-between; align-items: center; gap: 20px 40px; margin-top: 14px; }
 .season-foot .after { max-width: 760px; margin: 0; }
-.season-foot .note-seasons { flex: none; margin: 13px 12px 0 44px; transform: rotate(-2.7deg); }
-.season-foot .note-seasons::after { top: -18px; transform: rotate(55deg); }
-.map-wrap .note-map { margin: -3px 24px 22px 64px; font-size: 25px; }
-.map-wrap .note-map::after { left: -44px; top: -18px; transform: rotate(100deg); }
+.season-foot .note-seasons { flex: none; margin: 12px 8px 0 0; }
+.map-wrap .note-map { margin: 0 24px 22px 32px; }
 @media (max-width: 900px) {
   .season-foot { flex-wrap: wrap; gap: 7px; }
-  .season-foot .note-seasons { margin-left: auto; margin-right: 16px; }
+  .season-foot .note-seasons { margin-left: auto; margin-right: 0; }
 }
 @media (max-width: 720px) {
-  .lord-note { font-size: 23px; line-height: 1.25; max-width: 230px; }
-  .g-info .note-growth { margin: 7px 0 0 3px; font-size: 22px; }
-  .g-info .note-growth::after { left: -36px; width: 28px; height: 25px; top: 6px; }
-  .est-ctl .note-estates { margin-top: 13px; }
+  .lord-note { width: 240px; }
+  .g-info .note-growth { grid-column: 1 / -1; grid-row: 3; margin: 8px 0 0; justify-self: end; }
+  .est-ctl .note-estates { margin-top: 15px; }
   .season-foot .note-seasons { margin-top: 15px; }
-  .map-wrap .note-map { margin: 0 16px 18px 51px; font-size: 23px; }
-  .map-wrap .note-map::after { left: -35px; width: 31px; }
+  .map-wrap .note-map { margin: 0 16px 18px; max-width: calc(100% - 32px); }
 }

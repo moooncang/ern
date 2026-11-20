@@ -12,4 +12,4 @@ The original serif families below were downloaded from the official Google Fonts
 
 The modern interface uses [Pretendard Variable 1.3.9](pretendard/README.md), preserved as 92 upstream Unicode subsets (2,957,724 bytes). Its license, provenance, weight range, and checksums are documented in that directory. `assets/css/interface-fonts.css` declares the family with local URLs and `font-display: swap`; page styles select it separately.
 
-The four handwritten margin notes use [ERN Margin Pen](margin-pen/README.md), a renamed, 21,148-byte subset of Nanum Pen Script under the SIL Open Font License. Its reserved font names were replaced in the derivative; original copyright and license notices are preserved. `assets/css/margin-font.css` declares only this notes font.
+The margin notes now use generated handwriting images, with accessible text, and do not load a handwriting font. The earlier [ERN Margin Pen](margin-pen/README.md) subset and its SIL Open Font License are retained for provenance; `assets/css/margin-font.css` is no longer linked by any page.

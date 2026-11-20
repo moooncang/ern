@@ -93,9 +93,9 @@ python -m http.server 8765
 
 최종 그림은 사용자가 제시한 르네상스 공학 수기 이미지를 기준으로 삼는다. 건물·장치의 구조를 보여 주는 세피아 펜선, 보조선, 절제된 해칭과 작은 부분 상세를 사용한다. 너무 성긴 낙서나 마을 전체를 채운 전경으로 치우치지 않는다.
 
-- `images/modern/growth-pen.webp`, `region-pen.webp`: 성장 단계와 지도 지역의 작은 만년필 스케치 시트. 원래 단계·좌표·수치·조작을 유지한다.
+- `images/modern/growth-annotated.webp`: 여섯 성장 구조도마다 손글씨 메모 네 묶음을 직접 생성한 시트. 기울어진 필기, 취소선, 화살표와 부분 상세가 한 그림 안에서 함께 전환된다. 메모는 폰트가 아니며 접근성 설명에는 같은 문장을 제공한다. `region-pen.webp`는 지도 지역의 만년필 스케치 시트다. 원래 단계·좌표·수치·조작을 유지한다.
 - `images/ui/ink-symbols.webp`, `mode-doodles.webp`: 계절·세력·출발 방식에 사용하는 잉크 스케치. 큰 삽화와 두꺼운 장식을 대신한다.
 - `modern.css`, `symbols.css`, `map-modern.css`, `interface-pages.css`: 앞선 스타일 위에 간결한 배치·여백·정렬을 적용한다. 내용은 전부 원문이다.
 - `interface-fonts.css`: 명조 제목과 함께 사용하는 Pretendard UI 글꼴. 자체 호스팅하며 라이선스·출처는 `assets/fonts/pretendard/`에 보존한다.
 - 본문 페이지의 떠다니는 입자는 끈다. 입장 화면의 원래 연출은 유지한다.
-- 사용자가 따로 요청한 영주 메모 네 개만 `aside[data-lord-note]`에 추가한다. 우물·곳간, 세금과 촌락, 가을 공납, 서쪽 통행세에 관한 메모이며 기존 본문에 섞지 않는다. `marginalia.css`와 자체 호스팅한 `ERN Margin Pen` 글꼴로 표현한다. 보존 검사는 이 네 문장을 별도로 확인한 뒤 최초 본문의 기준값을 그대로 검사한다.
+- 다른 화면에 있던 우물·곳간, 세금과 촌락, 가을 공납, 서쪽 통행세 메모도 유지한다. `images/ui/lord-notes-handwritten.webp`에 실제 필기 이미지로 생성하고 `marginalia.css`에서 표시한다. 메모용 폰트는 로드하지 않는다. `aside[data-lord-note]`의 원래 문장은 화면 읽기 도구에 제공하며 보존 검사는 이 네 문장을 별도로 확인한 뒤 최초 본문의 기준값을 그대로 검사한다.
