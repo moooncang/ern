@@ -9,6 +9,8 @@ import data as d
 
 ROOT = Path(__file__).resolve().parent.parent
 BY = {c["코드"]: c for c in d.인물}
+FONTS = ("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500"
+         "&family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap")
 BOOT = ("(function(r){r.className='js';var s;try{s=localStorage.getItem('ern-season')}catch(e){}"
         "if(!s){var m=new Date().getMonth();s=m<2||m>10?'winter':m<5?'spring':m<8?'summer':'autumn'}"
         "r.dataset.season=s})(document.documentElement)")
@@ -37,40 +39,59 @@ def ico(name, cls=""):
     return f'<svg class="ico {cls}" aria-hidden="true"><use href="#i-{name}"/></svg>'
 
 
-def emblem(cls=""):
-    return f'''<svg class="emblem {cls}" viewBox="0 0 64 76" fill="none" aria-hidden="true"><path d="M9 10h46v31c0 14-23 27-23 27S9 55 9 41V10Z" stroke="currentColor" stroke-width="1.4"/><path d="M14 15h36v26c0 10-18 21-18 21S14 51 14 41V15Z" stroke="currentColor" stroke-width=".6"/><path d="M32 53V24m0 22c-10 0-14-7-14-7 8-2 14 1 14 7Zm0-9c-8-1-11-7-11-7 7-2 11 2 11 7Zm0 5c10 0 14-7 14-7-8-2-14 1-14 7Zm0-10c8-1 11-7 11-7-7-2-11 2-11 7Zm0-8c-5-5 0-11 0-11s5 6 0 11Z" fill="currentColor"/><path d="M21 5h22M32 0v9" stroke="currentColor"/></svg>'''
-
-
 def shell(파일, 머리제목, 본문, cover=False, pre=""):
-    """공통 프레임. 파일은 HTML 생성기의 단일 출처에서만 갱신한다."""
+    """pre: 하위 폴더 쪽에서 루트까지의 경로('../')"""
     title = d.제목 if not 머리제목 else f"{머리제목} · {d.제목}"
-    page = "character" if pre else 파일.removesuffix(".html")
-    labels = ["THE WORLD", "YOUR DOMAIN", "THE PEOPLE", "BEGIN YOUR STORY"]
     tabs = "".join(
-        f'<a href="{pre}{h}"{chr(32) + "aria-current=page" if h == 파일 else ""}><span>{e(t)}</span><small>{labels[i]}</small></a>'
-        for i, (h, t) in enumerate(d.메뉴))
-    dial = "".join(f'<button type="button" data-season="{k}" aria-pressed="false" aria-label="{e(t)}" title="{e(t)}">{ico(k)}</button>' for k, t, _, _ in d.계절)
+        '<a href="{}{}"{}><kbd>{}</kbd>{}</a>'.format(pre, h, ' aria-current="page"' if h == 파일 else "", i, e(t))
+        for i, (h, t) in enumerate(d.메뉴, 1))
+    dial = "".join(
+        f'<button type="button" data-season="{k}" aria-pressed="false" aria-label="{e(t)}" title="{e(t)}">{ico(k)}</button>'
+        for k, t, _, _ in d.계절)
+    # 켜짐/꺼짐에 따라 안쪽 선을 바꿔야 해서 이 아이콘만 use 없이 직접 넣는다
     snd = ('<button class="snd" type="button" aria-pressed="true" aria-label="효과음 (M)" title="효과음 (M)">'
            '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3l4-3.5v12l-4-3.5H4z"/>'
            '<path class="w" d="M14.5 9a4 4 0 0 1 0 6M17 6.5a7.5 7.5 0 0 1 0 11"/><path class="x" d="M15 9.5l5 5m0-5l-5 5"/></svg></button>')
-    top = f'''<a class="skip-link" href="#main">본문으로 건너뛰기</a>
-<header class="top"><div class="wrap">
-<a class="brand" href="{pre}home.html" aria-label="에른 변경 첫 화면">{emblem()}<span>THE ERN MARCH<small>변경의 신임 영주가 되었다</small></span></a>
-<nav class="tabs" id="site-nav" aria-label="주 메뉴">{tabs}</nav>
-<div class="tools">{snd}<button class="help-button" type="button" data-help aria-label="단축키 안내">?</button><a class="header-cta" href="{pre}start.html">이야기 시작 {ico("next")}</a></div>
-<button class="menu-toggle" type="button" data-menu-toggle aria-controls="site-nav" aria-expanded="false" aria-label="메뉴 열기"><span></span><span></span></button>
-</div><div class="reading-progress" data-reading-progress></div></header>'''
+    top = f'<div class="cover-tools">{snd}</div>' if cover else (
+        f'<header class="top"><div class="wrap"><a class="brand" href="{pre}home.html">'
+        f'<svg class="mark" aria-hidden="true"><use href="#wax"/></svg><span>{e(d.제목)}</span></a>'
+        f'<nav class="tabs" aria-label="주 메뉴">{tabs}</nav>'
+        f'<div class="tools"><a class="fief" href="{pre}start.html#note" title="영지 이름 정하기">'
+        f'<span data-domain>{e(d.기본_영지명)}</span></a>'
+        f'<div class="dial" role="group" aria-label="계절">{dial}</div>{snd}</div></div></header>')
     foot = "".join(f'<a href="{pre}{h}">{e(t)}</a>' for h, t in d.메뉴)
-    bottom = f'''<footer class="foot"><div class="wrap footer-grid"><a class="brand" href="{pre}home.html">{emblem()}<span>THE ERN MARCH<small>왕국의 끝, 당신의 시작.</small></span></a><nav aria-label="바닥글">{foot}</nav><div class="footer-season"><span class="eyebrow">THE TURN OF SEASONS</span><div class="dial" role="group" aria-label="계절">{dial}</div></div></div><div class="wrap footer-bottom"><span>정통 판타지 · 영지 경영 · 캐릭터 챗</span><span class="age-note">19+ 성인 대상 작품</span><a href="#main">맨 위로 ↑</a></div></footer>
-<dialog class="shortcuts-dialog" data-shortcuts aria-labelledby="shortcuts-title"><button class="dialog-close" type="button" data-close-help aria-label="단축키 안내 닫기">×</button><p class="eyebrow">A FEW SMALL KEYS</p><h2 id="shortcuts-title">손끝으로 넘기는 기록</h2><dl class="key-list"><dt><kbd>1</kbd> — <kbd>4</kbd></dt><dd>세계 · 영지 · 인물 · 시작</dd><dt><kbd>M</kbd></dt><dd>효과음 켜기 / 끄기</dd><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>인물 상세에서 표정 넘기기</dd><dt><kbd>Q</kbd> <kbd>E</kbd></dt><dd>이전 / 다음 인물</dd><dt><kbd>?</kbd></dt><dd>단축키 안내</dd></dl><p class="small-print">입력 중에는 단축키가 작동하지 않습니다.</p></dialog>'''
-    preload = f'<link rel="preload" as="image" href="{pre}images/art/ern-valley.webp">' if page in ("index", "home") else ""
-    return f'''<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>{e(title)}</title><meta name="description" content="{e(d.소개)}"><meta property="og:title" content="{e(d.제목)}"><meta property="og:description" content="{e(d.소개)}"><meta property="og:type" content="website"><meta property="og:image" content="https://moooncang.github.io/ern/images/art/ern-valley.webp"><meta name="theme-color" content="#f5f1e8">
-<script>{BOOT}</script>{preload}<link rel="icon" href="{pre}assets/icons/ern.svg" type="image/svg+xml">
-<link rel="stylesheet" href="{pre}assets/css/fonts.css"><link rel="stylesheet" href="{pre}assets/css/style.css"><link rel="stylesheet" href="{pre}assets/css/experience.css"><link rel="stylesheet" href="{pre}assets/css/chapters.css">
-</head><body data-page="{page}" data-default-domain="{e(d.기본_영지명)}">{SPRITE}<canvas class="air" aria-hidden="true"></canvas>{top}<main id="main">{본문}</main>{bottom}
-<script src="{pre}assets/js/main.js"></script><script src="{pre}assets/js/experience.js"></script></body></html>'''
+    bottom = "" if cover else (
+        f'<footer class="foot"><div class="wrap"><svg class="mark" aria-hidden="true"><use href="#wax"/></svg>'
+        f'<p class="en">{e(d.영문)}</p><nav aria-label="바닥글">{foot}</nav></div></footer>')
+    return f"""<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{e(title)}</title>
+<meta name="description" content="{e(d.소개)}">
+<meta property="og:title" content="{e(d.제목)}">
+<meta property="og:description" content="{e(d.소개)}">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#f6ecd6">
+<script>{BOOT}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="{FONTS}">
+<link rel="stylesheet" href="{pre}assets/css/style.css">
+</head>
+<body{' class="cover"' if cover else ''} data-default-domain="{e(d.기본_영지명)}">
+{SPRITE}
+<canvas class="air" aria-hidden="true"></canvas>
+{top}
+<main>
+{본문}
+</main>
+{bottom}
+<script src="{pre}assets/js/main.js"></script>
+</body>
+</html>
+"""
 
 
 # ── 공통 조각 ────────────────────────────────────────────────
@@ -102,7 +123,7 @@ def hd(제목, 영문, tag="h2", cls=""):
 
 
 def page_head(영문, 제목, 머리말):
-    return (f'<section class="head chapter-head"><div class="wrap"><p class="eyebrow chapter-kicker">THE ERN MARCH / {e(영문)}</p>{hd(제목, 영문, "h1", "big")}'
+    return (f'<section class="head"><div class="wrap">{hd(제목, 영문, "h1", "big")}'
             f'<p class="lead" data-rv>{e(머리말)}</p></div></section>')
 
 
@@ -111,9 +132,8 @@ def sec(제목, 영문, 안, cls="", narrow=True, id_=""):
             f'<div class="wrap{" narrow" if narrow else ""}">{hd(제목, 영문)}<div data-rv>{안}</div></div></section>')
 
 
-def plate(c, cls="", heading=False):
-    outer, name = ("div", "h1") if heading else ("span", "b")
-    return f'<{outer} class="plate {cls}"><small>{e(c["직책"])}</small><{name}>{e(c["이름"])}</{name}></{outer}>'
+def plate(c, cls=""):
+    return f'<span class="plate {cls}"><small>{e(c["직책"])}</small><b>{e(c["이름"])}</b></span>'
 
 
 def crack_button():
@@ -260,41 +280,82 @@ def atlas_svg():
 
 
 # ── 쪽 ───────────────────────────────────────────────────────
-def writ_dialog():
-    lines = "".join(f'<p class="ln">{e(x)}</p>' for x in d.칙서)
-    return f'''<dialog class="ceremony" data-ceremony aria-labelledby="writ-title"><button class="dialog-close" type="button" data-close-writ aria-label="서임장 닫기">×</button><div class="writ" data-writ>{emblem()}<p class="eyebrow">{e(d.칙서_라벨)}</p><h2 id="writ-title">그대에게, 변경의 땅을.</h2><p class="writ-caption">오르텐 왕국의 이름으로 내리는 서임장</p><div class="writ-body"><div>{lines}<p class="ln sign"><label for="dn">영지의 이름</label><input id="dn" data-domain-input maxlength="12" placeholder="{e(d.기본_영지명)}" autocomplete="off" spellcheck="false" enterkeyhint="go"></p><p class="ln"><a class="btn" href="start.html" data-enter>봉토를 받는다 {ico("next")}</a></p></div></div><p class="hint">붉은 인장을 눌러 봉인을 떼십시오.</p><a class="seal" href="start.html" data-seal aria-label="봉인을 떼고 서임장 펼치기"><svg class="l" aria-hidden="true"><use href="#wax"/></svg><svg class="r" aria-hidden="true"><use href="#wax"/></svg></a></div></dialog>'''
-
-
 def index():
-    return home("index.html")
+    lines = "".join(f'<p class="ln">{e(x)}</p>' for x in d.칙서)
+    bits = "".join(f'<i style="--a:{a}deg;--r:{r}px;--s:{s}"></i>' for a, r, s in
+                   [(8, 78, .9), (52, 96, .6), (97, 70, 1), (141, 104, .7), (186, 82, .8),
+                    (228, 98, .6), (263, 74, 1), (312, 90, .7), (338, 110, .5)])
+    return shell("index.html", "", f"""
+<div class="writ" data-writ>
+  <h1>{e(d.제목)}</h1>
+  <p class="en">{e(d.칙서_라벨)}</p>
+  <div class="writ-body"><div>{lines}
+    <p class="ln sign"><label for="dn">영지의 이름</label><input id="dn" data-domain-input maxlength="12" placeholder="{e(d.기본_영지명)}" autocomplete="off" spellcheck="false" enterkeyhint="go"></p>
+    <p class="ln"><a class="btn" href="home.html" data-enter>봉토를 받는다</a></p></div></div>
+  <p class="hint">인장을 눌러 봉인을 뗍니다</p>
+  <a class="seal" href="home.html" data-seal aria-label="봉인을 떼고 서임장 펼치기"><span class="bits" aria-hidden="true">{bits}</span><svg class="l" aria-hidden="true"><use href="#wax"/></svg><svg class="r" aria-hidden="true"><use href="#wax"/></svg></a>
+</div>""", cover=True)
 
 
-def home(filename="home.html"):
-    hero = f'''<section class="landscape-hero" aria-labelledby="hero-title"><img class="hero-art" src="images/art/ern-valley.webp" alt="황금빛 들판과 강 너머, 산기슭에 자리한 변경의 성읍" width="1774" height="887" fetchpriority="high"><div class="hero-wash"></div><div class="hero-border" aria-hidden="true"></div><div class="wrap hero-inner"><div class="hero-copy"><p class="eyebrow hero-eyebrow"><span></span> A NEW LORD. AN UNWRITTEN STORY.</p><h1 id="hero-title">변경의<br>신임 영주가<br><em>되었다.</em></h1><p class="hero-desc">왕국 동쪽 끝, 이름 없는 땅 하나.<br>그곳에서 당신의 이야기가 시작됩니다.</p><div class="hero-actions"><a class="btn" href="start.html" data-open-writ>나의 서임장 펼치기 {ico("next")}</a><a class="text-link" href="world.html">세계 둘러보기 <span>↗</span></a></div></div></div><div class="hero-foot"><span class="eyebrow">KINGDOM OF ORTEN <i>·</i> EASTERN FRONTIER</span><a href="#prologue" class="scroll-cue"><span>이야기 속으로</span><span>↓</span></a><span class="hero-edition">정통 판타지 · 영지 경영</span></div></section>
-<div class="chapter-ribbon"><div class="wrap"><span class="ribbon-title">THE ERN MARCH</span><span><b>12</b> 저마다의 삶</span><i>✦</i><span><b>6</b> 영지의 단계</span><i>✦</i><span><b>4</b> 흐르는 계절</span><a href="start.html">그리고, 당신 {ico("next")}</a></div></div>'''
-    prologue = f'''<section class="prologue wrap" id="prologue"><div class="chapter-label"><span class="eyebrow">01 / THE PROLOGUE</span><span class="fine-line"></span></div><div class="prologue-grid"><div><h2>왕국의 끝에서,<br><em>당신의</em> 역사가 시작된다.</h2><p class="editorial-note">A land to cultivate. A story to make your own.</p></div><div class="prologue-copy">{"".join(f"<p>{e(x)}</p>" for x in d.홈_소개)}<a class="text-link" href="world.html">에른 변경에 관하여 <span>↗</span></a></div></div></section>
-<section class="explore wrap" aria-label="에른 변경 둘러보기"><a class="explore-item" href="world.html"><div class="explore-picture explore-world"><img src="images/art/ern-valley.webp" alt="산과 들판이 펼쳐진 에른 변경" width="1774" height="887" loading="lazy"><span class="explore-number">I</span></div><div class="explore-caption"><div><span class="eyebrow">THE WORLD</span><h3>변경 너머의 세계</h3></div><span class="round-arrow">↗</span></div><p>숲의 경계에서 왕국의 질서까지.</p></a><a class="explore-item" href="domain.html"><div class="explore-picture explore-domain">{town()}<span class="explore-number">II</span></div><div class="explore-caption"><div><span class="eyebrow">YOUR DOMAIN</span><h3>손으로 일구는 영지</h3></div><span class="round-arrow">↗</span></div><p>땅을 일구고, 장부를 펴고, 내일을 짓는 일.</p></a><a class="explore-item" href="characters.html"><div class="explore-picture explore-people"><img src="images/c/b/1.jpg" alt="기사대장 카트린 볼크" width="1600" height="1103" loading="lazy"><span class="explore-number">III</span></div><div class="explore-caption"><div><span class="eyebrow">THE PEOPLE</span><h3>당신 곁의 열두 사람</h3></div><span class="round-arrow">↗</span></div><p>누구에게나, 당신과 다른 바람이 있습니다.</p></a></section>'''
-    ticks = "".join(f'<li><button type="button" data-g="{i}">{e(stage[0])}</button></li>' for i, stage in enumerate(d.단계))
-    stages = e(json.dumps([[x[0], x[1], x[3]] for x in d.단계], ensure_ascii=False))
-    grow = f'''<section class="growth-chapter"><div class="wrap"><div class="section-top"><div><p class="eyebrow">02 / A LAND OF YOUR OWN</p><h2>작은 개척지에서,<br>하나의 도시로.</h2></div><p>움집과 목책이 선 자리에서 시작합니다.<br>영지의 다음 모습을 직접 펼쳐 보십시오.</p></div><div class="growth-paper"><div class="growth-note"><span>에른 변경 개발 기록</span><span class="eyebrow">THE DOMAIN ARCHIVE</span></div><div class="grow" data-grow data-stages="{stages}">{town()}<div class="g-info" aria-live="polite"><p class="eyebrow">SETTLEMENT</p><p class="g-name" data-g-name>{e(d.단계[0][0])}</p><p class="g-pop">인구 <b data-g-pop>50</b><span data-g-cap>까지</span></p><p class="g-fac" data-g-fac>{e(d.단계[0][3])}</p></div><div class="g-ctl"><input type="range" min="0" max="5" step="1" value="0" aria-label="영지 단계" data-g-range><ol class="g-ticks">{ticks}</ol></div><p class="g-win"><span data-domain>{e(d.기본_영지명)}</span> 영지의 기록 <span class="grow-hint">← 인장을 움직여 보세요 →</span></p></div></div><div class="section-after"><span>시설은 예시입니다. 무엇이든 사업을 벌여야 생깁니다.</span><a class="text-link" href="domain.html">영지의 살림 살펴보기 <span>↗</span></a></div></div></section>'''
-    cards = "".join(f'''<a class="person-card" href="char/{c['코드']}.html"><div class="person-image"><img src="images/c/{c['코드']}/1.jpg" alt="{e(c['이름'])}" style="object-position:{d.인물_초점[c['코드']]}% 20%" width="1600" height="1103" loading="lazy"><span class="person-index">{i + 1:02d} / 12</span></div><div class="person-caption"><span class="person-role">{e(c['직책'])}</span><h3>{e(c['이름'])}</h3><span class="person-arrow">↗</span></div></a>''' for i, c in enumerate(d.인물))
-    people = f'''<section class="people-chapter" data-gallery><div class="wrap"><div class="section-top"><div><p class="eyebrow">03 / PEOPLE OF THE MARCH</p><h2>같은 땅, 서로 다른 바람.</h2></div><a class="text-link" href="characters.html">열두 사람의 기록 <span>↗</span></a></div><p class="people-intro">충성과 계약, 이해와 갈등. 영주가 없는 동안에도 이들의 삶은 계속됩니다.</p></div><div class="people-track" id="people-gallery" data-gallery-track tabindex="0" role="region" aria-label="인물 갤러리">{cards}</div><div class="wrap gallery-bottom"><span class="eyebrow">EVERY PERSON HAS A STORY</span><div><button type="button" data-gallery-prev aria-label="이전 인물 카드">←</button><button type="button" data-gallery-next aria-label="다음 인물 카드">→</button></div></div></section>'''
+def home():
+    figs = "".join(
+        f'<a class="fg" href="char/{k}.html" style="--i:{i}"><img src="images/fig/{k}.jpg" alt="" width="720" height="1080" '
+        f'decoding="async"{" fetchpriority=high" if i in (2, 3) else ""}>{plate(BY[k])}</a>'
+        for i, k in enumerate(d.홈_인물))
+    hero = (f'<section class="hero" data-hero><div class="hero-t"><h1>{e(d.제목)}</h1>'
+            f'<p class="en">{e(d.영문)}</p><p class="genre">{e(d.장르)} <span class="adult">19+</span></p>'
+            f'{crack_button()}</div><div class="frieze">{figs}</div></section>')
+    writ = ('<section class="sec say"><div class="wrap narrow">'
+            + "".join(f"<p data-rv>{e(x)}</p>" for x in d.홈_소개) + "</div></section>")
+
+    ticks = "".join(f'<li><button type="button" data-g="{i}">{e(s[0])}</button></li>' for i, s in enumerate(d.단계))
+    stages = e(json.dumps([[s[0], s[1], s[3]] for s in d.단계], ensure_ascii=False))
+    grow = sec("영지 단계", "THE STAGES", f"""<div class="grow" data-grow data-stages="{stages}">
+{town()}
+<div class="g-info" aria-live="polite"><p class="g-name" data-g-name>{e(d.단계[0][0])}</p>
+<p class="g-pop">인구 <b data-g-pop>{d.단계[0][1]}</b><span data-g-cap>까지</span></p><p class="g-fac" data-g-fac>{e(d.단계[0][3])}</p></div>
+<div class="g-ctl"><input type="range" min="0" max="{len(d.단계) - 1}" step="1" value="0" aria-label="영지 단계" data-g-range><ol class="g-ticks">{ticks}</ol></div>
+<p class="g-win"><span>[영지]</span> <span data-domain>{e(d.기본_영지명)}</span> · <span data-g-name>{e(d.단계[0][0])}</span> | 인구 <span data-g-pop>{d.단계[0][1]}</span></p>
+</div>""", "grow-sec", narrow=False)
+
     rows = "".join(f"<li>{e(t)}</li>" for t in reversed(d.태도))
-    cols = "".join(f'<div class="est-col" data-k="{k}" style="--lv:2"><span class="pennant"><b>{e(name)}</b></span><small>{e(BY[rep]["이름"])}</small><em data-lv>{e(d.태도[2])}</em></div>' for k, name, _, _, rep in d.세력)
-    edicts = "".join(f'<button type="button" class="edict" aria-pressed="false" data-e="{k}">{e(t)} <span>+</span></button>' for k, t, _, _ in d.칙령)
+    cols = "".join(
+        f'<div class="est-col" data-k="{k}" style="--lv:2"><span class="pennant"><b>{e(이름)}</b></span>'
+        f'<small>{e(BY[rep]["이름"])}</small><em data-lv>{e(d.태도[2])}</em></div>'
+        for k, 이름, _, _, rep in d.세력)
+    edicts = "".join(f'<button type="button" class="edict" aria-pressed="false" data-e="{k}">{e(t)}</button>'
+                     for k, t, _, _ in d.칙령)
     ed_data = e(json.dumps({k: {"out": o, "fx": fx} for k, _, o, fx in d.칙령}, ensure_ascii=False))
-    est = f'''<section class="estates-chapter wrap"><div class="section-top"><div><p class="eyebrow">04 / THE WEIGHT OF A DECISION</p><h2>모두를 위한 결정은<br>쉽지 않습니다.</h2></div><p>기사, 성당, 길드, 그리고 촌락.<br>당신의 결정이 네 세력의 마음을 움직입니다.</p></div><div class="est" data-est data-edicts="{ed_data}" data-levels="{e(json.dumps(d.태도, ensure_ascii=False))}"><div class="est-board"><ol class="est-rows" aria-hidden="true">{rows}</ol><div class="est-cols">{cols}</div></div><div class="est-ctl"><p class="eyebrow">ISSUE YOUR FIRST EDICT</p>{edicts}<p class="est-out" aria-live="polite" data-est-out>큰 결정은 대개 한쪽을 올리고 다른 쪽을 깎습니다.</p></div></div></section>'''
-    seasons = f'''<section class="seasons-chapter wrap"><div class="section-top compact"><div><p class="eyebrow">THE TURNING YEAR</p><h2>땅은 계절을 기억합니다.</h2></div><p>계절을 고르면 이곳의 공기도 달라집니다.</p></div><div class="seasons">''' + "".join(f'<button type="button" class="season" data-season="{k}" aria-pressed="false"><span class="season-top">{ico(k)}<span class="en">{en}</span></span><b>{e(t)}</b><span class="s-d">{e(x)}</span><span class="season-check" aria-hidden="true">↗</span></button>' for k, t, en, x in d.계절) + '</div></section>'
-    deeds = f'''<section class="beginnings wrap"><div class="section-top"><div><p class="eyebrow">05 / BEGIN YOUR STORY</p><h2>어떤 시작을 고르시겠습니까?</h2></div><span class="small-print">세 가지 출발. 그다음은 당신의 선택.</span></div><div class="deeds">''' + "".join(f'<a class="deed" href="start.html#{k}"><span class="deed-number">0{i + 1}</span><span class="en">{en}</span><h3>{e(t)}</h3><p>{e(a)}</p><span class="deed-link">이 시작을 고르기 {ico("next")}</span></a>' for i, (k, t, en, a, _, _) in enumerate(d.모드)) + '</div></section>'
-    end = f'''<section class="night-chapter"><img src="images/art/ern-night.webp" alt="달빛 아래 등불이 켜진 변경의 마을" width="1774" height="887" loading="lazy"><div class="night-content">{emblem()}<p class="eyebrow">YOUR STORY IS STILL UNWRITTEN</p><h2><span data-domain-or="{e(d.홈_맺음)}">{e(d.홈_맺음)}</span></h2><p>이제, 첫 장을 써 내려갈 시간입니다.</p><a class="btn btn-light" href="start.html" data-open-writ>나의 서임장 펼치기 {ico("next")}</a>{crack_button()}</div></section>'''
-    return shell(filename, "", hero + prologue + grow + people + est + seasons + deeds + end + writ_dialog())
+    est = sec("네 세력", "FOUR ESTATES", f"""<div class="est" data-est data-edicts="{ed_data}" data-levels="{e(json.dumps(d.태도, ensure_ascii=False))}">
+<div class="est-board"><ol class="est-rows" aria-hidden="true">{rows}</ol><div class="est-cols">{cols}</div></div>
+<div class="est-ctl"><p>결정을 눌러 보십시오.</p>{edicts}<p class="est-out" aria-live="polite" data-est-out>큰 결정은 대개 한쪽을 올리고 다른 쪽을 깎습니다.</p></div>
+</div>""", narrow=False)
+
+    deck = "".join(
+        f'<a class="tilt" href="characters.html#{c["코드"]}"><img src="images/card/{c["코드"]}.jpg" '
+        f'alt="{e(c["이름"])}, {e(c["직책"])}" width="960" height="662" loading="lazy" decoding="async"></a>'
+        for c in d.인물)
+    people = (f'<section class="sec"><div class="wrap">{hd("사람들", "HOUSEHOLD")}</div>'
+              f'<div class="deck" tabindex="0" role="region" aria-label="인물 카드">{deck}</div></section>')
+
+    seasons = sec("사계", "SEASONS", '<div class="seasons">' + "".join(
+        f'<button type="button" class="season" data-season="{k}" aria-pressed="false">{ico(k)}<b>{e(t)}</b>'
+        f'<span class="en">{en}</span><span class="s-d">{e(x)}</span></button>' for k, t, en, x in d.계절)
+        + f"</div><p class='after'>{e(d.계절_글)} 계절을 누르면 이 사이트의 계절이 바뀝니다.</p>", narrow=False)
+
+    deeds = sec("세 가지 출발", "BEGINNINGS", '<div class="deeds">' + "".join(
+        f'<a class="deed" href="start.html#{k}"><svg class="mark" aria-hidden="true"><use href="#wax"/></svg>'
+        f'<h3>{e(t)}</h3><span class="en">{en}</span><p>{e(a)}</p></a>' for k, t, en, a, _, _ in d.모드) + "</div>", narrow=False)
+
+    end = (f'<section class="sec end"><div class="wrap"><p class="closing" data-rv><span data-domain-or="{e(d.홈_맺음)}">'
+           f'{e(d.홈_맺음)}</span></p>{crack_button()}</div></section>')
+    return shell("home.html", "", hero + writ + grow + est + people + seasons + deeds + end)
 
 
 def characters():
     def entry(c):
         info = {k: c.get(k, "") for k in ("이름", "직책", "나이", "호칭", "목표", "소개")}
         info["img"] = f'images/c/{c["코드"]}/1.jpg'
-        info["focus"] = d.인물_초점[c["코드"]]
         return (f'<li data-g="{c["묶음"]}"><a class="ro" id="{c["코드"]}" href="char/{c["코드"]}.html" '
                 f'data-c="{e(json.dumps(info, ensure_ascii=False))}"><b>{e(c["이름"])}</b><small>{e(c["직책"])}</small></a></li>')
     c0 = d.인물[0]
@@ -302,7 +363,7 @@ def characters():
         f'<button type="button" role="tab" aria-selected="false" data-f="{k}">{e(t)}</button>' for k, t, _ in d.묶음)
     영문, 제목, 머리말 = d.인물_머리
     body = f"""<section class="select" data-select>
-<div class="sel-stage"><img data-sel-img style="object-position:{d.인물_초점[c0["코드"]]}% 20%" src="images/c/{c0["코드"]}/1.jpg" alt="" width="1600" height="1103" fetchpriority="high">
+<div class="sel-stage"><img data-sel-img src="images/c/{c0["코드"]}/1.jpg" alt="" width="1600" height="1103" fetchpriority="high">
 <span class="plate big"><small data-f="직책">{e(c0["직책"])}</small><b data-f="이름">{e(c0["이름"])}</b></span></div>
 <div class="sel-side">{hd(제목, 영문, "h1", "big")}<p class="lead">{e(머리말)}</p>
 <div class="sel-f" role="tablist" aria-label="묶음">{filters}</div>
@@ -327,7 +388,7 @@ def character(i):
         f'data-alt="{e(c["이름"])} — {e(t)}">{e(t)}</button>' for j, (num, t) in enumerate(d.표정))
     num0, t0 = d.표정[0]
     body = f"""<section class="prof">
-<div class="prof-hero"><img src="../images/c/{k}/1.jpg" alt="{e(c["이름"])}" width="1600" height="1103" fetchpriority="high">{plate(c, "big", heading=True)}</div>
+<div class="prof-hero"><img src="../images/c/{k}/1.jpg" alt="{e(c["이름"])}" width="1600" height="1103" fetchpriority="high">{plate(c, "big")}</div>
 <div class="wrap narrow">
 <nav class="prof-nav" aria-label="다른 인물"><a data-prev href="{prev["코드"]}.html">{ico("next", "flip")}<span>{e(prev["이름"])}</span><kbd>Q</kbd></a>
 <a href="../characters.html#{k}">명부</a><a data-next href="{nxt["코드"]}.html"><kbd>E</kbd><span>{e(nxt["이름"])}</span>{ico("next")}</a></nav>
@@ -393,7 +454,7 @@ def start():
                      for t, ph in d.노트_칸)
     note = (blocks(d.시작전) + f'<form class="note" data-note onsubmit="return false">'
             f'<label><span>영지 이름</span><input data-domain-input maxlength="12" placeholder="{e(d.기본_영지명)}" autocomplete="off" spellcheck="false"></label>'
-            f'{fields}<p class="note-save-message">작성한 내용은 이 브라우저에 자동으로 보관됩니다.</p><pre data-note-out aria-live="polite"></pre>'
+            f'{fields}<pre data-note-out aria-live="polite"></pre>'
             f'<p><button type="button" class="btn" data-copy>유저노트 초안 복사</button> <span class="copied" role="status" data-copied></span></p></form>')
     return shell("start.html", d.시작_머리[1], page_head(*d.시작_머리) + modes
                  + sec("시작 전에", "BEFORE YOU BEGIN", note, id_="note")
@@ -409,13 +470,8 @@ def main():
     for name, html in out.items():
         (ROOT / name).write_text(html, encoding="utf-8", newline="\n")
     # 자가 점검: HTML·CSS·데이터가 부르는 로컬 파일이 전부 있어야 한다
-    refs = set()
-    for stylesheet in (ROOT / "assets/css").glob("*.css"):
-        css = stylesheet.read_text(encoding="utf-8")
-        for quoted, single_quoted, unquoted in re.findall(r'''url\(\s*(?:"([^"]*)"|'([^']*)'|([^\s)]+))\s*\)''', css):
-            target = quoted or single_quoted or unquoted
-            if not target.startswith(("data:", "http:", "https:", "#")):
-                refs.add((stylesheet.parent / target.split("#")[0]).resolve())
+    css = (ROOT / "assets/css/style.css").read_text(encoding="utf-8")
+    refs = {(ROOT / "assets/css" / m).resolve() for m in re.findall(r"url\(([^)\"'#%]+)\)", css)}
     for name, html in out.items():
         base = (ROOT / name).parent
         refs |= {(base / m).resolve() for m in re.findall(r'(?:href|src)="([^"#:]+)"', html)}

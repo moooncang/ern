@@ -164,7 +164,7 @@
 
   /* ── 숫자 키로 메뉴 이동, M으로 소리 ── */
   d.addEventListener('keydown', e => {
-    if (isCover || typing() || d.querySelector('dialog[open]') || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (isCover || typing() || e.metaKey || e.ctrlKey || e.altKey) return;
     const a = $$('.tabs a')[e.key - 1];
     if (a) { sfx.play('page'); location.href = a.href; return; }
     if (e.key === 'm' || e.key === 'M') sfx.toggle();
@@ -178,8 +178,8 @@
     const open = () => {
       if (state !== 'idle') return;
       state = 'open'; d.body.classList.add('open'); sfx.play('crack');
-      lines.forEach((ln, i) => setTimeout(() => { ln.classList.add('on'); if (i < 2) sfx.play('quill', 0); }, reduce ? 0 : 180 + i * 180));
-      setTimeout(() => { if (state === 'open') state = 'ready'; if (fine && (!writ.closest('dialog') || writ.closest('dialog').open)) inp.focus({ preventScroll: true }); }, reduce ? 0 : 180 + lines.length * 180);
+      lines.forEach((ln, i) => setTimeout(() => { ln.classList.add('on'); if (i < 2) sfx.play('quill', 0); }, reduce ? 0 : 900 + i * 850));
+      setTimeout(() => { if (state === 'open') state = 'ready'; if (fine) inp.focus({ preventScroll: true }); }, reduce ? 0 : 900 + lines.length * 850);
     };
     const go = () => {
       if (state === 'go' || state === 'idle') return;
@@ -189,10 +189,7 @@
     seal.addEventListener('click', e => { e.preventDefault(); open(); });
     enter.addEventListener('click', e => { e.preventDefault(); go(); });
     d.addEventListener('keydown', e => {
-      const ceremony = writ.closest('dialog');
-      if (ceremony && !ceremony.open) return;
-      if (e.metaKey || e.ctrlKey || e.altKey || ['Tab', 'Shift', 'Escape'].includes(e.key)) return;
-      if (e.target.closest('[data-close-writ]')) return;
+      if (e.metaKey || e.ctrlKey || e.altKey || e.key === 'Tab' || e.key === 'Shift') return;
       if (state === 'idle') { if (e.target !== seal && !e.target.closest('.snd')) { e.preventDefault(); open(); } }
       else if (e.key === 'Enter' && e.target !== enter) { e.preventDefault(); go(); }
     });
@@ -278,7 +275,7 @@
   const sel = $('[data-select]');
   if (sel) {
     const img = $('[data-sel-img]', sel), ros = $$('.ro', sel), link = $('[data-f-link]', sel), F = {};
-    $$('[data-f]:not(button)', sel).forEach(el => { F[el.dataset.f] = el; });
+    $$('[data-f]', sel).forEach(el => { F[el.dataset.f] = el; });
     let cur = null;
     function pick(a, quiet) {
       if (!a || a === cur) return;
@@ -287,7 +284,6 @@
       a.classList.add('on'); cur = a;
       Object.keys(F).forEach(k => { F[k].textContent = c[k]; });
       link.href = a.href;
-      img.style.objectPosition = `${c.focus ?? 50}% 20%`;
       if (!quiet) { sfx.play('page', 90); sel.classList.remove('swap'); void sel.offsetWidth; sel.classList.add('swap'); }
       swap(img, c.img, null, () => cur === a);
     }
