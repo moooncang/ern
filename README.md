@@ -99,3 +99,13 @@ python -m http.server 8765
 - `interface-fonts.css`: 명조 제목과 함께 사용하는 Pretendard UI 글꼴. 자체 호스팅하며 라이선스·출처는 `assets/fonts/pretendard/`에 보존한다.
 - 본문 페이지의 떠다니는 입자는 끈다. 입장 화면의 원래 연출은 유지한다.
 - 다른 화면에 있던 우물·곳간, 세금과 촌락, 가을 공납, 서쪽 통행세 메모도 유지한다. `images/ui/lord-notes-handwritten.webp`에 실제 필기 이미지로 생성하고 `marginalia.css`에서 표시한다. 메모용 폰트는 로드하지 않는다. `aside[data-lord-note]`의 원래 문장은 화면 읽기 도구에 제공하며 보존 검사는 이 네 문장을 별도로 확인한 뒤 최초 본문의 기준값을 그대로 검사한다.
+
+## 전체 화면의 폴리오 마감
+
+현재 기획·화면 순서·원문·인물 원화와 손글씨 도판을 유지하며, 테두리와 표면·조작 상태를 다듬었다. `images/finish/folio-frame.webp`와 `folio-ornaments.webp`는 이미지 생성으로 제작한 투명 세피아 펜화다. 참나무·밀 모서리, 얇은 이중 괘선, 작은 리본 구분선을 사용한다. 프레임의 투명한 중앙은 채우지 않으며, 장식은 클릭을 받지 않는다.
+
+- `finish.css`: 공통 메뉴·제목 괘선·버튼·바닥글과 홈의 성장·세력·계절·출발 카드 마감. 그림과 손글씨의 여백을 유지하고 모바일 모서리 안쪽 공간을 확보한다.
+- `finish-pages.css`: 인물 원화의 종이 마운트, 기록·표정 선택, 장부·계산기, 시작 모드와 입력 문서의 이중선·선택·포커스 상태.
+- `finish-atlas.css`: 지도·지역 기록의 프레임과 선택 상태, 모바일 지역 버튼, 세계관 설명의 여백. 기존 제목이 30개 그리드 행을 차지하던 문제를 고쳐 설명 사이의 과도한 빈 공간을 없앴다.
+
+`python3 tests/original_smoke.py --site-only`는 18쪽과 주요 기능을 데스크톱·모바일 및 기본·축소 동작 설정에서 검증한다. 상세 입장 애니메이션 행렬은 생략한다. `tests/visual_smoke.py`, `tests/marginalia_smoke.py`, `tests/preserve_plan.py`로 메뉴·카드·필기 에셋·원문 보존을 추가 확인한다.

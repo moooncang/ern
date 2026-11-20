@@ -94,6 +94,9 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 <link rel="stylesheet" href="{asset_url('assets/css/map-modern.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/interface-pages.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/marginalia.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/finish.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/finish-pages.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/finish-atlas.css', pre)}">
 </head>
 <body{' class="cover"' if cover else ''} data-default-domain="{e(d.기본_영지명)}">
 {SPRITE.replace("@@ASSET_ROOT@@", pre)}

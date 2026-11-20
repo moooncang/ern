@@ -81,6 +81,14 @@ def check_browser(browser, base, mobile=False, motion="reduce", viewport=None):
         page.evaluate("document.fonts.ready")
         assert page.title() and page.locator("main").inner_text().strip(), path
         assert_no_overflow(page, f"{mode}: {path}")
+        if path == "world.html" and viewport["width"] >= 1100:
+            trailing_gaps = page.locator("main > .sec > .wrap.narrow").evaluate_all("""els => els.map(el => {
+                const contentBottom = Math.max(...[...el.children].map(child => child.getBoundingClientRect().bottom));
+                return Math.round(el.getBoundingClientRect().bottom - contentBottom);
+            })""")
+            # A spanning grid heading once created 29 empty rows below each
+            # short lore section. Allow framing space, but not blank screens.
+            assert all(gap <= 160 for gap in trailing_gaps), f"Empty space after world lore sections: {trailing_gaps}px"
         if path != "index.html":
             # Visit the foot of long pages so lazy artwork and scroll-triggered
             # decoration also participate in the overflow/resource checks.
@@ -456,8 +464,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8766/")
     parser.add_argument("--chromium", default=shutil.which("chromium"))
-    parser.add_argument("--entry-only", action="store_true", help="Run only the five-size envelope accessibility checks")
-    parser.add_argument("--writing-only", action="store_true", help="Run only staged-writing, resize, and reduced-motion entry checks")
+    scope = parser.add_mutually_exclusive_group()
+    scope.add_argument("--entry-only", action="store_true", help="Run only the five-size envelope accessibility checks")
+    scope.add_argument("--writing-only", action="store_true", help="Run only staged-writing, resize, and reduced-motion entry checks")
+    scope.add_argument("--site-only", action="store_true", help="Run the 18-page feature flows and map edges, skipping detailed entry matrices")
     args = parser.parse_args()
     base = args.base_url.rstrip("/") + "/"
     if not args.entry_only and not args.writing_only:
@@ -472,14 +482,15 @@ def main():
                 for motion in ("reduce", "no-preference"):
                     check_browser(browser, base, motion=motion)
                     check_browser(browser, base, mobile=True, motion=motion)
-            if not args.entry_only:
+            if not args.entry_only and not args.site_only:
                 for viewport in MOTION_VIEWPORTS:
                     normal_motion(browser, base, viewport, ready_resize_to=(390, 844) if viewport == (903, 1195) else None)
                 normal_motion(browser, base, (903, 1195), resize_to=(390, 844))
                 normal_motion(browser, base, (390, 844), resize_to=(844, 390))
             if not args.entry_only and not args.writing_only:
                 map_name_edges(browser, base)
-            entry_accessibility(browser, base)
+            if not args.site_only:
+                entry_accessibility(browser, base)
         finally:
             browser.close()
     print("All original-site browser checks passed.", flush=True)

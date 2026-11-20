@@ -1,0 +1,239 @@
+/* Final folio finish: the original pages, words, and drawings keep their roles. */
+:root {
+  --folio-frame: url(../../images/finish/folio-frame.webp);
+  --folio-ornaments: url(../../images/finish/folio-ornaments.webp);
+  --folio-rule: #b5a083;
+  --folio-faint: rgb(125 92 58 / .2);
+  --folio-sheet: #faf5e9;
+  --folio-shadow: 0 16px 30px -24px rgb(70 48 26 / .32);
+}
+body:not(.cover) {
+  --line: #d0c1a8;
+  --soft: #716655;
+  --wax: #873c34;
+  --wax2: #6c2d28;
+  background-image: linear-gradient(rgb(247 242 231 / .89), rgb(247 242 231 / .89)), url(../../images/ui/parchment.webp);
+  text-underline-offset: .22em;
+}
+body:not(.cover) ::selection { background: #ddc9aa; color: #32291f; }
+body:not(.cover) :focus-visible { outline: 2px solid var(--wax); outline-offset: 4px; }
+
+/* The navigation uses the same fine rules and stamped red as the folios. */
+.top {
+  background: rgb(249 245 235 / .97);
+  border-bottom-color: var(--folio-rule);
+  box-shadow: 0 3px 0 #f8f2e5, 0 4px 0 var(--folio-faint);
+}
+.top.has-scrolled { box-shadow: 0 3px 0 #f8f2e5, 0 4px 0 var(--folio-faint), 0 12px 24px -18px rgb(60 44 25 / .3); }
+.top .brand { letter-spacing: -.025em; }
+.top .brand .mark { width: 31px; height: 31px; }
+.top .tabs a { border-radius: 0; transition: color .2s, background .2s; }
+.top .tabs a:hover { background: rgb(139 104 61 / .055); }
+.top .tabs a[aria-current] { color: var(--wax); background: linear-gradient(transparent 12%, rgb(143 75 45 / .055)); }
+.top .tab-ribbon { height: 2px; background: var(--wax); }
+.top .tab-ribbon::after { display: block; width: 4px; height: 4px; left: calc(50% - 2px); bottom: -2px; background: var(--wax); }
+.top .dial { border-right-color: var(--line); }
+.top .dial button { border-radius: 50%; }
+.top .dial button[aria-pressed="true"] { border-color: rgb(135 60 52 / .3); background: #efe2d1; box-shadow: inset 0 0 0 3px #f8f2e5; }
+.top .snd { border-radius: 50%; }
+.top .fief { padding: 2px 0; border-bottom: 1px dotted var(--folio-rule); }
+.reading-progress { opacity: .8; }
+
+/* Heading rules tie the chapter system together without adding labels. */
+body:not(.cover) .hd { column-gap: clamp(15px, 2.6vw, 34px); }
+body:not(.cover) .hd i {
+  display: block;
+  min-width: 24px;
+  height: 5px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid rgb(164 134 94 / .13);
+  background: none;
+}
+body:not(.cover) .hd i::before,
+body:not(.cover) .hd i::after { width: 3px; height: 3px; top: -2px; border-color: var(--folio-rule); background: var(--paper); }
+body:not(.cover) .hd h1,
+body:not(.cover) .hd h2 { text-wrap: balance; }
+.js body:not(.cover) .hd.in .en { letter-spacing: .14em; }
+body:not(.cover) .head { background: linear-gradient(110deg, rgb(230 211 179 / .16), transparent 70%); border-bottom: 1px solid var(--folio-faint); }
+body:not(.cover) .head .lead { color: var(--soft); }
+
+/* The six original characters remain the frontispiece. */
+.hero {
+  width: min(calc(100% - 40px), 1600px);
+  margin: 24px auto 0;
+  padding-bottom: 24px;
+  overflow: hidden;
+  border: 1px solid rgb(164 134 94 / .15);
+  background: radial-gradient(ellipse at 50% 20%, rgb(255 253 245 / .75), transparent 66%), linear-gradient(rgb(248 242 227 / .84), rgb(248 242 227 / .84)), url(../../images/ui/parchment.webp) center / 640px;
+  box-shadow: var(--folio-shadow);
+  --folio-corner: 96px;
+}
+.hero-t { padding: 25px 42px 22px; }
+.hero-t::before {
+  content: '';
+  display: block;
+  width: 250px;
+  height: 78px;
+  margin: 0 auto 18px;
+  background: var(--folio-ornaments) center top / 100% 200% no-repeat;
+  opacity: .9;
+  pointer-events: none;
+}
+.hero h1 { font-size: clamp(2.8rem, 5.5vw, 4.8rem); text-wrap: balance; }
+.hero .en { color: #8b6447; font-size: .7rem; letter-spacing: .35em; }
+.hero .genre { margin-top: 14px; }
+.hero .frieze { padding-inline: 18px; }
+body:not(.cover) .fg .plate { background: #f7efdf; border-color: var(--folio-rule); box-shadow: inset 0 0 0 3px #f7efdf, inset 0 0 0 4px rgb(157 120 77 / .22), 0 4px 12px -7px rgb(49 30 16 / .3); }
+body:has(.hero) main > .say { padding-block: 36px 42px; }
+body:has(.hero) .say p { font-size: .9rem; line-height: 1.9; }
+body:has(.hero) .say p + p { border-left: 1px solid var(--folio-faint); padding-left: 28px; }
+body:has(.hero) main > .sec:has(.deck) { background: linear-gradient(180deg, rgb(231 216 191 / .2), rgb(255 251 243 / .25)); border-block: 1px solid var(--folio-faint); }
+body:has(.hero) main > .sec:has(.seasons) { background: rgb(255 252 244 / .2); }
+
+/* One generated border, sized for each object; the transparent middle is never filled. */
+.hero, .grow, .est-board, .season, .deed { position: relative; }
+.hero::after, .grow::after, .est-board::after, .season::after, .deed::after {
+  content: '';
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  border: 1px solid transparent;
+  border-image-source: var(--folio-frame);
+  border-image-slice: 320;
+  border-image-width: var(--folio-corner, 48px);
+  border-image-outset: 0;
+  border-image-repeat: stretch;
+  background: none;
+  opacity: .85;
+  transform: none;
+  filter: none;
+  z-index: 1;
+  pointer-events: none;
+}
+.grow {
+  --folio-corner: 70px;
+  border-color: rgb(161 128 85 / .18);
+  background: linear-gradient(120deg, rgb(255 251 239 / .78), rgb(247 236 213 / .86)), url(../../images/ui/parchment.webp) center / 640px;
+  box-shadow: var(--folio-shadow), 4px 5px 0 -2px #f3ead7, 4px 5px 0 -1px rgb(167 137 92 / .25);
+}
+.g-info { border-left: 1px solid var(--folio-faint); padding: 12px 0 12px 32px; }
+.g-pop b { font-variant-numeric: tabular-nums; }
+.g-fac { max-width: 26em; }
+.g-ctl { margin-inline: 6px; border-top: 3px double var(--line); }
+.g-ctl input { cursor: pointer; }
+.g-ctl input::-webkit-slider-thumb { box-shadow: 0 0 0 1px var(--wax), 0 2px 4px rgb(71 36 24 / .2); }
+.g-ctl input::-moz-range-thumb { box-shadow: 0 0 0 1px var(--wax), 0 2px 4px rgb(71 36 24 / .2); }
+.g-ticks button { position: relative; transition: color .2s, background .2s; border-radius: 1px; font-size: .78rem; }
+.g-ticks button:hover { color: var(--wax); background: rgb(135 60 52 / .04); }
+.g-ticks button[aria-current="true"] { color: var(--wax); font-weight: 700; text-decoration: underline; text-decoration-color: rgb(135 60 52 / .35); text-decoration-thickness: 1px; text-underline-offset: 6px; }
+.g-win { margin-right: 10px; color: #8c7c63; }
+
+/* Faction charts read like a ruled ledger, with loose ink badges on paper. */
+.est { gap: 36px; }
+.est-board {
+  --folio-corner: 52px;
+  border-radius: 0;
+  border-color: rgb(161 128 85 / .18);
+  padding: 26px 22px 24px;
+  background: linear-gradient(rgb(252 248 236 / .82), rgb(247 240 222 / .8)), url(../../images/ui/parchment.webp) center / 640px;
+  box-shadow: var(--folio-shadow);
+}
+.est-cols::before { opacity: .8; }
+.est-col .pennant, .est-col[data-dir] .pennant { border-radius: 2px; border-color: #bca88b; background: #faf3e4; box-shadow: inset 0 0 0 3px #faf3e4, inset 0 0 0 4px rgb(157 120 77 / .2), 0 3px 5px rgb(65 46 23 / .08); }
+.est-col[data-dir="down"] .pennant { background: #f5e5d7; border-color: var(--wax); }
+.est-col[data-dir="up"] .pennant { border-color: #7c7654; }
+.est-col small { color: #7f715f; font-size: .75rem; line-height: 1.5; min-height: 3em; }
+.est-rows { font-size: .75rem; }
+.est-col em { font-size: .81rem; }
+.est-ctl .edict {
+  min-width: 180px;
+  padding: 13px 24px;
+  border-radius: 1px;
+  border-color: var(--folio-rule);
+  background: rgb(252 247 235 / .6);
+  box-shadow: inset 0 0 0 3px rgb(247 240 223 / .8), inset 0 0 0 4px var(--folio-faint);
+  transition: background .2s, border-color .2s, color .2s;
+}
+.est-ctl .edict:hover { background: #ede1cd; border-color: #9e7950; }
+.est-ctl .edict[aria-pressed="true"] { background: var(--wax); border-color: var(--wax2); color: #fff7e9; box-shadow: inset 0 0 0 3px var(--wax), inset 0 0 0 4px rgb(255 228 185 / .25); }
+.est-ctl .est-out { padding-top: 18px; border-top: 3px double var(--line); }
+
+/* Original portrait cards have a paper mount; scrolling and dimensions stay measured. */
+.deck { padding-top: 16px; padding-bottom: 32px; }
+.deck .tilt { padding: 7px; border: 1px solid var(--folio-faint); background: #fcf7e9; box-shadow: 0 10px 20px -16px rgb(61 42 22 / .4); }
+.deck .tilt img { border-color: rgb(140 108 68 / .23); }
+.deck .tilt:hover { border-color: #b89b74; }
+.deck-tools button { border: 1px solid var(--folio-rule); background: #f9f2e3; box-shadow: inset 0 0 0 3px #f9f2e3, inset 0 0 0 4px var(--folio-faint); }
+.deck-tools button:hover:not(:disabled) { box-shadow: inset 0 0 0 3px var(--wax), inset 0 0 0 4px rgb(255 228 185 / .25); }
+.deck-count { font-variant-numeric: tabular-nums; color: #8b7051; }
+
+/* Small season and mode studies share the same stationery, not new illustrations. */
+.season, .season[aria-pressed="true"] { --folio-corner: 38px; padding: 26px 24px; border-radius: 0; border-color: var(--line); background: linear-gradient(135deg, #fbf6ea, #f3e9d5); box-shadow: 0 6px 12px -10px rgb(68 43 21 / .3); }
+.season::before { width: 37px; height: 37px; }
+.season b { font-family: 'Nanum Myeongjo', serif; font-size: 1.3rem; }
+.season .s-d { border-top: 1px solid var(--folio-faint); padding-top: 13px; margin-top: 14px; font-size: .85rem; }
+.season:hover { background: #f8efdd; border-color: #bba07b; box-shadow: 0 9px 18px -13px rgb(68 43 21 / .28); }
+.season[aria-pressed="true"] { border-color: var(--wax); background: #f2e5d2; box-shadow: inset 0 -3px var(--wax), 0 9px 18px -13px rgb(68 43 21 / .2); }
+.season[aria-pressed="true"]::after { opacity: 1; transform: none; }
+.deed { --folio-corner: 47px; gap: 8px; padding: 31px; background: linear-gradient(140deg, #fbf6e9, #f1e6d0); border-color: rgb(161 128 85 / .3); box-shadow: var(--folio-shadow); }
+.deed::before { width: 84px; height: 84px; margin-bottom: 14px; }
+.deed h3 { font-family: 'Nanum Myeongjo', serif; font-size: 1.45rem; font-weight: 800; }
+.deed p { padding-top: 16px; border-top: 1px solid var(--folio-faint); font-size: .9rem; }
+.deed:hover { background: #faf0dd; border-color: #a78055; box-shadow: 0 14px 25px -19px rgb(71 42 16 / .4); }
+
+/* Crisp, inset button rules and a finished colophon. */
+body:not(.cover) .btn { padding: 14px 24px; border-color: var(--wax2); box-shadow: inset 0 0 0 3px var(--wax), inset 0 0 0 4px rgb(255 228 185 / .3), 0 3px 7px -4px rgb(71 36 24 / .4); }
+body:not(.cover) .btn:hover { box-shadow: inset 0 0 0 3px var(--wax2), inset 0 0 0 4px rgb(255 228 185 / .4), 0 6px 12px -8px rgb(71 36 24 / .4); }
+body:not(.cover) .btn:active { transform: translateY(1px); }
+.foot { position: relative; margin-top: 28px; padding-block: 36px; border-top: 3px double var(--line); background: linear-gradient(rgb(234 219 191 / .18), transparent); }
+.foot::before { content: ''; display: block; width: 150px; height: 48px; margin: -17px auto 24px; background: var(--folio-ornaments) center bottom / 100% 200% no-repeat; opacity: .8; pointer-events: none; }
+.foot nav a:hover { color: var(--wax); text-decoration: underline; }
+
+@media (max-width: 1120px) {
+  .top .tabs { border-top-color: var(--folio-faint); }
+  .g-info { padding-left: 24px; }
+}
+@media (max-width: 720px) {
+  .hero { width: calc(100% - 24px); margin-top: 14px; padding-bottom: 32px; --folio-corner: 60px; }
+  .hero-t { padding: 22px 24px 12px; }
+  .hero-t::before { width: 180px; height: 56px; margin-bottom: 14px; }
+  .hero h1 { font-size: clamp(1.95rem, 6.9vw, 3rem); line-height: 1.42; }
+  .hero .en { font-size: .57rem; letter-spacing: .22em; }
+  .hero .genre { max-width: 26em; margin-inline: auto; font-size: .67rem; }
+  .hero .frieze { --fw: 30.5vw; padding-inline: 0; }
+  body:has(.hero) main > .say { padding-block: 28px; }
+  body:has(.hero) .say p { font-size: .84rem; }
+  body:has(.hero) .say p + p { padding-left: 0; border-left: 0; padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--folio-faint); }
+  body:not(.cover) .hd { column-gap: 14px; }
+  body:not(.cover) .hd i { min-width: 12px; }
+  .grow { --folio-corner: 44px; box-shadow: 2px 3px 0 -1px #f3ead7, 2px 3px 0 rgb(167 137 92 / .2); }
+  .g-info { border-left: 0; border-top: 1px solid var(--folio-faint); padding: 18px 0 0; }
+  .g-ctl { margin-inline: 0; }
+  .g-ticks button { font-size: .75rem; }
+  .g-win { margin: -8px 0 6px 14px; }
+  .est-board { --folio-corner: 40px; padding: 24px 18px; }
+  .est { gap: 27px; }
+  .est-ctl .edict { width: 100%; min-width: 0; }
+  .season, .season[aria-pressed="true"] { --folio-corner: 30px; padding: 22px 17px; }
+  .season b { font-size: 1.14rem; }
+  .season::before { width: 30px; height: 30px; }
+  .season .s-d { padding-top: 11px; margin-top: 12px; font-size: .8rem; }
+  .deed { --folio-corner: 42px; padding: 27px; }
+  .deed::before { width: 76px; height: 76px; }
+  .deed p { font-size: .85rem; }
+  .deck .tilt { padding: 5px; }
+  .foot { padding-block: 28px; margin-top: 18px; }
+  .foot::before { margin-bottom: 18px; }
+}
+@media (max-width: 380px) {
+  .hero-t { padding-inline: 20px; }
+  .hero .frieze { --fw: 30vw; }
+  .hero h1 { font-size: 1.85rem; }
+  .hero .genre { font-size: .63rem; }
+  .season, .season[aria-pressed="true"] { padding: 20px 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .top .tabs a, .g-ticks button, .est-ctl .edict { transition: none; }
+}

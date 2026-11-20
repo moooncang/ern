@@ -1,0 +1,220 @@
+/* A survey folio around the original live map and regional records. */
+body:has(.atlas) {
+  --atlas-paper: #f6f3e9;
+  --atlas-rule: #b8a68d;
+  --atlas-rule-soft: rgb(128 104 74 / .22);
+  --atlas-accent: #87443b;
+}
+
+.atlas > .wrap { align-items: start; gap: 32px 34px; }
+.atlas .map-wrap {
+  isolation: isolate;
+  padding: 0;
+  border: 1px solid var(--atlas-rule);
+  border-radius: 2px;
+  background: var(--atlas-paper);
+  box-shadow: 0 3px 0 -1px #eee7d9, 0 4px 0 -1px var(--atlas-rule-soft), 0 13px 30px rgb(75 54 31 / .055);
+}
+.atlas .map-wrap::before,
+.atlas .map-wrap::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+.atlas .map-wrap::before {
+  inset: 7px;
+  border: 1px solid var(--atlas-rule-soft);
+}
+.atlas .map-wrap::after {
+  inset: 0;
+  border: 72px solid transparent;
+  border-image: var(--folio-frame, url(../../images/finish/folio-frame.webp)) 320 / 72px / 0 stretch;
+  opacity: .73;
+}
+.atlas .map-modern { background: var(--atlas-paper); }
+.atlas .map-modern .map-field { fill: var(--atlas-paper); }
+.atlas .map-modern .lb,
+.atlas .map-modern .note { stroke: var(--atlas-paper); }
+.atlas .map-modern .region-marker.on .node-halo {
+  fill: rgb(135 68 59 / .045);
+  stroke: rgb(135 68 59 / .6);
+  stroke-width: 1.5;
+}
+.atlas .map-modern .rg.on .lb,
+.atlas .map-modern .rg:hover .lb,
+.atlas .map-modern .rg:focus-visible .lb { fill: var(--atlas-accent); }
+.atlas .map-modern .route { stroke: var(--atlas-accent); opacity: .8; }
+.atlas .map-modern .rg:hover .hit {
+  fill: rgb(135 68 59 / .035);
+  stroke: rgb(135 68 59 / .25);
+  stroke-width: 1;
+}
+.atlas .map-modern .rg:focus-visible { outline: none; }
+.atlas .map-modern .rg:focus-visible .hit {
+  fill: rgb(135 68 59 / .055);
+  stroke: var(--atlas-accent);
+  stroke-width: 2;
+}
+.atlas .note-map { position: relative; z-index: 1; }
+
+/* Six destinations retain their order and link to the same SVG routes. */
+.atlas .atlas-side { padding-top: 0; }
+.atlas .rg-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.atlas .rg-list button {
+  position: relative;
+  min-height: 66px;
+  padding: 13px 15px 12px 19px;
+  gap: 5px;
+  border: 1px solid var(--atlas-rule-soft);
+  border-radius: 1px;
+  background: rgb(255 253 247 / .23);
+  box-shadow: inset 0 0 0 3px rgb(255 253 247 / .35);
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+.atlas .rg-list button::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  bottom: 15px;
+  left: 7px;
+  width: 2px;
+  background: transparent;
+  transition: background .18s ease;
+}
+.atlas .rg-list button b { font-size: .87rem; line-height: 1.5; word-break: keep-all; }
+.atlas .rg-list button small { font-size: .68rem; line-height: 1.5; color: #827869; }
+.atlas .rg-list button:hover { border-color: #ad9981; background: rgb(241 233 219 / .7); }
+.atlas .rg-list button[aria-current] {
+  border-color: #a9796e;
+  color: var(--atlas-accent);
+  background: #eee3d8;
+  box-shadow: inset 0 0 0 3px rgb(255 250 240 / .48);
+}
+.atlas .rg-list button[aria-current]::before { background: var(--atlas-accent); }
+.atlas .rg-list button[aria-current] small { color: var(--atlas-accent); }
+.atlas .rg-list button:focus-visible {
+  outline: 2px solid var(--atlas-accent);
+  outline-offset: 3px;
+}
+
+/* A quieter second sheet for the active regional record. */
+.atlas .rg-info {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr) 84px;
+  column-gap: 14px;
+  padding: 28px;
+  border: 1px solid #c7b79e;
+  border-radius: 1px;
+  background: linear-gradient(125deg, #fcf9f0, #f5f0e4);
+  box-shadow: 0 3px 0 -1px #e9e0d0, 0 4px 0 -1px var(--atlas-rule-soft), 0 10px 20px rgb(75 54 31 / .035);
+}
+.atlas .rg-info::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgb(128 104 74 / .13);
+  pointer-events: none;
+}
+.atlas .region-symbol { width: 84px; height: 84px; margin: -7px -5px 0 0; }
+.atlas .rg-info h2 {
+  align-self: end;
+  font-family: 'Nanum Myeongjo', serif;
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.45;
+}
+.atlas .rg-info .dir { margin: 7px 0 20px; font-size: .72rem; letter-spacing: .025em; color: #8b705a; }
+.atlas .rg-info > p:not(.dir) {
+  padding-top: 18px;
+  border-top: 1px solid var(--atlas-rule-soft);
+  font-size: .91rem;
+  line-height: 1.95;
+  color: #625b50;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.atlas .rg-info > .rep {
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--atlas-rule-soft);
+  color: var(--atlas-accent);
+}
+.atlas .rg-info .rep .plate { padding: 0; border: 0; background: none; box-shadow: none; text-align: left; }
+.atlas .rg-info .rep .plate small { font-size: .65rem; line-height: 1.6; }
+.atlas .rg-info .rep .plate b { margin-top: 3px; font-size: .86rem; line-height: 1.6; }
+.atlas .rg-info .rep .ico { flex: none; width: 18px; height: 18px; }
+.atlas .rg-info .rep:hover { transform: none; }
+.atlas .rg-info .rep:hover .plate b { color: var(--atlas-accent); }
+
+/* The existing kingdom notes continue as ruled folio entries. */
+body:has(.atlas) main > .sec { padding-block: 48px; border-top: 0; }
+body:has(.atlas) main > .sec > .wrap.narrow {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  align-items: start;
+  gap: 36px;
+}
+body:has(.atlas) main > .sec > .wrap.narrow > .hd {
+  display: block;
+  grid-row: 1;
+  margin: 0;
+  padding-top: 18px;
+  border-top: 2px solid #936b55;
+}
+body:has(.atlas) main > .sec > .wrap.narrow > .hd h2 { font-size: 1.48rem; line-height: 1.55; }
+body:has(.atlas) main > .sec > .wrap.narrow > .hd .en { display: block; max-width: none; margin-top: 10px; font-size: .58rem; letter-spacing: .15em; }
+body:has(.atlas) main > .sec > .wrap.narrow > div {
+  min-width: 0;
+  padding: 17px 0 20px;
+  border-top: 1px solid var(--atlas-rule-soft);
+  border-bottom: 1px solid var(--atlas-rule-soft);
+  color: #625b50;
+  font-size: .94rem;
+  line-height: 1.95;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+body:has(.atlas) main > .sec > .wrap.narrow > div > p:last-child { margin-bottom: 0; }
+body:has(.atlas) main > .sec dl { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 0 26px; margin: 0; }
+body:has(.atlas) main > .sec dt,
+body:has(.atlas) main > .sec dd { margin: 0; padding: 17px 0; border-bottom: 1px solid rgb(128 104 74 / .14); }
+body:has(.atlas) main > .sec dt { font: 650 .85rem/1.95 var(--font-ui); color: #514336; }
+body:has(.atlas) main > .sec dt:first-child,
+body:has(.atlas) main > .sec dt:first-child + dd { padding-top: 0; }
+body:has(.atlas) main > .sec dt:last-of-type,
+body:has(.atlas) main > .sec dd:last-child { padding-bottom: 0; border-bottom: 0; }
+
+@media (min-width: 721px) and (max-width: 960px) {
+  .atlas .atlas-side { gap: 24px; align-items: start; }
+  .atlas .rg-list { margin-bottom: 0; }
+}
+@media (max-width: 720px) {
+  .atlas > .wrap { gap: 25px; }
+  .atlas .map-wrap::before { inset: 5px; }
+  .atlas .map-wrap::after { border-width: 40px; border-image-width: 40px; opacity: .68; }
+  .atlas .rg-list { gap: 8px; margin-bottom: 18px; }
+  .atlas .rg-list button { min-height: 65px; padding: 12px 11px 11px 18px; }
+  .atlas .rg-list button b { font-size: .8rem; }
+  .atlas .rg-list button small { font-size: .65rem; }
+  .atlas .rg-info { grid-template-columns: minmax(0, 1fr) 76px; column-gap: 10px; padding: 24px 22px; }
+  .atlas .region-symbol { width: 76px; height: 76px; }
+  .atlas .rg-info h2 { font-size: 1.5rem; }
+  .atlas .rg-info > p:not(.dir) { padding-top: 16px; font-size: .89rem; }
+  body:has(.atlas) main > .sec { padding-block: 32px; }
+  body:has(.atlas) main > .sec > .wrap.narrow { display: block; }
+  body:has(.atlas) main > .sec > .wrap.narrow > .hd { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; padding-top: 15px; margin-bottom: 20px; }
+  body:has(.atlas) main > .sec > .wrap.narrow > .hd h2 { font-size: 1.37rem; }
+  body:has(.atlas) main > .sec > .wrap.narrow > .hd .en { max-width: 32%; margin: 0; font-size: .53rem; line-height: 1.7; text-align: right; }
+  body:has(.atlas) main > .sec > .wrap.narrow > div { padding-top: 0; border-top: 0; font-size: .91rem; }
+  body:has(.atlas) main > .sec dl { display: block; }
+  body:has(.atlas) main > .sec dt { padding: 18px 0 5px; border: 0; font-size: .85rem; }
+  body:has(.atlas) main > .sec dd { padding: 0 0 18px; }
+  body:has(.atlas) main > .sec dt:last-of-type { padding-bottom: 5px; }
+}
