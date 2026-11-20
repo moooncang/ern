@@ -6,11 +6,10 @@ from html import escape as e
 from pathlib import Path
 
 import data as d
+from engraving import town_details, atlas_details
 
 ROOT = Path(__file__).resolve().parent.parent
 BY = {c["코드"]: c for c in d.인물}
-FONTS = ("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500"
-         "&family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap")
 BOOT = ("(function(r){r.className='js';var s;try{s=localStorage.getItem('ern-season')}catch(e){}"
         "if(!s){var m=new Date().getMonth();s=m<2||m>10?'winter':m<5?'spring':m<8?'summer':'autumn'}"
         "r.dataset.season=s})(document.documentElement)")
@@ -18,11 +17,7 @@ BOOT = ("(function(r){r.className='js';var s;try{s=localStorage.getItem('ern-sea
 # 모든 쪽에 들어가는 그림 조각: 밀랍 인장, 계절 넷, 소리, 화살표
 SPRITE = """<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="wax" viewBox="0 0 100 100">
-<path fill="#8f2020" d="M50 3c9-2 15 5 23 7s17 2 20 11-2 15 0 23 6 16 2 24-13 8-18 15-8 14-17 15-14-6-22-7-18 1-23-7 0-16-3-24-9-14-6-23 12-10 18-16S41 5 50 3z"/>
-<circle cx="50" cy="50" r="32" fill="#a12a26"/><circle cx="50" cy="50" r="32" fill="none" stroke="#6f1616" stroke-width="1.5"/>
-<path fill="#7a1a1a" d="M50 24c6 4 8 9 5 13 7-1 11 4 7 10 7 0 9 7 3 12 5 3 4 10-3 12 1 6-5 10-12 8-7 2-13-2-12-8-7-2-8-9-3-12-6-5-4-12 3-12-4-6 0-11 7-10-3-4-1-9 5-13z"/>
-<path stroke="#a12a26" stroke-width="1.6" stroke-linecap="round" fill="none" d="M50 31v46M50 44l-7-5M50 44l7-5M50 56l-9-5M50 56l9-5M50 67l-7-4M50 67l7-4"/>
-<path fill="#fff" opacity=".14" d="M24 36c5-12 16-19 28-19-9 4-17 11-22 22z"/>
+<image href="@@ASSET_ROOT@@images/ui/wax-seal.webp" x="0" y="0" width="100" height="100"/>
 </symbol>
 <g id="ico" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
 <symbol id="i-spring" viewBox="0 0 24 24"><path d="M12 21v-9M12 12c0-4-3-6-7-6 0 4 3 6 7 6zM12 14c0-3 2.5-5 6-5 0 3-2.5 5-6 5z"/></symbol>
@@ -75,13 +70,12 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#f6ecd6">
 <script>{BOOT}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="{FONTS}">
+<link rel="stylesheet" href="{pre}assets/css/fonts.css">
 <link rel="stylesheet" href="{pre}assets/css/style.css">
+<link rel="stylesheet" href="{pre}assets/css/materials.css">
 </head>
 <body{' class="cover"' if cover else ''} data-default-domain="{e(d.기본_영지명)}">
-{SPRITE}
+{SPRITE.replace("@@ASSET_ROOT@@", pre)}
 <canvas class="air" aria-hidden="true"></canvas>
 {top}
 <main>
@@ -217,7 +211,7 @@ def town():
     ground = '<path class="ground" d="M0 290H800"/>'
     return (f'<svg class="town" viewBox="0 0 800 340" role="img" aria-label="영지가 단계마다 자라는 그림">'
             f'<g filter="url(#wob)">{hills}{g(5, bg5, "far")}{g(4, bg4)}{g(3, bg3)}{ground}'
-            f'{g(0, s0)}{g(1, s1)}{g(2, s2)}{g(3, s3)}{g(4, s4)}{g(5, s5)}</g></svg>')
+            f'{g(0, s0)}{g(1, s1)}{g(2, s2)}{g(3, s3)}{g(4, s4)}{g(5, s5)}{town_details()}</g></svg>')
 
 
 # ── 그림: 에른 변경 약도 ────────────────────────────────────
@@ -276,7 +270,7 @@ def atlas_svg():
             '<text class="note" x="30" y="258">왕도 라우넨</text><path class="road-end" d="M40 276l-14 0m6 -6l-6 6l6 6"/>')
     return (f'<svg class="map" viewBox="0 0 900 560" role="group" aria-label="에른 변경 약도">'
             f'<rect class="frame" x="8" y="8" width="884" height="544"/><rect class="frame" x="16" y="16" width="868" height="528"/>'
-            f'{compass}{road}{routes}{out}</svg>')
+            f'{compass}{road}{routes}{out}{atlas_details()}</svg>')
 
 
 # ── 쪽 ───────────────────────────────────────────────────────
@@ -470,8 +464,13 @@ def main():
     for name, html in out.items():
         (ROOT / name).write_text(html, encoding="utf-8", newline="\n")
     # 자가 점검: HTML·CSS·데이터가 부르는 로컬 파일이 전부 있어야 한다
-    css = (ROOT / "assets/css/style.css").read_text(encoding="utf-8")
-    refs = {(ROOT / "assets/css" / m).resolve() for m in re.findall(r"url\(([^)\"'#%]+)\)", css)}
+    refs = set()
+    for stylesheet in (ROOT / "assets/css").glob("*.css"):
+        css = stylesheet.read_text(encoding="utf-8")
+        for double, single, unquoted in re.findall(r'''url\(\s*(?:"([^"]*)"|'([^']*)'|([^\s)]+))\s*\)''', css):
+            target = double or single or unquoted
+            if not target.startswith(("data:", "http:", "https:", "#")):
+                refs.add((stylesheet.parent / target.split("#")[0]).resolve())
     for name, html in out.items():
         base = (ROOT / name).parent
         refs |= {(base / m).resolve() for m in re.findall(r'(?:href|src)="([^"#:]+)"', html)}

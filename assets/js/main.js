@@ -275,7 +275,7 @@
   const sel = $('[data-select]');
   if (sel) {
     const img = $('[data-sel-img]', sel), ros = $$('.ro', sel), link = $('[data-f-link]', sel), F = {};
-    $$('[data-f]', sel).forEach(el => { F[el.dataset.f] = el; });
+    $$('[data-f]:not(button)', sel).forEach(el => { F[el.dataset.f] = el; });
     let cur = null;
     function pick(a, quiet) {
       if (!a || a === cur) return;

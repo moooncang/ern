@@ -1,0 +1,25 @@
+/* 기존 봉토 칙서의 구도·치수·색상을 유지하고 재질과 판화선만 보강한다. */
+body:not(.cover){
+  background-image:linear-gradient(rgb(246 236 214/.82),rgb(246 236 214/.82)),url(../../images/ui/parchment.webp);
+  background-size:auto,512px 512px;
+}
+.writ{
+  background-image:linear-gradient(rgb(246 236 214/.88),rgb(240 228 200/.88)),url(../../images/ui/parchment.webp);
+  background-size:auto,512px 512px;
+}
+.deed,.slot{
+  background-image:linear-gradient(rgb(246 236 214/.88),rgb(239 225 194/.9)),url(../../images/ui/parchment.webp);
+  background-size:auto,512px 512px;
+}
+.plate{
+  background-image:linear-gradient(135deg,rgb(255 245 214/.045),transparent 55%,rgb(0 0 0/.1));
+  text-shadow:0 1px 1px rgb(0 0 0/.45);
+}
+.town .engraving path,.town .engraving circle,.town .engraving line{
+  fill:none;stroke:var(--soft);stroke-width:.7;stroke-dasharray:none;stroke-dashoffset:0;opacity:.65;
+  stroke-linecap:round;stroke-linejoin:round;pointer-events:none;
+}
+.map .atlas-engraving{
+  fill:none;stroke:var(--gold-ink);stroke-width:.8;opacity:.65;pointer-events:none;
+  stroke-linecap:round;stroke-linejoin:round;
+}

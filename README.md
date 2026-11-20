@@ -46,3 +46,12 @@ python -m http.server 8765
 ```
 
 브라우저에서 `http://localhost:8765/`를 연다.
+
+## 원래 기획을 유지한 재질 보강
+
+문구와 쪽 구성, 인물 구도는 `PLAN.md`를 기준으로 유지한다. 재질 표현만 `assets/css/materials.css`에서 보강한다.
+
+- `images/ui/wax-seal.webp`: 기존 참나무잎 문양으로 제작한 투명 밀랍 에셋. 원래 인장 위치와 갈라지는 동작에 사용한다.
+- `images/ui/parchment.webp`: 기존 양피지 색 위에 약하게 적용하는 종이결.
+- `_build/engraving.py`: 기존 지도·영지 SVG에 더하는 세부 판화선. 설정·지역·성장 단계는 바꾸지 않는다.
+- `assets/css/fonts.css`, `assets/fonts/`: 원래 세 글꼴과 두께를 그대로 자체 호스팅한다. OFL 라이선스와 출처는 해당 폴더에 있다.
