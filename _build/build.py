@@ -419,7 +419,7 @@ def home():
     ed_data = e(json.dumps({k: {"out": o, "fx": fx} for k, _, o, fx in d.칙령}, ensure_ascii=False))
     est = sec("네 세력", "FOUR ESTATES", f"""<div class="est" data-est data-edicts="{ed_data}" data-levels="{e(json.dumps(d.태도, ensure_ascii=False))}">
 <div class="est-board"><ol class="est-rows" aria-hidden="true">{rows}</ol><div class="est-cols">{cols}</div></div>
-<div class="est-ctl"><p>결정을 눌러 보십시오.</p>{edicts}<p class="est-out" aria-live="polite" data-est-out>큰 결정은 대개 한쪽을 올리고 다른 쪽을 깎습니다.</p>
+<div class="est-ctl"><p>결정을 눌러 보십시오.</p>{edicts}<p class="est-out" aria-live="polite" data-est-out>네 세력은 결정마다 제 득실을 따져 반응합니다.</p>
 {lord_note("세금을 올리면 촌락이 반발.", "note-estates")}</div>
 </div>""", "scene-estates", narrow=False)
 

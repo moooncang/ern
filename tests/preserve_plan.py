@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Preserve the original story and interaction contracts during asset upgrades.
 
-Baselines were captured from commit bceb51b. No Git history, packages, or server
+Baselines were captured from commit bceb51b. On 2026-11-21, with the author's approval,
+the copy owner re-captured start/home/domain, PLAN.md and data.py after syncing
+copy to the current story rules (estate reactions, mode difficulty). No Git history, packages, or server
 are needed to run this check. New wrappers, layouts, classes, decorative images,
 and SVG interiors are allowed across the site. Original body copy, link
 destinations, form controls, and source facts remain protected.
@@ -82,11 +84,11 @@ BASELINE = {
             "semantic": "9d820925ffdcbe6a9410bebb9707a2ac83fa239146c94a65bef7ec4212336804"
         },
         "domain.html": {
-            "content": "5c653461591722d1dbb08c824d644c1bd98b616fc71a1c56a3f4b8201fe09e53",
+            "content": "2354c8cf533a051949c28df1e87919ad5ad3c0b2793853d20eace9aa92f3365e",
             "semantic": "dff333aabf034b3ac65981de818631919209b7b441be1ee9cafd5081e806cc6c"
         },
         "home.html": {
-            "content": "243c76a8f0f1aca0d1c6bf7230b4270347c2cebe05b4090bd9fd04be29d3f508",
+            "content": "4f30b746abbcbcf07ab0ecd0a031480e54e667c6f791532163bbba1c2380446e",
             "semantic": "044550dcbf96296665ba52330b3c5ffd6b5af00e3b2804941f45f8004dec7510"
         },
         "index.html": {
@@ -94,7 +96,7 @@ BASELINE = {
             "semantic": "a143516f2e6d0b985c271bf4af9992b5c543682be3f87061d88e78a13054c828"
         },
         "start.html": {
-            "content": "4e2bc49d56098077be22ab5d38801f33ca3687d12396eb51812b09b78b8b1103",
+            "content": "1241f615e64553f1ed91a6c3becef67dc6465c6be9bb34c57bfa5666908d5648",
             "semantic": "471d675ec078e84ba236f99d79f901d0d1e07ddc418f2bfa600597a74e077d22"
         },
         "world.html": {
@@ -103,8 +105,8 @@ BASELINE = {
         }
     },
     "protected": {
-        "PLAN.md": "bb48ebb1385031da1f4b8872616ab1fd6b45fc41914b864bcc3198464e36e398",
-        "_build/data.py": "47d73ca1d9efef99f3430033c5d6c5ea28221b426a0e3a98c66c9c89b2c00057"
+        "PLAN.md": "58bcd08097b98df74bfcbdfe718e8cc9ae52ee8db63b3587cca8185969e16c22",
+        "_build/data.py": "df99201ecf82dae9f11fdc3c36a1c21cba9489feb068f5b061322d2199a335f2"
     }
 }
 
