@@ -22,7 +22,7 @@ FIGURES = ["j", "f", "a", "b", "g", "l"]
 REGIONS = ["home", "seril", "kardun", "waste", "reibek", "haster"]
 FILTER_LABELS = ["전체", "가신 · 영지", "변경 너머", "바깥"]
 ENTRY_VIEWPORTS = [(903, 1195), (1440, 900), (390, 844), (320, 640), (844, 390)]
-MOTION_VIEWPORTS = [(1280, 900), (390, 844), (320, 640), (844, 390)]
+MOTION_VIEWPORTS = list(ENTRY_VIEWPORTS)
 
 
 def check_http(base):
@@ -174,19 +174,25 @@ def check_browser(browser, base, mobile=False):
     context.close()
 
 
-def normal_motion(browser, base, viewport=(1280, 900)):
+def normal_motion(browser, base, viewport=(1280, 900), resize_to=None, ready_resize_to=None):
     width, height = viewport
+    label = f"{width}×{height}" + (f" → {resize_to[0]}×{resize_to[1]}" if resize_to else "")
     context = browser.new_context(reduced_motion="no-preference", viewport={"width": width, "height": height})
     page = context.new_page()
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.goto(urljoin(base, "index.html"), wait_until="load")
+    source_copy = page.locator("p[data-ink]").all_text_contents()
+    assert len(source_copy) == 2, "The two original writ paragraphs must remain intact"
     page.evaluate("""() => {
         window.__envelopeOpeningSamples = [];
         const sample = timestamp => {
             const writ = document.querySelector('[data-writ]');
             const envelope = document.querySelector('.envelope-art');
+            const quill = document.querySelector('.writing-quill');
+            const paragraphs = [...document.querySelectorAll('p[data-ink]')];
             const box = envelope.getBoundingClientRect();
+            const planeStyle = getComputedStyle(envelope);
             let visible = true, opacity = 1;
             for (let node = envelope; node; node = node.parentElement) {
                 const style = getComputedStyle(node);
@@ -195,26 +201,78 @@ def normal_motion(browser, base, viewport=(1280, 900)):
             }
             window.__envelopeOpeningSamples.push({
                 timestamp, state: writ.dataset.state,
-                ratio: box.width / box.height,
+                // A parked envelope may rotate; compare its physical plane, not
+                // the axis-aligned bounding rectangle enlarged by that rotation.
+                ratio: envelope.offsetWidth / envelope.offsetHeight,
+                physicalWidth: envelope.offsetWidth,
+                physicalHeight: envelope.offsetHeight,
+                fractionalPlaneError: Math.abs(parseFloat(planeStyle.width) - 1.5 * parseFloat(planeStyle.height)),
                 x: box.x + scrollX, y: box.y + scrollY,
                 width: box.width, height: box.height,
                 visible: visible && opacity >= .15,
+                viewportWidth: innerWidth,
+                viewportHeight: innerHeight,
+                inkProgress: +(writ.dataset.inkProgress || 0),
+                inert: document.querySelector('.writ-body').inert,
+                quillVisible: +getComputedStyle(quill).opacity > .1 && getComputedStyle(quill).display !== 'none',
+                paragraphsHidden: paragraphs.every(p => getComputedStyle(p).clipPath.includes('100%')),
                 overflow: document.documentElement.scrollWidth > innerWidth + 1,
             });
+            const current = window.__envelopeOpeningSamples.at(-1);
+            const stroke = +quill.dataset.strokeProgress;
+            if (writ.dataset.state === 'writing' && quill.classList.contains('tracing') && stroke > .05 && stroke < .95) {
+                const paragraph = paragraphs[+quill.dataset.inkLine];
+                const range = document.createRange();
+                range.setStart(paragraph.firstChild, +quill.dataset.inkOffset);
+                range.setEnd(paragraph.firstChild, +quill.dataset.inkEnd);
+                const glyph = range.getBoundingClientRect();
+                const nib = quill.querySelector('.quill-tip').getBoundingClientRect();
+                const paragraphBox = paragraph.getBoundingClientRect();
+                const edge = parseFloat(paragraph.style.clipPath.split(',')[3]);
+                current.nibError = Math.hypot(nib.x - (glyph.left + glyph.width * stroke), nib.y - (glyph.bottom - 2));
+                current.clipError = Math.abs(nib.x - (paragraphBox.left + edge));
+            }
             if (writ.dataset.state !== 'ready') requestAnimationFrame(sample);
         };
         requestAnimationFrame(sample);
     }""")
     page.locator("[data-seal]").click()
+    if resize_to:
+        page.wait_for_function("document.querySelector('[data-writ]').dataset.state === 'writing' && +document.querySelector('[data-writ]').dataset.inkProgress > .08")
+        page.set_viewport_size({"width": resize_to[0], "height": resize_to[1]})
+        width, height = resize_to
     page.wait_for_function("!document.querySelector('[data-domain-input]').closest('[inert]')")
     samples = page.evaluate("window.__envelopeOpeningSamples")
     transition = [sample for sample in samples if sample["state"] not in ("sealed", "ready", "leaving", None)]
     assert len(transition) >= 3, f"{width}×{height}: opening animation was not sampled"
-    assert all(abs(sample["ratio"] - 1.5) < .005 for sample in transition if sample["visible"]), f"{width}×{height}: visible envelope stretched during opening"
+    sequence = list(dict.fromkeys(sample["state"] for sample in transition))
+    assert sequence == ["breaking", "unfolding", "extracting", "presenting", "writing"], f"{label}: unexpected writing order {sequence}"
+    before_writing = [sample for sample in transition if sample["state"] != "writing"]
+    assert all(sample["paragraphsHidden"] for sample in before_writing), f"{label}: ink appeared before extraction/presentation completed"
+    writing = [sample for sample in transition if sample["state"] == "writing"]
+    assert len(writing) >= 10 and any(0 < sample["inkProgress"] < .9 for sample in writing), f"{label}: no progressive writing observed"
+    assert all(sample["inert"] for sample in transition), f"{label}: name/entry enabled before all writing finished"
+    regressions = [(before["inkProgress"], after["inkProgress"], after["timestamp"] - before["timestamp"])
+                   for before, after in zip(writing, writing[1:]) if after["inkProgress"] < before["inkProgress"] - .0002]
+    assert not regressions, f"{label}: writing progress moved backward: {regressions[:5]}"
+    traced = [sample for sample in writing if "nibError" in sample]
+    assert len(traced) >= 8, f"{label}: insufficient real quill/glyph tracing samples"
+    assert max(sample["nibError"] for sample in traced) < 2.5, f"{label}: nib left the active glyph (max {max(sample['nibError'] for sample in traced):.1f}px)"
+    assert all(sample["clipError"] is not None and sample["clipError"] < 2.5 for sample in traced), f"{label}: visible ink edge did not follow the nib"
+    assert all(sample["quillVisible"] for sample in traced), f"{label}: quill not visible while tracing"
+    assert page.locator("p[data-ink]").all_text_contents() == source_copy, f"{label}: animated writing changed the original copy"
+    assert page.locator("p[data-ink]").evaluate_all("els => els.every(el => getComputedStyle(el).clipPath === 'none' && +el.dataset.inkProgress === 1)"), f"{label}: final ink is incomplete"
+    assert page.locator("[data-writ]").get_attribute("data-ink-progress") == "1", f"{label}: final progress is incomplete"
+    # Fractional CSS sizes retain the physical plane through landing. Integer
+    # offset* measurements may round by up to1.25px; neither measurement includes
+    # the deliberate parked rotation.
+    assert all(sample["fractionalPlaneError"] <= 1.25 and abs(sample["physicalWidth"] - 1.5 * sample["physicalHeight"]) <= 1.25 for sample in transition if sample["visible"]), f"{width}×{height}: visible envelope stretched during opening"
     # Ignore hidden re-layouts and account for slow frames. A visible object must
     # travel continuously, rather than teleport when the reading layout changes.
     for previous, current in zip(samples, samples[1:]):
         if not (previous["visible"] and current["visible"]):
+            continue
+        if previous["viewportWidth"] != current["viewportWidth"] or previous["viewportHeight"] != current["viewportHeight"]:
             continue
         delta_ms = current["timestamp"] - previous["timestamp"]
         allowance = max(16, previous["width"] * .12) * max(1, delta_ms / 32)
@@ -225,6 +283,26 @@ def normal_motion(browser, base, viewport=(1280, 900)):
         assert abs(current["width"] - previous["width"]) <= allowance, f"{width}×{height}: visible envelope resized abruptly"
     assert not any(sample["overflow"] for sample in samples), f"{width}×{height}: horizontal overflow during opening"
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), f"{width}×{height}: horizontal overflow after opening"
+    parked = page.locator(".envelope-art")
+    expect(parked).to_be_visible()
+    assert parked.evaluate("el => !el.hidden && +getComputedStyle(el).opacity >= .15"), f"{width}×{height}: parked envelope disappeared"
+    physical_error = parked.evaluate("el => Math.abs(el.offsetWidth - 1.5 * el.offsetHeight)")
+    assert physical_error <= 1.25, f"{width}×{height}: parked envelope plane stretched"
+    if ready_resize_to:
+        page.set_viewport_size({"width": ready_resize_to[0], "height": ready_resize_to[1]})
+        width, height = ready_resize_to
+        page.wait_for_function("""() => {
+            const pen = document.querySelector('.quill-tip').getBoundingClientRect();
+            const paper = document.querySelector('.letter-document').getBoundingClientRect();
+            return pen.x >= paper.left && pen.x <= paper.right && pen.y >= paper.top && pen.y <= paper.bottom &&
+                document.documentElement.scrollWidth <= innerWidth + 1;
+        }""", timeout=1500)
+        expect(page.locator("[data-writ]")).to_have_attribute("data-state", "ready")
+        expect(page.locator("[data-writ]")).to_have_attribute("data-ink-progress", "1")
+        assert page.locator("p[data-ink]").all_text_contents() == source_copy
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), "Ready-state resize introduced horizontal overflow"
+        expect(parked).to_be_visible()
+        label += f" (ready resize → {width}×{height})"
 
     for selector in ("[data-domain-input]", "[data-enter]"):
         control = page.locator(selector)
@@ -237,8 +315,7 @@ def normal_motion(browser, base, viewport=(1280, 900)):
     page.wait_for_url("**/home.html")
     expect(page.locator("[data-domain]").first).to_have_text("연출검증")
     assert not errors, errors
-    sequence = list(dict.fromkeys(sample["state"] for sample in transition))
-    print(f"PASS [normal motion {width}×{height}]: {' → '.join(sequence)}, no visible jumps/stretch/overflow, controls and entry work", flush=True)
+    print(f"PASS [normal motion {label}]: five phases, synchronized quill/ink, gated controls, persistent envelope, complete copy and entry", flush=True)
     context.close()
 
 
@@ -277,6 +354,11 @@ def entry_accessibility(browser, base):
 
         seal.focus()
         page.keyboard.press("Enter" if index % 2 == 0 else "Space")
+        expect(writ).to_have_attribute("data-state", "ready")
+        expect(writ).to_have_attribute("data-ink-progress", "1")
+        assert page.locator("p[data-ink]").evaluate_all("els => els.length === 2 && els.every(el => getComputedStyle(el).clipPath === 'none')"), "Reduced motion left unfinished ink"
+        assert page.locator(".writing-quill").evaluate("el => getComputedStyle(el).display === 'none' || +getComputedStyle(el).opacity === 0"), "Reduced motion should skip the quill animation"
+        expect(page.locator(".envelope-art")).to_be_visible()
         expect(name).to_be_editable()
         page.wait_for_function("!document.querySelector('[data-domain-input]').closest('[inert]')")
         name.scroll_into_view_if_needed()
@@ -341,9 +423,10 @@ def main():
     parser.add_argument("--base-url", default="http://127.0.0.1:8766/")
     parser.add_argument("--chromium", default=shutil.which("chromium"))
     parser.add_argument("--entry-only", action="store_true", help="Run only the five-size envelope accessibility checks")
+    parser.add_argument("--writing-only", action="store_true", help="Run only staged-writing, resize, and reduced-motion entry checks")
     args = parser.parse_args()
     base = args.base_url.rstrip("/") + "/"
-    if not args.entry_only:
+    if not args.entry_only and not args.writing_only:
         check_http(base)
     with sync_playwright() as p:
         options = {"headless": True}
@@ -351,11 +434,15 @@ def main():
             options["executable_path"] = args.chromium
         browser = p.chromium.launch(**options)
         try:
-            if not args.entry_only:
+            if not args.entry_only and not args.writing_only:
                 check_browser(browser, base)
                 check_browser(browser, base, mobile=True)
+            if not args.entry_only:
                 for viewport in MOTION_VIEWPORTS:
-                    normal_motion(browser, base, viewport)
+                    normal_motion(browser, base, viewport, ready_resize_to=(390, 844) if viewport == (903, 1195) else None)
+                normal_motion(browser, base, (903, 1195), resize_to=(390, 844))
+                normal_motion(browser, base, (390, 844), resize_to=(844, 390))
+            if not args.entry_only and not args.writing_only:
                 map_name_edges(browser, base)
             entry_accessibility(browser, base)
         finally:

@@ -171,7 +171,7 @@
     if (e.key === 'm' || e.key === 'M') sfx.toggle();
   });
 
-  /* ── 입장: 봉투를 고정하고 밀랍, 덮개, 편지 꺼내기를 차례로 보여 준다. ── */
+  /* ── 입장: 봉투를 열고, 꺼낸 서임장에 깃펜으로 칙서를 적는다. ── */
   const writ = $('[data-writ]');
   if (writ) {
     const seal = $('[data-seal]', writ), inp = $('[data-domain-input]', writ);
@@ -179,16 +179,105 @@
     const scene = $('.envelope-art', writ), paper = $('.letter-document', writ);
     const title = $('.writ-title', writ), titleSlot = $('.letter-title-slot', writ);
     const destination = $('.reading-slot', writ), stationery = $('.stationery', writ);
+    const quill = $('.writing-quill', writ), nib = $('.quill-tip', quill), ink = $$('[data-ink]', writ);
     const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
     const timing = { duration: 650, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' };
     let state = 'sealed';
     const phase = value => { state = value; writ.dataset.state = value; };
     body.inert = true;
+
+    const frames = (duration, draw) => new Promise(resolve => {
+      const start = performance.now();
+      const tick = now => {
+        const progress = Math.max(0, Math.min(1, (now - start) / duration));
+        draw(progress);
+        if (progress < 1) requestAnimationFrame(tick); else resolve();
+      };
+      requestAnimationFrame(tick);
+    });
+    const glyphRect = (node, start, end) => {
+      const range = d.createRange(); range.setStart(node, start); range.setEnd(node, end);
+      return range.getBoundingClientRect();
+    };
+    const placePen = (x, y) => {
+      const sheet = paper.getBoundingClientRect();
+      quill.style.transform = 'translate('+(x-sheet.left)+'px,'+(y-sheet.top)+'px)';
+      const size = parseFloat(getComputedStyle(quill).getPropertyValue('--quill-size'));
+      const room = innerWidth - 16 - x;
+      // Fit the entire transparent image plane, including its bottom-right
+      // corner, so turning the feather cannot create mobile scroll overflow.
+      const reach = size*Math.hypot(.92,.04);
+      const angle = room >= reach ? 0 : -(Math.atan2(.04,.92)+Math.acos(Math.max(0,Math.min(1,room/reach))))*180/Math.PI;
+      quill.style.setProperty('--quill-angle', angle+'deg');
+    };
+    const movePen = async (target, duration) => {
+      const from = nib.getBoundingClientRect();
+      quill.classList.remove('tracing'); quill.classList.add('lifted');
+      await frames(duration, t => {
+        const to = target(), ease = t*t*(3-2*t);
+        placePen(from.left+(to.x-from.left)*ease, from.top+(to.y-from.top)*ease-Math.sin(t*Math.PI)*13);
+      });
+      quill.classList.remove('lifted');
+    };
+    const writeWrit = async () => {
+      phase('writing');
+      if (d.fonts) await d.fonts.ready;
+      const segmenter = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter('ko', {granularity:'grapheme'}) : null;
+      const texts = ink.map(paragraph => {
+        const text = paragraph.textContent;
+        let offset = 0;
+        const chunks = segmenter ? Array.from(segmenter.segment(text), part => part.segment) : Array.from(text);
+        return chunks.map(value => {const start=offset;offset+=value.length;return {value,start,end:offset};});
+      });
+      const total = texts.reduce((sum, row) => sum+row.length, 0);
+      let completed = 0, first = true;
+      for (let line = 0; line < ink.length; line++) {
+        const paragraph = ink[line], node = paragraph.firstChild;
+        let previous = null;
+        for (let index = 0; index < texts[line].length; index++) {
+          const glyph = texts[line][index], rect = () => glyphRect(node,glyph.start,glyph.end);
+          const target = () => {const r=rect();return {x:r.left,y:r.bottom-2};};
+          const current = rect(), prior = previous ? glyphRect(node,previous.start,previous.end) : null;
+          const newRow = !prior || Math.abs(current.top-prior.top)>current.height*.6;
+          if (newRow && (current.top < 60 || current.bottom > innerHeight-60)) {
+            paragraph.scrollIntoView({block:'center',behavior:'instant'});
+          }
+          if (first) {
+            const point=target();placePen(point.x,point.y);quill.classList.add('active');first=false;await pause(150);
+          } else if (newRow) {
+            await movePen(target, 140);
+          }
+          quill.classList.add('tracing');
+          quill.dataset.inkLine = line; quill.dataset.inkOffset = glyph.start; quill.dataset.inkEnd = glyph.end;
+          const duration = /[,.!?]/.test(glyph.value) ? 95 : /\s/.test(glyph.value) ? 15 : 34;
+          await frames(duration, t => {
+            // Measure the real glyph every frame: line wrapping follows font and viewport changes.
+            const r=rect(), p=paragraph.getBoundingClientRect(), x=r.left+r.width*t;
+            const top=Math.max(0,r.top-p.top-2), bottom=Math.min(p.height,r.bottom-p.top+2);
+            const edge=Math.max(0,Math.min(p.width,x-p.left));
+            paragraph.style.clipPath='polygon(0 0,100% 0,100% '+top+'px,'+edge+'px '+top+'px,'+edge+'px '+bottom+'px,0 '+bottom+'px)';
+            placePen(x,r.bottom-2-Math.sin(t*Math.PI)*.8);
+            paragraph.dataset.inkProgress=((index+t)/texts[line].length).toFixed(4);
+            writ.dataset.inkProgress=((completed+index+t)/total).toFixed(4);
+            quill.dataset.strokeProgress=t.toFixed(4);
+          });
+          if (!/\s/.test(glyph.value)) sfx.play('quill',220);
+          previous=glyph;
+        }
+        completed+=texts[line].length;
+        paragraph.classList.add('written','on'); paragraph.style.removeProperty('clip-path'); paragraph.dataset.inkProgress='1';
+        quill.classList.remove('tracing');
+        await pause(170);
+      }
+      writ.dataset.inkProgress='1';
+      quill.classList.add('resting');
+      await movePen(() => {const r=paper.getBoundingClientRect();return {x:r.right-82,y:r.bottom-20};},320);
+    };
     const ready = () => {
-      scene.hidden = true; stationery.append(scene); scene.removeAttribute('style');
       phase('ready'); writ.removeAttribute('aria-busy'); body.inert = false;
-      lines.forEach(line => line.classList.add('on'));
-      inp.focus({ preventScroll: true });
+      ink.forEach(line => {line.classList.add('written');line.style.removeProperty('clip-path');line.dataset.inkProgress='1';});
+      writ.dataset.inkProgress='1'; lines.forEach(line => line.classList.add('on'));
+      inp.focus({ preventScroll: true }); scene.setAttribute('aria-hidden','true');
       const box = inp.getBoundingClientRect();
       if (box.top < 16 || box.bottom > innerHeight - 16) inp.scrollIntoView({ block: 'center', behavior: 'instant' });
     };
@@ -198,9 +287,9 @@
       phase('breaking'); writ.setAttribute('aria-busy', 'true');
       seal.setAttribute('aria-expanded', 'true'); seal.setAttribute('tabindex', '-1');
       if (reduce) {
-        titleSlot.append(title); destination.append(paper); d.body.classList.add('open'); ready(); return;
+        titleSlot.append(title); destination.append(paper); d.body.classList.add('open');
+        scene.classList.add('unsealed','flap-open','flap-behind','parked'); ready(); return;
       }
-      // A viewport overlay keeps the envelope still while the document below reflows.
       d.body.append(scene);
       Object.assign(scene.style, {position:'fixed',left:box.left+'px',top:box.top+'px',width:box.width+'px',height:box.height+'px',right:'auto',bottom:'auto',zIndex:'20'});
       scene.classList.add('unsealed'); sfx.play('crack');
@@ -212,16 +301,27 @@
       const envelopeMotion = scene.animate([{transform:'translateY(0)'},{transform:'translateY('+box.height*.28+'px)'}],timing);
       const extraction = paper.animate([{transform:'translateY(0)'},{transform:'translateY('+(-box.height*.55)+'px)'}],timing);
       await Promise.all([envelopeMotion.finished, extraction.finished]);
-      const before = paper.getBoundingClientRect();
+      const before = paper.getBoundingClientRect(), envelopeBefore = scene.getBoundingClientRect();
       phase('presenting'); destination.append(paper); extraction.cancel(); d.body.classList.add('open');
       const after = paper.getBoundingClientRect();
       const from = 'translate('+(before.left-after.left)+'px,'+(before.top-after.top)+'px) scale('+(before.width/after.width)+','+(before.height/after.height)+')';
-      const presentation = paper.animate([{transform:from},{transform:'none'}],{duration:550,easing:'cubic-bezier(.2,.75,.25,1)',fill:'both'});
-      const exit = scene.animate([{transform:'translateY('+box.height*.28+'px)',opacity:1},{transform:'translateY('+box.height*.65+'px)',opacity:0}],{duration:450,easing:'ease-in',fill:'forwards'});
-      lines.forEach((line,i) => setTimeout(() => line.classList.add('on'),120+i*100));
-      await Promise.all([presentation.finished,exit.finished]);
-      presentation.cancel(); ready(); envelopeMotion.cancel(); exit.cancel();
+      const presentation = paper.animate([{transform:from},{transform:'none'}],{duration:650,easing:'cubic-bezier(.2,.75,.25,1)',fill:'both'});
+      // Move the same envelope below the sheet, keep its opacity, and leave it there.
+      envelopeMotion.cancel(); stationery.append(scene); scene.removeAttribute('style'); scene.classList.add('parked');
+      const stage = stationery.getBoundingClientRect();
+      const parked = getComputedStyle(scene);
+      const landing = scene.animate([
+        {left:(envelopeBefore.left-stage.left)+'px',top:(envelopeBefore.top-stage.top)+'px',width:envelopeBefore.width+'px',height:envelopeBefore.height+'px',transform:'rotate(0deg)'},
+        {left:parked.left,top:parked.top,width:parked.width,height:parked.height,transform:'rotate(-5deg)'}
+      ],{duration:650,easing:'cubic-bezier(.2,.75,.25,1)',fill:'both'});
+      await Promise.all([presentation.finished,landing.finished]); presentation.cancel(); landing.cancel();
+      await writeWrit(); ready();
     };
+    addEventListener('resize', () => {
+      if (state !== 'ready' || !quill.classList.contains('active')) return;
+      const sheet = paper.getBoundingClientRect();
+      placePen(sheet.right-82, sheet.bottom-20);
+    });
     const go = () => {
       if (state !== 'ready') return;
       phase('leaving'); sfx.play('stamp'); d.body.classList.add('go');

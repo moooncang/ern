@@ -299,7 +299,7 @@ def atlas_svg():
 
 # ── 쪽 ───────────────────────────────────────────────────────
 def index():
-    lines = "".join(f'<p class="ln">{e(x)}</p>' for x in d.칙서)
+    lines = "".join(f'<p class="ln ink-line" data-ink>{e(x)}</p>' for x in d.칙서)
     bits = "".join(f'<i style="--a:{a}deg;--r:{r}px;--s:{s}"></i>' for a, r, s in
                    [(8, 78, .9), (52, 96, .6), (97, 70, 1), (141, 104, .7), (186, 82, .8),
                     (228, 98, .6), (263, 74, 1), (312, 90, .7), (338, 110, .5)])
@@ -319,6 +319,7 @@ def index():
               <p class="ln"><a class="btn" href="home.html" data-enter>봉토를 받는다</a></p>
             </div></div>
           </div>
+          <span class="writing-quill" aria-hidden="true"><img class="quill-feather" src="images/atelier/writing-quill.webp" alt="" width="512" height="512"><i class="quill-tip"></i></span>
         </div>
       </div>
       <img class="envelope-pocket" src="images/ui/envelope.webp" alt="" width="1536" height="1024">
