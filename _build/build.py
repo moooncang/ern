@@ -65,6 +65,12 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
     bottom = "" if cover else (
         f'<footer class="foot"><div class="wrap"><svg class="mark" aria-hidden="true"><use href="#wax"/></svg>'
         f'<p class="en">{e(d.영문)}</p><nav aria-label="바닥글">{foot}</nav></div></footer>')
+    scene_styles = "" if cover else "\n".join(
+        f'<link rel="stylesheet" href="{asset_url("assets/css/" + name + ".css", pre)}">'
+        for name in ("scenes", "scenes-pages", "scenes-atlas"))
+    scene_scripts = "" if cover else "\n".join(
+        f'<script src="{asset_url("assets/js/" + name + ".js", pre)}"></script>'
+        for name in ("scenes", "scenes-pages", "scenes-atlas"))
     return f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -97,6 +103,7 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 <link rel="stylesheet" href="{asset_url('assets/css/finish.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/finish-pages.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/finish-atlas.css', pre)}">
+{scene_styles}
 </head>
 <body{' class="cover"' if cover else ''} data-default-domain="{e(d.기본_영지명)}">
 {SPRITE.replace("@@ASSET_ROOT@@", pre)}
@@ -108,6 +115,7 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 {bottom}
 <script src="{asset_url('assets/js/main.js', pre)}"></script>
 <script src="{asset_url('assets/js/visual.js', pre)}"></script>
+{scene_scripts}
 </body>
 </html>
 """
@@ -361,7 +369,7 @@ def home():
         f'<a class="fg" href="char/{k}.html" style="--i:{i}"><img src="images/fig/{k}.jpg" alt="" width="720" height="1080" '
         f'decoding="async"{" fetchpriority=high" if i in (2, 3) else ""}>{plate(BY[k])}</a>'
         for i, k in enumerate(d.홈_인물))
-    hero = (f'<section class="hero" data-hero><div class="hero-t"><h1>{e(d.제목)}</h1>'
+    hero = (f'<section class="hero scene-frontispiece" data-hero><div class="hero-t"><h1>{e(d.제목)}</h1>'
             f'<p class="en">{e(d.영문)}</p><p class="genre">{e(d.장르)} <span class="adult">19+</span></p>'
             f'{crack_button()}</div><div class="frieze">{figs}</div></section>')
     writ = ('<section class="sec say"><div class="wrap narrow">'
@@ -376,7 +384,7 @@ def home():
 {lord_note("우물과 곳간부터 확인.", "note-growth")}</div>
 <div class="g-ctl"><input type="range" min="0" max="{len(d.단계) - 1}" step="1" value="0" aria-label="영지 단계" data-g-range><ol class="g-ticks">{ticks}</ol></div>
 <p class="g-win"><span>[영지]</span> <span data-domain>{e(d.기본_영지명)}</span> · <span data-g-name>{e(d.단계[0][0])}</span> | 인구 <span data-g-pop>{d.단계[0][1]}</span></p>
-</div>""", "grow-sec", narrow=False)
+</div>""", "grow-sec scene-growth", narrow=False)
 
     rows = "".join(f"<li>{e(t)}</li>" for t in reversed(d.태도))
     cols = "".join(
@@ -390,24 +398,26 @@ def home():
 <div class="est-board"><ol class="est-rows" aria-hidden="true">{rows}</ol><div class="est-cols">{cols}</div></div>
 <div class="est-ctl"><p>결정을 눌러 보십시오.</p>{edicts}<p class="est-out" aria-live="polite" data-est-out>큰 결정은 대개 한쪽을 올리고 다른 쪽을 깎습니다.</p>
 {lord_note("세금을 올리면 촌락이 반발.", "note-estates")}</div>
-</div>""", narrow=False)
+</div>""", "scene-estates", narrow=False)
 
     deck = "".join(
         f'<a class="tilt" href="characters.html#{c["코드"]}"><img src="images/card/{c["코드"]}.jpg" '
         f'alt="{e(c["이름"])}, {e(c["직책"])}" width="960" height="662" loading="lazy" decoding="async"></a>'
         for c in d.인물)
-    people = (f'<section class="sec"><div class="wrap">{hd("사람들", "HOUSEHOLD")}</div>'
+    people = (f'<section class="sec scene-household"><div class="wrap">{hd("사람들", "HOUSEHOLD")}</div>'
               f'<div class="deck" tabindex="0" role="region" aria-label="인물 카드">{deck}</div></section>')
 
-    seasons = sec("사계", "SEASONS", '<div class="seasons">' + "".join(
+    specimens = '<div class="season-observation" aria-hidden="true">' + "".join(
+        f'<span class="season-study" data-specimen="{k}"></span>' for k, _, _, _ in d.계절) + '</div>'
+    seasons = sec("사계", "SEASONS", '<div class="almanac">' + specimens + '<div class="seasons">' + "".join(
         f'<button type="button" class="season" data-season="{k}" aria-pressed="false">{ico(k)}<b>{e(t)}</b>'
         f'<span class="en">{en}</span><span class="s-d">{e(x)}</span></button>' for k, t, en, x in d.계절)
-        + f"</div><div class='season-foot'><p class='after'>{e(d.계절_글)} 계절을 누르면 이 사이트의 계절이 바뀝니다.</p>"
-        + lord_note("가을 공납 몫은 따로.", "note-seasons") + "</div>", narrow=False)
+        + f"</div></div><div class='season-foot'><p class='after'>{e(d.계절_글)} 계절을 누르면 이 사이트의 계절이 바뀝니다.</p>"
+        + lord_note("가을 공납 몫은 따로.", "note-seasons") + "</div>", "scene-seasons", narrow=False)
 
     deeds = sec("세 가지 출발", "BEGINNINGS", '<div class="deeds">' + "".join(
         f'<a class="deed" href="start.html#{k}"><svg class="mark" aria-hidden="true"><use href="#wax"/></svg>'
-        f'<h3>{e(t)}</h3><span class="en">{en}</span><p>{e(a)}</p></a>' for k, t, en, a, _, _ in d.모드) + "</div>", narrow=False)
+        f'<h3>{e(t)}</h3><span class="en">{en}</span><p>{e(a)}</p></a>' for k, t, en, a, _, _ in d.모드) + "</div>", "scene-beginnings", narrow=False)
 
     end = (f'<section class="sec end"><div class="wrap"><p class="closing" data-rv><span data-domain-or="{e(d.홈_맺음)}">'
            f'{e(d.홈_맺음)}</span></p>{crack_button()}</div></section>')

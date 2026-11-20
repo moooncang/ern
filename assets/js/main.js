@@ -433,9 +433,18 @@
       if (!quiet) { sfx.play('page', 90); sel.classList.remove('swap'); void sel.offsetWidth; sel.classList.add('swap'); }
       swap(img, c.img, null, () => cur === a);
     }
+    // Layout and scrolling can fire mouseenter beneath a stationary pointer.
+    // Preview only an intentional pointer movement; focus and touch keep their controls.
+    let pointerX = null, pointerY = null;
+    d.addEventListener('pointermove', event => {
+      if (!fine || event.pointerType === 'touch') return;
+      if (event.clientX === pointerX && event.clientY === pointerY) return;
+      pointerX = event.clientX; pointerY = event.clientY;
+      const link = event.target.closest && event.target.closest('.ro');
+      if (link && sel.contains(link)) pick(link);
+    }, { passive: true });
     ros.forEach(a => {
       a.addEventListener('pointerdown', () => { a._was = a === cur; });
-      a.addEventListener('mouseenter', () => { if (fine) pick(a); });
       a.addEventListener('focus', () => pick(a));
       /* 손가락으로는 첫 누름이 고르기, 고른 것을 다시 누르면 기록으로 간다 */
       a.addEventListener('click', e => { if (!fine && a._was === false) { e.preventDefault(); pick(a); } });

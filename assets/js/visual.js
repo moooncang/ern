@@ -3,7 +3,7 @@
   'use strict';
   const doc = document;
   if (doc.body.classList.contains('cover')) return;
-  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  const motion = (window.ERNPresentation ||= { motion: matchMedia('(prefers-reduced-motion: reduce)') }).motion;
   const $ = (selector, root = doc) => root.querySelector(selector);
   const $$ = (selector, root = doc) => [...root.querySelectorAll(selector)];
   const decorative = (className, parent) => {
