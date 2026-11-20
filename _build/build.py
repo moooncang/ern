@@ -8,6 +8,7 @@ from pathlib import Path
 
 import data as d
 from music_data import TRACKS
+from sfx_data import EFFECTS
 from engraving import town_details, atlas_details
 from map_art import illustrated_map, region_art
 from town_art import town_art
@@ -81,6 +82,10 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
         "tracks": [{**track, "src": pre + track["src"],
                     "cover": pre + track["cover"] if track["cover"] else None} for track in TRACKS],
     }, ensure_ascii=False).replace("<", "\\u003c")
+    sfx_data = json.dumps({
+        "effects": {name: {**effect, "files": [asset_url(path, pre) for path in effect["files"]]}
+                    for name, effect in EFFECTS.items()},
+    }, ensure_ascii=False).replace("<", "\\u003c")
     return f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -124,6 +129,8 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 {본문}
 </main>
 {bottom}
+<script type="application/json" id="sfx-data">{sfx_data}</script>
+<script src="{asset_url('assets/js/sfx.js', pre)}"></script>
 <script src="{asset_url('assets/js/main.js', pre)}"></script>
 <script src="{asset_url('assets/js/visual.js', pre)}"></script>
 {scene_scripts}
@@ -612,6 +619,8 @@ def main():
         refs.add(ROOT / track["src"])
         if track["cover"]:
             refs.add(ROOT / track["cover"])
+    for effect in EFFECTS.values():
+        refs.update(ROOT / path for path in effect["files"])
     missing = sorted(str(p) for p in refs if not p.exists())
     assert not missing, "없는 파일:\n" + "\n".join(missing)
     assert coin(1500) == "15금화" and coin(342) == "3금화 4은화 2동화" and coin(0) == "0동화"

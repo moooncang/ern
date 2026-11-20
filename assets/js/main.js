@@ -12,73 +12,8 @@
   const typing = () => /INPUT|TEXTAREA|SELECT/.test(d.activeElement ? d.activeElement.tagName : '');
   const isCover = d.body.classList.contains('cover');
 
-  /* ── 효과음: 파일 없이 Web Audio로 만든다. 첫 조작 뒤에만 울리고, 끄면 기억한다 ── */
-  const sfx = (() => {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    let ctx, out, hiss, on = store.get('ern-sfx') !== 'off';
-    const last = {};
-    function wake() {
-      if (!AC || !on) return;
-      if (!ctx) {
-        ctx = new AC(); out = ctx.createGain(); out.gain.value = .7; out.connect(ctx.destination);
-        hiss = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-        const ch = hiss.getChannelData(0);
-        for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
-      }
-      if (ctx.state === 'suspended') ctx.resume();
-    }
-    ['pointerdown', 'keydown'].forEach(t => addEventListener(t, wake, { capture: true, passive: true }));
-    function env(g, t, peak, dur) {
-      g.gain.setValueAtTime(.0001, t);
-      g.gain.exponentialRampToValueAtTime(peak, t + .008);
-      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-    }
-    function noise(dur, peak, type, f, f2, q, at) {
-      const t = ctx.currentTime + (at || 0), s = ctx.createBufferSource(), flt = ctx.createBiquadFilter(), g = ctx.createGain();
-      s.buffer = hiss; s.loop = true; flt.type = type; flt.Q.value = q || .7; flt.frequency.setValueAtTime(f, t);
-      if (f2) flt.frequency.exponentialRampToValueAtTime(f2, t + dur);
-      env(g, t, peak, dur); s.connect(flt); flt.connect(g); g.connect(out);
-      s.start(t, Math.random() * .5); s.stop(t + dur + .05);
-    }
-    function tone(f, dur, peak, type, f2, at) {
-      const t = ctx.currentTime + (at || 0), o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
-      if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
-      env(g, t, peak, dur); o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + .05);
-    }
-    const lib = {
-      tick: () => noise(.035, .05, 'highpass', 3600),                       // 깃펜 끝
-      page: () => noise(.24, .16, 'bandpass', 1500, 520, .6),               // 종이 넘김
-      stamp: () => { tone(96, .2, .5, 'sine', 44); noise(.07, .22, 'lowpass', 800); },   // 도장
-      crack: () => { noise(.09, .4, 'highpass', 2200); tone(170, .28, .35, 'triangle', 58); noise(.5, .1, 'bandpass', 1100, 320, .6, .06); },  // 밀랍 깨짐
-      quill: () => { for (let i = 0; i < 5; i++) noise(.09, .04, 'bandpass', 2400 + Math.random() * 900, 1800, 2.5, i * .11 + Math.random() * .03); },  // 글씨
-      chime: () => { tone(784, 1.1, .05); tone(1175, 1.4, .035, 'sine', 0, .05); },  // 계절 바뀜
-    };
-    function play(n, gap) {
-      if (!on || !ctx || d.hidden) return;
-      const now = performance.now();
-      if (now - (last[n] || 0) < (gap == null ? 60 : gap)) return;
-      last[n] = now;
-      if (ctx.state === 'running') lib[n]();
-      else if (navigator.userActivation && navigator.userActivation.isActive) ctx.resume().then(lib[n]);
-    }
-    function paint() { $$('.snd').forEach(b => b.setAttribute('aria-pressed', on)); }
-    function toggle() {
-      on = !on; store.set('ern-sfx', on ? 'on' : 'off'); paint();
-      if (on) { wake(); play('stamp'); }
-    }
-    $$('.snd').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); toggle(); }));
-    paint();
-    if (fine) d.addEventListener('mouseover', e => {
-      const t = e.target.closest && e.target.closest('.tabs a, .btn, .ro, .deed, .slot, .season, .edict, .rg-list button, .face-tabs button, .g-ticks button, .dial button, .fg, .tilt');
-      if (t && !t.contains(e.relatedTarget)) play('tick', 70);
-    });
-    d.addEventListener('click', e => {
-      const t = e.target.closest && e.target.closest('.tabs a, .foot a, .brand, .btn, .deed, .tilt, .fg, .rep, .prof-nav a, .fief');
-      if (t && !t.matches('[data-enter], [data-copy]')) play('page');
-    });
-    return { play, toggle };
-  })();
+  /* 녹음된 효과음 엔진. 기존 선택/입장 타이밍과 효과음 설정을 그대로 쓴다. */
+  const sfx = window.ERNSFX || { play() {}, toggle() {} };
 
   /* ── 공기: 계절마다 다른 것이 떠다닌다(입장 화면은 금빛 먼지) ── */
   const air = (() => {
@@ -423,14 +358,14 @@
     const img = $('[data-sel-img]', sel), ros = $$('.ro', sel), link = $('[data-f-link]', sel), F = {};
     $$('[data-f]:not(button)', sel).forEach(el => { F[el.dataset.f] = el; });
     let cur = null;
-    function pick(a, quiet) {
+    function pick(a, quiet, silent = false) {
       if (!a || a === cur) return;
       const c = JSON.parse(a.dataset.c);
       if (cur) cur.classList.remove('on');
       a.classList.add('on'); cur = a;
       Object.keys(F).forEach(k => { F[k].textContent = c[k]; });
       link.href = a.href;
-      if (!quiet) { sfx.play('page', 90); sel.classList.remove('swap'); void sel.offsetWidth; sel.classList.add('swap'); }
+      if (!quiet) { if (!silent) sfx.play('page', 90); sel.classList.remove('swap'); void sel.offsetWidth; sel.classList.add('swap'); }
       swap(img, c.img, null, () => cur === a);
     }
     // Layout and scrolling can fire mouseenter beneath a stationary pointer.
@@ -441,7 +376,7 @@
       if (event.clientX === pointerX && event.clientY === pointerY) return;
       pointerX = event.clientX; pointerY = event.clientY;
       const link = event.target.closest && event.target.closest('.ro');
-      if (link && sel.contains(link)) pick(link);
+      if (link && sel.contains(link)) pick(link, false, true);
     }, { passive: true });
     ros.forEach(a => {
       a.addEventListener('pointerdown', () => { a._was = a === cur; });

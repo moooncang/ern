@@ -1,0 +1,114 @@
+[
+  {
+    "file": "select-1.wav",
+    "seconds": 0.108,
+    "bytes": 9806,
+    "peak_dbfs": -10.0,
+    "rms_dbfs": -27.72,
+    "sha256": "702a99ce74d55531728dd55a876d04c1912813c6770c51f26618772bedbb19d5"
+  },
+  {
+    "file": "select-2.wav",
+    "seconds": 0.112,
+    "bytes": 10158,
+    "peak_dbfs": -10.0,
+    "rms_dbfs": -29.82,
+    "sha256": "06e10f129c55042daf9b6565347ebf425866b3f7f0c8de4332dd240a7624b6f5"
+  },
+  {
+    "file": "paper-turn-1.wav",
+    "seconds": 0.34,
+    "bytes": 30268,
+    "peak_dbfs": -8.0,
+    "rms_dbfs": -26.48,
+    "sha256": "fdf91561ab362b0f1d6c8cbfc5872ad3bfa00ad801428d90705699fb57124d2f"
+  },
+  {
+    "file": "paper-turn-2.wav",
+    "seconds": 0.508,
+    "bytes": 45090,
+    "peak_dbfs": -8.0,
+    "rms_dbfs": -26.72,
+    "sha256": "792b9d76692b2aa1046292e65ae47bdc44ef66b5b963567c602ea2e8633b62f4"
+  },
+  {
+    "file": "paper-turn-3.wav",
+    "seconds": 0.48,
+    "bytes": 42616,
+    "peak_dbfs": -8.0,
+    "rms_dbfs": -28.55,
+    "sha256": "308f0c0d32f6ab5cc0fee6be0fa082fb0b1289dbd97576fabdf5ca3d965a7a51"
+  },
+  {
+    "file": "seal-press-1.wav",
+    "seconds": 0.27,
+    "bytes": 24094,
+    "peak_dbfs": -8.0,
+    "rms_dbfs": -27.17,
+    "sha256": "49b9894f27421d6698c98d31b2efc504aa80a1b3f056df3699e1d06b93d8bc68"
+  },
+  {
+    "file": "seal-press-2.wav",
+    "seconds": 0.2566,
+    "bytes": 22914,
+    "peak_dbfs": -8.0,
+    "rms_dbfs": -23.07,
+    "sha256": "6727f5d37b1fc646c72d09470854f3fdd9b97b854d484fee5f4398b65439542e"
+  },
+  {
+    "file": "wax-break-1.wav",
+    "seconds": 0.238,
+    "bytes": 21272,
+    "peak_dbfs": -8.0,
+    "rms_dbfs": -22.71,
+    "sha256": "1a409f8b563418de91b12817046033e919ac490d8f61e097138f849e7181e2ed"
+  },
+  {
+    "file": "wax-break-2.wav",
+    "seconds": 0.3,
+    "bytes": 26740,
+    "peak_dbfs": -8.0,
+    "rms_dbfs": -23.58,
+    "sha256": "63d41307850998bb19e35d691c7befaf9ed3d3cbe55ab2dc04c60debf4b33128"
+  },
+  {
+    "file": "pen-stroke-1.wav",
+    "seconds": 0.135,
+    "bytes": 12190,
+    "peak_dbfs": -11.44,
+    "rms_dbfs": -24.0,
+    "sha256": "8605514a8c7da04f3f8c6ea069b96ecd98fab990efdcf9cd65950a3714d5c065"
+  },
+  {
+    "file": "pen-stroke-2.wav",
+    "seconds": 0.155,
+    "bytes": 13954,
+    "peak_dbfs": -11.0,
+    "rms_dbfs": -24.6,
+    "sha256": "12b1785f0824efeafd2ff5739a49fddb926c9e95e0089fef58ef4a420f902ce6"
+  },
+  {
+    "file": "pen-stroke-3.wav",
+    "seconds": 0.148,
+    "bytes": 13336,
+    "peak_dbfs": -11.0,
+    "rms_dbfs": -27.01,
+    "sha256": "297d00ac7a445554b55a3208c6799c0ddf03c373b2c507d8edd17e27dc546826"
+  },
+  {
+    "file": "folio-shift-1.wav",
+    "seconds": 0.4545,
+    "bytes": 40370,
+    "peak_dbfs": -8.0,
+    "rms_dbfs": -27.25,
+    "sha256": "8d549f3f9bd27210faff2e6ea7e296d58c0f77c314cb0c889d0f8e430e8f1dae"
+  },
+  {
+    "file": "folio-shift-2.wav",
+    "seconds": 0.4836,
+    "bytes": 42936,
+    "peak_dbfs": -8.26,
+    "rms_dbfs": -24.0,
+    "sha256": "968b9522f5f37945a0a7ea80811a55c48797efac321364f5582022c1beea506e"
+  }
+]

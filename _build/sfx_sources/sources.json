@@ -1,0 +1,63 @@
+[
+  {
+    "file": "UIClick_WoodBack_OS_01.ogg",
+    "sha256": "6037c03072ceb55b24c39f83ecaaa67380ba9973cde1f7b60cb07160f98d8ea2",
+    "url": "https://raw.githubusercontent.com/facebookincubator/Meta-open-sound/514c926efecdb3c7812bf00eedf8e5c8d61dd681/corpora/oculus-audio-pack/ogg/UIClick_WoodBack_OS_01.ogg",
+    "license": "CC-BY-4.0"
+  },
+  {
+    "file": "UIClick_WoodConfirm_OS_01.ogg",
+    "sha256": "ac28a77f418e353b50ed9071e54f2c9028a3daf145a3e0b82a0bdc2092ba2730",
+    "url": "https://raw.githubusercontent.com/facebookincubator/Meta-open-sound/514c926efecdb3c7812bf00eedf8e5c8d61dd681/corpora/oculus-audio-pack/ogg/UIClick_WoodConfirm_OS_01.ogg",
+    "license": "CC-BY-4.0"
+  },
+  {
+    "file": "OBJBook_BookClose_OS_01.ogg",
+    "sha256": "9d76bc7c3851b94de6d48292e7a996eb0eed2220dd5bad4d1763e2c267391d24",
+    "url": "https://raw.githubusercontent.com/facebookincubator/Meta-open-sound/514c926efecdb3c7812bf00eedf8e5c8d61dd681/corpora/oculus-audio-pack/ogg/OBJBook_BookClose_OS_01.ogg",
+    "license": "CC-BY-4.0"
+  },
+  {
+    "file": "OBJBook_BookOpen_OS_01.ogg",
+    "sha256": "55ada797a671096852baf46323016fee8617500d66b76390f9eafa2871567b2f",
+    "url": "https://raw.githubusercontent.com/facebookincubator/Meta-open-sound/514c926efecdb3c7812bf00eedf8e5c8d61dd681/corpora/oculus-audio-pack/ogg/OBJBook_BookOpen_OS_01.ogg",
+    "license": "CC-BY-4.0"
+  },
+  {
+    "file": "OBJBook_BookOpen_OS_02.ogg",
+    "sha256": "d0f5c5a960977742603d6dc980a90df71a36ce8f9ed2ab13461dddcd5edd2d4f",
+    "url": "https://raw.githubusercontent.com/facebookincubator/Meta-open-sound/514c926efecdb3c7812bf00eedf8e5c8d61dd681/corpora/oculus-audio-pack/ogg/OBJBook_BookOpen_OS_02.ogg",
+    "license": "CC-BY-4.0"
+  },
+  {
+    "file": "WOODImpt_LargeWoodDrop_OS_01.ogg",
+    "sha256": "2047aecd791504d99607b6dc055273091103b559f96b6327ba9128c618121feb",
+    "url": "https://raw.githubusercontent.com/facebookincubator/Meta-open-sound/514c926efecdb3c7812bf00eedf8e5c8d61dd681/corpora/oculus-audio-pack/ogg/WOODImpt_LargeWoodDrop_OS_01.ogg",
+    "license": "CC-BY-4.0"
+  },
+  {
+    "file": "PAPRHndl_BookPageTurns_OS_01.ogg",
+    "sha256": "5fb5bdd48b9544728fa7599e1c3f9ead148fee2bc1a8f4e541c2baf06c842cd1",
+    "url": "https://raw.githubusercontent.com/facebookincubator/Meta-open-sound/514c926efecdb3c7812bf00eedf8e5c8d61dd681/corpora/oculus-audio-pack/ogg/PAPRHndl_BookPageTurns_OS_01.ogg",
+    "license": "CC-BY-4.0"
+  },
+  {
+    "file": "PAPRHndl_PaperCrumple_OS_01.ogg",
+    "sha256": "d061b6582b88aacda656d362a2f1421c654e860e27532b8c773569971dd0af9b",
+    "url": "https://raw.githubusercontent.com/facebookincubator/Meta-open-sound/514c926efecdb3c7812bf00eedf8e5c8d61dd681/corpora/oculus-audio-pack/ogg/PAPRHndl_PaperCrumple_OS_01.ogg",
+    "license": "CC-BY-4.0"
+  },
+  {
+    "file": "PAPRRip_PaperTear_OS_01.ogg",
+    "sha256": "d1c2d210d8bb07db8124b6080f38816e2a323d136fbc72f9296c976d3eb91a34",
+    "url": "https://raw.githubusercontent.com/facebookincubator/Meta-open-sound/514c926efecdb3c7812bf00eedf8e5c8d61dd681/corpora/oculus-audio-pack/ogg/PAPRRip_PaperTear_OS_01.ogg",
+    "license": "CC-BY-4.0"
+  },
+  {
+    "file": "pencil-writing.wav",
+    "sha256": "13ddbe898d798e7dfe70bbe201399ce10c98ba45553085e2403e38516f7ddb17",
+    "url": "https://raw.githubusercontent.com/flxzt/rnote/main/crates/rnote-engine/data/sounds/originals/Pencil%2C%20Writing%2C%20Close%2C%20A.wav",
+    "source": "https://freesound.org/people/InspectorJ/sounds/398271/",
+    "license": "CC-BY-3.0"
+  }
+]
