@@ -14,7 +14,11 @@
 <link rel="stylesheet" href="assets/css/style.css?v=cf6e5ea02960">
 <link rel="stylesheet" href="assets/css/materials.css?v=89c971883465">
 <link rel="stylesheet" href="assets/css/craft.css?v=52ee641188c8">
-<link rel="stylesheet" href="assets/css/entry.css?v=cfdcb5ace52a">
+<link rel="stylesheet" href="assets/css/atelier.css?v=d652ca368112">
+<link rel="stylesheet" href="assets/css/emblems.css?v=68122f98740d">
+<link rel="stylesheet" href="assets/css/map-art.css?v=b9166ac42345">
+<link rel="stylesheet" href="assets/css/town-art.css?v=5da9feb1b83d">
+<link rel="stylesheet" href="assets/css/entry.css?v=9692f2c9b4c4">
 </head>
 <body class="cover" data-default-domain="에른">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -36,26 +40,38 @@
 
 <div class="writ" data-writ data-state="sealed">
   <div class="stationery">
-    <div class="envelope-art" aria-hidden="true">
+    <div class="envelope-art">
       <div class="envelope-lining"></div>
-      <img class="envelope-pocket" src="images/ui/envelope.webp" alt="" width="1536" height="1024" fetchpriority="high">
-      <img class="envelope-flap" src="images/ui/envelope.webp" alt="" width="1536" height="1024">
+      <img class="envelope-rim" src="images/ui/envelope.webp" alt="" width="1536" height="1024" fetchpriority="high">
+      <div class="letter-clip">
+        <div class="letter-document">
+          <img class="letter-sheet" src="images/ui/letter-sheet.webp" alt="" width="1086" height="1448">
+          <div class="letter-content">
+            <div class="letter-title-slot"></div>
+            <div class="writ-body" id="writ-body" inert><div><p class="ln">오르텐의 왕은 이 문서를 지닌 자에게 왕국 동쪽 끝, 에른 변경의 땅을 봉토로 내린다.</p><p class="ln">받은 자는 가을 수확 뒤 공납을 바치고, 소집이 있으면 병력을 낸다.</p>
+              <p class="ln sign"><label for="dn">영지의 이름</label><input id="dn" data-domain-input maxlength="12" placeholder="에른" autocomplete="off" spellcheck="false" enterkeyhint="next"></p>
+              <p class="ln"><a class="btn" href="home.html" data-enter>봉토를 받는다</a></p>
+            </div></div>
+          </div>
+        </div>
+      </div>
+      <img class="envelope-pocket" src="images/ui/envelope.webp" alt="" width="1536" height="1024">
+      <img class="envelope-front" src="images/atelier/envelope-front.webp" alt="" width="1536" height="1024">
+      <div class="envelope-flap">
+        <div class="flap-front">
+          <img src="images/ui/envelope.webp" alt="" width="1536" height="1024">
+          <div class="writ-title"><h1>변경의 신임 영주가 되었다</h1><p class="en">ROYAL WRIT · KINGDOM OF ORTEN</p></div>
+        </div>
+        <div class="flap-back" aria-hidden="true"></div>
+      </div>
+      <a class="seal" href="home.html" role="button" data-seal aria-label="봉인을 떼고 서임장 펼치기" aria-controls="writ-body" aria-expanded="false"><span class="bits" aria-hidden="true"><i style="--a:8deg;--r:78px;--s:0.9"></i><i style="--a:52deg;--r:96px;--s:0.6"></i><i style="--a:97deg;--r:70px;--s:1"></i><i style="--a:141deg;--r:104px;--s:0.7"></i><i style="--a:186deg;--r:82px;--s:0.8"></i><i style="--a:228deg;--r:98px;--s:0.6"></i><i style="--a:263deg;--r:74px;--s:1"></i><i style="--a:312deg;--r:90px;--s:0.7"></i><i style="--a:338deg;--r:110px;--s:0.5"></i></span><svg class="l" aria-hidden="true"><use href="#wax"/></svg><svg class="r" aria-hidden="true"><use href="#wax"/></svg><svg class="whole" aria-hidden="true"><use href="#wax"/></svg></a>
     </div>
-    <img class="letter-sheet" src="images/ui/letter-sheet.webp" alt="" aria-hidden="true" width="1086" height="1448">
-    <div class="writ-content">
-      <h1>변경의 신임 영주가 되었다</h1>
-      <p class="en">ROYAL WRIT · KINGDOM OF ORTEN</p>
-      <div class="writ-body" id="writ-body" inert><div><p class="ln">오르텐의 왕은 이 문서를 지닌 자에게 왕국 동쪽 끝, 에른 변경의 땅을 봉토로 내린다.</p><p class="ln">받은 자는 가을 수확 뒤 공납을 바치고, 소집이 있으면 병력을 낸다.</p>
-        <p class="ln sign"><label for="dn">영지의 이름</label><input id="dn" data-domain-input maxlength="12" placeholder="에른" autocomplete="off" spellcheck="false" enterkeyhint="next"></p>
-        <p class="ln"><a class="btn" href="home.html" data-enter>봉토를 받는다</a></p>
-      </div></div>
-    </div>
-    <a class="seal" href="home.html" role="button" data-seal aria-label="봉인을 떼고 서임장 펼치기" aria-controls="writ-body" aria-expanded="false"><span class="bits" aria-hidden="true"><i style="--a:8deg;--r:78px;--s:0.9"></i><i style="--a:52deg;--r:96px;--s:0.6"></i><i style="--a:97deg;--r:70px;--s:1"></i><i style="--a:141deg;--r:104px;--s:0.7"></i><i style="--a:186deg;--r:82px;--s:0.8"></i><i style="--a:228deg;--r:98px;--s:0.6"></i><i style="--a:263deg;--r:74px;--s:1"></i><i style="--a:312deg;--r:90px;--s:0.7"></i><i style="--a:338deg;--r:110px;--s:0.5"></i></span><svg class="l" aria-hidden="true"><use href="#wax"/></svg><svg class="r" aria-hidden="true"><use href="#wax"/></svg><svg class="whole" aria-hidden="true"><use href="#wax"/></svg></a>
+    <div class="reading-slot"></div>
   </div>
   <p class="hint">인장을 눌러 봉인을 뗍니다</p>
 </div>
 </main>
 
-<script src="assets/js/main.js?v=ffa8cbf86fa3"></script>
+<script src="assets/js/main.js?v=c4734ed750cc"></script>
 </body>
 </html>

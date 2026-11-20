@@ -8,6 +8,8 @@ from pathlib import Path
 
 import data as d
 from engraving import town_details, atlas_details
+from map_art import illustrated_map, region_art
+from town_art import town_art
 
 ROOT = Path(__file__).resolve().parent.parent
 def asset_url(path, pre=""):
@@ -79,6 +81,10 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 <link rel="stylesheet" href="{asset_url('assets/css/style.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/materials.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/craft.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/atelier.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/emblems.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/map-art.css', pre)}">
+<link rel="stylesheet" href="{asset_url('assets/css/town-art.css', pre)}">
 <link rel="stylesheet" href="{asset_url('assets/css/entry.css', pre)}">
 </head>
 <body{' class="cover"' if cover else ''} data-default-domain="{e(d.기본_영지명)}">
@@ -111,9 +117,18 @@ def blocks(bs):
     return "".join(block(b) for b in bs)
 
 
-def table(head, rows):
+def table(head, rows, illustrations=None):
     h = "".join(f'<th scope="col">{e(x)}</th>' for x in head)
-    r = "".join("<tr>" + "".join(f"<td>{e(c)}</td>" for c in row) + "</tr>" for row in rows)
+    r = ""
+    for i, row in enumerate(rows):
+        cells = []
+        for j, cell in enumerate(row):
+            art = ""
+            if j == 0 and illustrations:
+                cls, path = illustrations[i]
+                art = f'<img class="{cls}" src="{path}" alt="" loading="lazy">'
+            cells.append(f"<td>{art}{e(cell)}</td>")
+        r += "<tr>" + "".join(cells) + "</tr>"
     return f'<div class="scroll"><table><thead><tr>{h}</tr></thead><tbody>{r}</tbody></table></div>'
 
 
@@ -133,8 +148,10 @@ def sec(제목, 영문, 안, cls="", narrow=True, id_=""):
             f'<div class="wrap{" narrow" if narrow else ""}">{hd(제목, 영문)}<div data-rv>{안}</div></div></section>')
 
 
-def plate(c, cls=""):
-    return f'<span class="plate {cls}"><small>{e(c["직책"])}</small><b>{e(c["이름"])}</b></span>'
+def plate(c, cls="", heading=False):
+    tag = "h1" if heading else "b"
+    outer = "div" if heading else "span"
+    return f'<{outer} class="plate {cls}"><small>{e(c["직책"])}</small><{tag}>{e(c["이름"])}</{tag}></{outer}>'
 
 
 def crack_button():
@@ -289,21 +306,33 @@ def index():
     return shell("index.html", "", f"""
 <div class="writ" data-writ data-state="sealed">
   <div class="stationery">
-    <div class="envelope-art" aria-hidden="true">
+    <div class="envelope-art">
       <div class="envelope-lining"></div>
-      <img class="envelope-pocket" src="images/ui/envelope.webp" alt="" width="1536" height="1024" fetchpriority="high">
-      <img class="envelope-flap" src="images/ui/envelope.webp" alt="" width="1536" height="1024">
+      <img class="envelope-rim" src="images/ui/envelope.webp" alt="" width="1536" height="1024" fetchpriority="high">
+      <div class="letter-clip">
+        <div class="letter-document">
+          <img class="letter-sheet" src="images/ui/letter-sheet.webp" alt="" width="1086" height="1448">
+          <div class="letter-content">
+            <div class="letter-title-slot"></div>
+            <div class="writ-body" id="writ-body" inert><div>{lines}
+              <p class="ln sign"><label for="dn">영지의 이름</label><input id="dn" data-domain-input maxlength="12" placeholder="{e(d.기본_영지명)}" autocomplete="off" spellcheck="false" enterkeyhint="next"></p>
+              <p class="ln"><a class="btn" href="home.html" data-enter>봉토를 받는다</a></p>
+            </div></div>
+          </div>
+        </div>
+      </div>
+      <img class="envelope-pocket" src="images/ui/envelope.webp" alt="" width="1536" height="1024">
+      <img class="envelope-front" src="images/atelier/envelope-front.webp" alt="" width="1536" height="1024">
+      <div class="envelope-flap">
+        <div class="flap-front">
+          <img src="images/ui/envelope.webp" alt="" width="1536" height="1024">
+          <div class="writ-title"><h1>{e(d.제목)}</h1><p class="en">{e(d.칙서_라벨)}</p></div>
+        </div>
+        <div class="flap-back" aria-hidden="true"></div>
+      </div>
+      <a class="seal" href="home.html" role="button" data-seal aria-label="봉인을 떼고 서임장 펼치기" aria-controls="writ-body" aria-expanded="false"><span class="bits" aria-hidden="true">{bits}</span><svg class="l" aria-hidden="true"><use href="#wax"/></svg><svg class="r" aria-hidden="true"><use href="#wax"/></svg><svg class="whole" aria-hidden="true"><use href="#wax"/></svg></a>
     </div>
-    <img class="letter-sheet" src="images/ui/letter-sheet.webp" alt="" aria-hidden="true" width="1086" height="1448">
-    <div class="writ-content">
-      <h1>{e(d.제목)}</h1>
-      <p class="en">{e(d.칙서_라벨)}</p>
-      <div class="writ-body" id="writ-body" inert><div>{lines}
-        <p class="ln sign"><label for="dn">영지의 이름</label><input id="dn" data-domain-input maxlength="12" placeholder="{e(d.기본_영지명)}" autocomplete="off" spellcheck="false" enterkeyhint="next"></p>
-        <p class="ln"><a class="btn" href="home.html" data-enter>봉토를 받는다</a></p>
-      </div></div>
-    </div>
-    <a class="seal" href="home.html" role="button" data-seal aria-label="봉인을 떼고 서임장 펼치기" aria-controls="writ-body" aria-expanded="false"><span class="bits" aria-hidden="true">{bits}</span><svg class="l" aria-hidden="true"><use href="#wax"/></svg><svg class="r" aria-hidden="true"><use href="#wax"/></svg><svg class="whole" aria-hidden="true"><use href="#wax"/></svg></a>
+    <div class="reading-slot"></div>
   </div>
   <p class="hint">인장을 눌러 봉인을 뗍니다</p>
 </div>""", cover=True)
@@ -323,7 +352,7 @@ def home():
     ticks = "".join(f'<li><button type="button" data-g="{i}">{e(s[0])}</button></li>' for i, s in enumerate(d.단계))
     stages = e(json.dumps([[s[0], s[1], s[3]] for s in d.단계], ensure_ascii=False))
     grow = sec("영지 단계", "THE STAGES", f"""<div class="grow" data-grow data-stages="{stages}">
-{town()}
+{town_art()}
 <div class="g-info" aria-live="polite"><p class="g-name" data-g-name>{e(d.단계[0][0])}</p>
 <p class="g-pop">인구 <b data-g-pop>{d.단계[0][1]}</b><span data-g-cap>까지</span></p><p class="g-fac" data-g-fac>{e(d.단계[0][3])}</p></div>
 <div class="g-ctl"><input type="range" min="0" max="{len(d.단계) - 1}" step="1" value="0" aria-label="영지 단계" data-g-range><ol class="g-ticks">{ticks}</ol></div>
@@ -369,7 +398,7 @@ def characters():
         info = {k: c.get(k, "") for k in ("이름", "직책", "나이", "호칭", "목표", "소개")}
         info["img"] = f'images/c/{c["코드"]}/1.jpg'
         return (f'<li data-g="{c["묶음"]}"><a class="ro" id="{c["코드"]}" href="char/{c["코드"]}.html" '
-                f'data-c="{e(json.dumps(info, ensure_ascii=False))}"><b>{e(c["이름"])}</b><small>{e(c["직책"])}</small></a></li>')
+                f'data-c="{e(json.dumps(info, ensure_ascii=False))}"><img class="ro-portrait" src="images/c/{c["코드"]}/1.jpg" alt="" width="64" height="64" loading="lazy"><b>{e(c["이름"])}</b><small>{e(c["직책"])}</small></a></li>')
     c0 = d.인물[0]
     filters = '<button type="button" role="tab" aria-selected="true" data-f="all">전체</button>' + "".join(
         f'<button type="button" role="tab" aria-selected="false" data-f="{k}">{e(t)}</button>' for k, t, _ in d.묶음)
@@ -400,7 +429,7 @@ def character(i):
         f'data-alt="{e(c["이름"])} — {e(t)}">{e(t)}</button>' for j, (num, t) in enumerate(d.표정))
     num0, t0 = d.표정[0]
     body = f"""<section class="prof">
-<div class="prof-hero"><img src="../images/c/{k}/1.jpg" alt="{e(c["이름"])}" width="1600" height="1103" fetchpriority="high">{plate(c, "big")}</div>
+<div class="prof-hero"><img src="../images/c/{k}/1.jpg" alt="{e(c["이름"])}" width="1600" height="1103" fetchpriority="high">{plate(c, "big", heading=True)}</div>
 <div class="wrap narrow">
 <nav class="prof-nav" aria-label="다른 인물"><a data-prev href="{prev["코드"]}.html">{ico("next", "flip")}<span>{e(prev["이름"])}</span><kbd>Q</kbd></a>
 <a href="../characters.html#{k}">명부</a><a data-next href="{nxt["코드"]}.html"><kbd>E</kbd><span>{e(nxt["이름"])}</span>{ico("next")}</a></nav>
@@ -421,17 +450,19 @@ def world():
     for k, 이름, 방위, 설명, rep in d.지역:
         name = f'<span data-domain>{e(d.기본_영지명)}</span>' if k == "home" else e(이름)
         who = (f'<a class="rep" href="char/{rep}.html">{plate(BY[rep])}{ico("next")}</a>' if rep else "")
-        infos += (f'<article class="rg-info" data-r="{k}"{"" if k == "home" else " hidden"}><h2>{name}</h2>'
+        infos += (f'<article class="rg-info" data-r="{k}"{"" if k == "home" else " hidden"}>{region_art(k)}<h2>{name}</h2>'
                   f'<p class="dir">{e(방위)}</p><p>{e(설명)}</p>{who}</article>')
-    atlas = (f'<section class="atlas" data-atlas><div class="wrap"><div class="map-wrap">{atlas_svg()}</div>'
+    atlas = (f'<section class="atlas" data-atlas><div class="wrap"><div class="map-wrap">{illustrated_map(atlas_svg())}</div>'
              f'<div class="atlas-side"><ol class="rg-list">{btns}</ol><div aria-live="polite">{infos}</div></div></div></section>')
     return shell("world.html", d.세계_머리[1], page_head(*d.세계_머리) + atlas
                  + "".join(sec(t, en, blocks(bs)) for en, t, bs in d.세계))
 
 
 def domain():
-    stages = table(["단계", "인구", "이 무렵의 시설"], [[s[0], s[2], s[3]] for s in d.단계])
-    est = table(["세력", "쥔 것", "바라는 것", "대표"], [[이름, a, b, BY[rep]["이름"]] for _, 이름, a, b, rep in d.세력])
+    stages = table(["단계", "인구", "이 무렵의 시설"], [[s[0], s[2], s[3]] for s in d.단계],
+                   [("stage-thumb", f"images/atelier/town-{i}.webp") for i in range(len(d.단계))])
+    est = table(["세력", "쥔 것", "바라는 것", "대표"], [[이름, a, b, BY[rep]["이름"]] for _, 이름, a, b, rep in d.세력],
+                [("faction-thumb", f"images/atelier/faction-{k}.webp") for k, *_ in d.세력])
     rows = "".join(
         f'<tr data-v="{v}"><td>{e(t)}</td><td>{coin(v)}</td><td class="qty">'
         f'<button type="button" data-d="-1" aria-label="{e(t)} 빼기">−</button><output>0</output>'
@@ -439,7 +470,7 @@ def domain():
     tally = (f'<div class="tally scroll" data-tally><table><thead><tr><th scope="col">품목</th><th scope="col">값</th>'
              f'<th scope="col">수량</th></tr></thead><tbody>{rows}</tbody><tfoot><tr><th scope="row" colspan="2">합계 '
              f'<button type="button" class="link" data-reset>지우기</button></th><td><output data-total>0동화</output></td></tr></tfoot></table></div>')
-    seasons = "<dl>" + "".join(f"<dt>{e(t)}</dt><dd>{e(x)}</dd>" for _, t, _, x in d.계절) + f"</dl><p>{e(d.계절_글)}</p>"
+    seasons = "<dl>" + "".join(f'<dt><img class="season-thumb" src="images/atelier/season-{k}.webp" alt="" width="64" height="64" loading="lazy">{e(t)}</dt><dd>{e(x)}</dd>' for k, t, _, x in d.계절) + f"</dl><p>{e(d.계절_글)}</p>"
     a, b = d.정보창.split("{영지명}")
     win = (f'<p>{e(d.정보창_글)}</p><div class="scroll"><pre>{e(a)}<span class="mine" data-domain>{e(d.기본_영지명)}</span>{e(b)}</pre></div>')
     return shell("domain.html", d.영지_머리[1], page_head(*d.영지_머리)

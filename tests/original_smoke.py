@@ -95,11 +95,13 @@ def check_browser(browser, base, mobile=False):
     page.locator("[data-g-range]").fill("4")
     expect(page.locator("[data-g-name]").first).to_have_text("도시")
     expect(page.locator("[data-g-pop]").first).to_have_text("20,000")
-    assert page.locator(".town .st.on").evaluate_all("els => els.every(el => +el.dataset.s <= 4)")
+    stages = page.locator("[data-grow] .st[data-s]")
+    assert stages.count() >= 6, "The six visual development stages must remain available"
+    assert page.locator("[data-grow] .st.on").evaluate_all("els => els.every(el => +el.dataset.s <= 4)")
     page.locator('[data-g="0"]').click()
     expect(page.locator("[data-g-name]").first).to_have_text("개척지")
     expect(page.locator("[data-g-pop]").first).to_have_text("50")
-    assert page.locator(".town .st.on").evaluate_all("els => els.every(el => +el.dataset.s === 0)")
+    assert page.locator("[data-grow] .st.on").evaluate_all("els => els.every(el => +el.dataset.s === 0)")
     page.locator('[data-e="tax"]').click()
     expect(page.locator('.est-col[data-k="knight"] [data-lv]')).to_have_text("지지")
     expect(page.locator('.est-col[data-k="village"] [data-lv]')).to_have_text("불만")
@@ -181,15 +183,24 @@ def normal_motion(browser, base, viewport=(1280, 900)):
     page.goto(urljoin(base, "index.html"), wait_until="load")
     page.evaluate("""() => {
         window.__envelopeOpeningSamples = [];
-        const sample = () => {
+        const sample = timestamp => {
             const writ = document.querySelector('[data-writ]');
-            if (writ.dataset.state === 'opening') {
-                const box = document.querySelector('.envelope-art').getBoundingClientRect();
-                window.__envelopeOpeningSamples.push({
-                    ratio: box.width / box.height,
-                    overflow: document.documentElement.scrollWidth > innerWidth + 1,
-                });
+            const envelope = document.querySelector('.envelope-art');
+            const box = envelope.getBoundingClientRect();
+            let visible = true, opacity = 1;
+            for (let node = envelope; node; node = node.parentElement) {
+                const style = getComputedStyle(node);
+                opacity *= +style.opacity;
+                if (style.display === 'none' || style.visibility === 'hidden') visible = false;
             }
+            window.__envelopeOpeningSamples.push({
+                timestamp, state: writ.dataset.state,
+                ratio: box.width / box.height,
+                x: box.x + scrollX, y: box.y + scrollY,
+                width: box.width, height: box.height,
+                visible: visible && opacity >= .15,
+                overflow: document.documentElement.scrollWidth > innerWidth + 1,
+            });
             if (writ.dataset.state !== 'ready') requestAnimationFrame(sample);
         };
         requestAnimationFrame(sample);
@@ -197,8 +208,21 @@ def normal_motion(browser, base, viewport=(1280, 900)):
     page.locator("[data-seal]").click()
     page.wait_for_function("!document.querySelector('[data-domain-input]').closest('[inert]')")
     samples = page.evaluate("window.__envelopeOpeningSamples")
-    assert len(samples) >= 3, f"{width}×{height}: opening animation was not sampled"
-    assert all(abs(sample["ratio"] - 1.5) < .005 for sample in samples), f"{width}×{height}: envelope stretched during opening"
+    transition = [sample for sample in samples if sample["state"] not in ("sealed", "ready", "leaving", None)]
+    assert len(transition) >= 3, f"{width}×{height}: opening animation was not sampled"
+    assert all(abs(sample["ratio"] - 1.5) < .005 for sample in transition if sample["visible"]), f"{width}×{height}: visible envelope stretched during opening"
+    # Ignore hidden re-layouts and account for slow frames. A visible object must
+    # travel continuously, rather than teleport when the reading layout changes.
+    for previous, current in zip(samples, samples[1:]):
+        if not (previous["visible"] and current["visible"]):
+            continue
+        delta_ms = current["timestamp"] - previous["timestamp"]
+        allowance = max(16, previous["width"] * .12) * max(1, delta_ms / 32)
+        previous_center = (previous["x"] + previous["width"] / 2, previous["y"] + previous["height"] / 2)
+        current_center = (current["x"] + current["width"] / 2, current["y"] + current["height"] / 2)
+        distance = sum((a - b) ** 2 for a, b in zip(previous_center, current_center)) ** .5
+        assert distance <= allowance, f"{width}×{height}: visible envelope jumped {distance:.1f}px in {delta_ms:.1f}ms"
+        assert abs(current["width"] - previous["width"]) <= allowance, f"{width}×{height}: visible envelope resized abruptly"
     assert not any(sample["overflow"] for sample in samples), f"{width}×{height}: horizontal overflow during opening"
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), f"{width}×{height}: horizontal overflow after opening"
 
@@ -213,7 +237,8 @@ def normal_motion(browser, base, viewport=(1280, 900)):
     page.wait_for_url("**/home.html")
     expect(page.locator("[data-domain]").first).to_have_text("연출검증")
     assert not errors, errors
-    print(f"PASS [normal motion {width}×{height}]: envelope stays 3:2, no horizontal overflow, controls reachable, name/entry work", flush=True)
+    sequence = list(dict.fromkeys(sample["state"] for sample in transition))
+    print(f"PASS [normal motion {width}×{height}]: {' → '.join(sequence)}, no visible jumps/stretch/overflow, controls and entry work", flush=True)
     context.close()
 
 
@@ -284,6 +309,33 @@ def entry_accessibility(browser, base):
         context.close()
 
 
+def map_name_edges(browser, base):
+    """The supported twelve-character name must fit the mobile map and heading."""
+    for width in (320, 390):
+        context = browser.new_context(viewport={"width": width, "height": 844}, reduced_motion="reduce")
+        page = context.new_page()
+        page.goto(urljoin(base, "start.html"), wait_until="load")
+        page.locator("[data-domain-input]").fill("가나다라마바사아자차카타")
+        page.goto(urljoin(base, "world.html"), wait_until="load")
+        expect(page.locator('.rg-info[data-r="home"] h2')).to_have_text("가나다라마바사아자차카타")
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), f"{width}px: maximum domain name overflows the page"
+        geometry = page.locator(".map").evaluate("""map => {
+            const home = map.querySelector('[data-domain]');
+            const label = home.getBoundingClientRect(), bounds = map.getBoundingClientRect();
+            const collisions = [...map.querySelectorAll('.lb')].filter(el => el !== home).filter(el => {
+                const other = el.getBoundingClientRect();
+                const area = Math.max(0, Math.min(label.right, other.right) - Math.max(label.left, other.left)) *
+                    Math.max(0, Math.min(label.bottom, other.bottom) - Math.max(label.top, other.top));
+                return area > 1;
+            }).map(el => el.textContent);
+            return {inside: label.left >= bounds.left && label.right <= bounds.right, collisions};
+        }""")
+        assert geometry["inside"], f"{width}px: domain label extends outside the map"
+        assert not geometry["collisions"], f"{width}px: domain label overlaps {geometry['collisions']}"
+        print(f"PASS [map {width}px]: maximum-length name wraps in heading and fits between map labels", flush=True)
+        context.close()
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8766/")
@@ -304,6 +356,7 @@ def main():
                 check_browser(browser, base, mobile=True)
                 for viewport in MOTION_VIEWPORTS:
                     normal_motion(browser, base, viewport)
+                map_name_edges(browser, base)
             entry_accessibility(browser, base)
         finally:
             browser.close()

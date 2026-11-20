@@ -1,0 +1,42 @@
+/* Complete paintings replace only the original settlement drawing. */
+.town.town-art {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 2 / 1;
+  height: auto;
+  overflow: hidden;
+  margin: 0 0 16px;
+}
+
+.town-art > .st {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+  object-position: 50% 50%;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: opacity .65s ease, transform .9s var(--ease);
+}
+
+.town-art > .st.on {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* The original controller activates stages cumulatively. Keep its last one. */
+.town-art > .st.on:has(~ .st.on) {
+  opacity: 0;
+}
+
+@media (max-width: 720px) {
+  .town.town-art { margin-bottom: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .town-art > .st { transition: none; transform: none; }
+}

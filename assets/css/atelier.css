@@ -1,0 +1,285 @@
+/* 에른의 문서 공방: 원래 글·순서·인물을 지키는 실제 삽화와 문서 재질. */
+
+/* 하사·계승·자유: 각각의 출발을 설명하는 물건 삽화. */
+.deed, .slot {
+  --mode-position: 0%;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto 1fr;
+  align-content: start;
+  justify-items: center;
+  min-height: 0;
+  padding: 0 27px 46px;
+  gap: 9px;
+  background-image: url(../../images/atelier/folio.webp);
+  background-size: 100% 100%;
+  box-shadow: 0 1px 0 #c8ad76, 0 4px 0 -1px #f1e3c4, 0 5px 0 -1px #cdb787, 0 16px 27px rgb(58 41 29 / .13);
+}
+.deed:nth-child(2), .slot:nth-child(2) { --mode-position: 50%; }
+.deed:nth-child(3), .slot:nth-child(3) { --mode-position: 100%; }
+.deed::before, .slot::before {
+  content: "";
+  display: block;
+  width: calc(100% + 40px);
+  aspect-ratio: 1.14;
+  margin: 7px -20px 2px;
+  background-image: url(../../images/atelier/mode-triptych.webp);
+  background-size: 300% auto;
+  background-position: var(--mode-position) center;
+  background-repeat: no-repeat;
+  mask-image: linear-gradient(#000 86%, transparent);
+  pointer-events: none;
+}
+.deed h3 { font-size: 1.65rem; }
+.deed p { margin-top: 10px; line-height: 1.9; }
+.deed .en, .slot .en { margin: 0; color: var(--gold-ink); }
+.deed:hover, .slot:hover { box-shadow: 0 1px 0 #b29251, 0 4px 0 -1px #f1e3c4, 0 5px 0 -1px #cdb787, 0 20px 30px rgb(58 41 29 / .18); }
+.slot { grid-template-rows: auto auto auto; padding-inline: 22px; padding-bottom: 39px; }
+.slot::before { width: calc(100% + 32px); margin-inline: -16px; }
+.slot b { font-size: 1.75rem; line-height: 1.45; }
+.slot[aria-selected=true] { outline: 1px solid var(--gold-ink); outline-offset: 3px; box-shadow: 0 1px 0 #b29251, 0 4px 0 -1px #f1e3c4, 0 5px 0 -1px #cdb787, 0 20px 30px rgb(58 41 29 / .18); }
+.slot[aria-selected=false]::before { filter: saturate(.72); opacity: .87; }
+.slot[aria-selected=false]:hover::before { filter: none; opacity: 1; }
+.mode-pane { padding-top: 16px; }
+.mode-pane .lv { padding: 24px 30px; border: 1px solid var(--line); background: linear-gradient(rgb(246 236 214 / .38), rgb(246 236 214 / .38)), url(../../images/ui/parchment.webp); background-size: auto, 512px; box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px rgb(211 189 140 / .45); }
+
+/* 동전 삽화를 얹은 장부: 실제 표와 계산기는 그림 아래에서 동작한다. */
+.tally::before {
+  content: "";
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 1;
+  background: url(../../images/atelier/coins-ledger.webp) center / cover no-repeat;
+  border-bottom: 1px solid var(--line);
+}
+body:not(.cover) main .scroll:has(table) {
+  border: 1px solid #b69a62;
+  padding: 10px;
+  background: url(../../images/atelier/folio.webp) center / 100% 100% no-repeat;
+  box-shadow: 0 2px 0 #f2e5c9, 0 3px 0 #d3bd8c, 0 11px 22px rgb(58 41 29 / .08);
+}
+body:not(.cover) main .tally.scroll { padding: 0 10px 10px; }
+.tally::before { width: calc(100% + 20px); margin-left: -10px; margin-bottom: 10px; }
+body:not(.cover) main .scroll table { background: rgb(246 236 214 / .44); }
+body:not(.cover) main .scroll thead th { background: rgb(174 131 55 / .13); }
+body:not(.cover) main .scroll th, body:not(.cover) main .scroll td { padding-block: 15px; }
+body:not(.cover) main .scroll tbody td:first-child { font-family: "Nanum Myeongjo", serif; font-weight: 700; }
+body:not(.cover) main .scroll tbody tr:last-child td { border-bottom-color: transparent; }
+.tally tfoot { background: rgb(173 130 52 / .09); }
+.tally tfoot th, .tally tfoot td { padding: 23px 13px 19px; }
+.tally tfoot output { font-variant-numeric: tabular-nums; }
+.qty button { background-image: linear-gradient(rgb(255 250 234 / .5), rgb(226 202 153 / .18)); box-shadow: inset 0 0 0 1px var(--gold), inset 0 0 0 3px var(--paper), inset 0 0 0 4px var(--line), 0 2px 3px rgb(58 41 29 / .08); }
+
+/* 기록지: 금박 모서리와 실제 종이 면을 함께 늘리는 아홉 조각 테두리. */
+.note, .sel-info, .prof > .wrap.narrow > .rec {
+  border: 29px solid transparent;
+  border-image-source: url(../../images/atelier/folio.webp);
+  border-image-slice: 160 fill;
+  border-image-repeat: stretch;
+  padding: 15px 10px 19px;
+  box-shadow: 0 10px 24px rgb(58 41 29 / .09);
+}
+.note { margin-top: 35px; gap: 25px; }
+.note label { grid-template-columns: 5em minmax(0, 1fr); }
+.note label span { font-size: .88rem; }
+.note input { background: rgb(255 249 230 / .38); border-bottom-color: #b39358; }
+.note input:focus { background: rgb(255 249 230 / .72); }
+.note pre { padding: 24px; border: 1px solid #9b7843; background-image: linear-gradient(rgb(58 41 29 / .58), rgb(58 41 29 / .58)), url(../../images/ui/banner-cloth.webp); background-size: auto, 180px; box-shadow: inset 0 0 0 4px var(--leather), inset 0 0 0 5px #775733; }
+.note > p { gap: 17px; }
+.note .btn { font-size: .92rem; }
+.sel-info { margin-top: 32px; border-width: 23px; padding: 14px 7px 17px; }
+.sel-info > p { font-size: .93rem; }
+.sel-info .rec { border-top: 1px solid rgb(168 132 63 / .6); border-bottom: 1px solid rgb(168 132 63 / .6); padding-block: 20px; grid-template-columns: auto minmax(0, 1fr); gap: 11px 16px; }
+.sel-info .rec dd { font-weight: 400; font-size: .89rem; }
+.sel-info .btn { margin-top: 2px; }
+.prof > .wrap.narrow > .rec { margin-top: 30px; margin-bottom: 70px; padding: 19px 16px 21px; grid-template-columns: 125px minmax(0, 1fr); gap: 16px 20px; }
+.prof > .wrap.narrow > .rec dt { color: var(--gold-ink); }
+.prof > .wrap.narrow > .rec dd { font-weight: 400; line-height: 1.9; }
+
+/* 기존 초상화가 문서에 끼운 도판으로 보이도록 실제 종이 테두리를 쓴다. */
+.sel-stage::after, .prof-hero::after {
+  border: 13px solid transparent;
+  border-image-source: url(../../images/atelier/folio.webp);
+  border-image-slice: 125;
+  border-image-repeat: stretch;
+  box-shadow: inset 0 -110px 90px -45px rgb(30 18 8 / .48);
+}
+.face-stage::after { border: 9px solid transparent; border-image-source: url(../../images/atelier/folio.webp); border-image-slice: 125; border-image-repeat: stretch; box-shadow: none; }
+.prof-nav { padding-top: 22px; padding-bottom: 22px; }
+.prof-nav > a:nth-child(2) { border: 1px solid var(--line); background: rgb(246 236 214 / .55); padding: 8px 21px; }
+.face-tabs { margin-top: 18px; }
+.face-tabs button { background-image: linear-gradient(rgb(246 236 214 / .65), rgb(246 236 214 / .65)), url(../../images/ui/parchment.webp); background-size: auto, 180px; }
+.face-tabs button[aria-pressed=true] { background-image: linear-gradient(rgb(143 32 32 / .8), rgb(143 32 32 / .8)), url(../../images/ui/parchment.webp); }
+.deck { padding-bottom: 40px; }
+.tilt img { outline-offset: 6px; box-shadow: 0 2px 0 #b89a60, 0 5px 0 -1px #f0e0bb, 0 6px 0 -1px #c6aa73, 0 17px 27px rgb(58 41 29 / .22); }
+
+/* 마무리 문장은 작은 봉토 문서 한 장으로. 새 카피는 더하지 않는다. */
+.sec.end > .wrap {
+  position: relative;
+  width: min(calc(100% - 48px), 850px);
+  min-height: 225px;
+  display: grid;
+  place-content: center;
+  gap: 18px;
+  padding: 65px 70px;
+  background: url(../../images/atelier/folio.webp) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 12px 12px rgb(58 41 29 / .09));
+}
+.sec.end > .wrap::after { content: ""; position: absolute; width: 62px; height: 62px; left: calc(50% - 31px); bottom: -23px; background: url(../../images/ui/wax-seal.webp) center / contain no-repeat; filter: drop-shadow(0 3px 3px rgb(58 20 20 / .2)); }
+.sec.end .closing { margin: 0; line-height: 1.7; font-size: clamp(1.15rem, 2.2vw, 1.7rem); }
+.foot { background-image: linear-gradient(rgb(246 236 214 / .75), rgb(246 236 214 / .8)), url(../../images/ui/parchment.webp); background-size: auto, 512px; }
+.top { background-image: linear-gradient(rgb(246 236 214 / .92), rgb(246 236 214 / .92)), url(../../images/ui/parchment.webp); background-size: auto, 512px; }
+.hd i { box-shadow: 0 1px 0 rgb(255 251 233 / .8); }
+.head .hd i { height: 3px; background: linear-gradient(to bottom, var(--gold) 0 1px, transparent 1px 2px, var(--line) 2px); }
+
+@media (max-width: 1100px) {
+  .deed { padding-inline: 21px; }
+  .deed::before { width: calc(100% + 30px); margin-inline: -15px; }
+  .deed p { font-size: .88rem; }
+  .sel-info { border-width: 20px; padding-inline: 5px; }
+  .sel-info .rec { gap: 10px 13px; }
+}
+@media (max-width: 720px) {
+  .deeds { gap: 44px; max-width: 430px; margin-inline: auto; }
+  .deed { padding: 0 30px 44px; }
+  .deed::before { width: calc(100% + 44px); margin-inline: -22px; aspect-ratio: 1.28; }
+  .deed h3 { font-size: 1.6rem; }
+  .deed p { font-size: .94rem; }
+  .slots { gap: 9px; }
+  .slot { padding: 0 7px 30px; gap: 5px; }
+  .slot::before { width: calc(100% + 6px); margin: 4px -3px 0; aspect-ratio: 1.05; }
+  .slot b { font-size: 1.05rem; }
+  .slot .en { font-size: .56rem; letter-spacing: .07em; }
+  .slot .mark { width: 37px; height: 37px; margin-left: -18.5px; bottom: -18px; }
+  .mode-pane { padding-top: 7px; }
+  .mode-pane .lv { padding: 20px; font-size: .87rem; }
+  body:not(.cover) main .scroll:has(table) { padding: 7px; }
+  body:not(.cover) main .tally.scroll { padding: 0 7px 7px; }
+  .tally::before { width: calc(100% + 14px); margin-left: -7px; margin-bottom: 7px; aspect-ratio: 2.5; }
+  body:not(.cover) main .scroll th, body:not(.cover) main .scroll td { padding: 12px 8px; }
+  .tally td:first-child { white-space: normal; }
+  .tally .qty { width: 112px; }
+  .tally .qty output { min-width: 1.6em; }
+  .tally .qty button { width: 30px; }
+  .tally tfoot th, .tally tfoot td { padding: 20px 8px 16px; font-size: .98rem; }
+  .note { border-width: 23px; padding: 14px 5px 17px; gap: 22px; }
+  .note label { grid-template-columns: 1fr; gap: 8px; }
+  .note input { padding-inline: 9px; }
+  .note pre { padding: 20px 16px; font-size: .79rem; }
+  .note .btn { font-size: .84rem; padding-inline: 9px; }
+  .sel-info { border-width: 23px; padding: 13px 6px 16px; }
+  .sel-info .rec { grid-template-columns: 83px minmax(0, 1fr); gap: 11px 13px; }
+  .sel-info .rec dd { font-size: .85rem; }
+  .sel-info > p { font-size: .9rem; }
+  .prof > .wrap.narrow > .rec { border-width: 23px; padding: 12px 5px 17px; grid-template-columns: 86px minmax(0, 1fr); gap: 14px 13px; }
+  .prof > .wrap.narrow > .rec dt { font-size: .72rem; white-space: normal; }
+  .prof > .wrap.narrow > .rec dd { font-size: .87rem; }
+  .prof-nav > a:nth-child(2) { padding: 7px 15px; }
+  .sec.end > .wrap { width: calc(100% - 32px); min-height: 220px; padding: 54px 35px; }
+  .sec.end .closing { font-size: 1.15rem; }
+}
+@media (max-width: 380px) {
+  .slot b { font-size: .93rem; }
+  .slot .en { font-size: .49rem; letter-spacing: .03em; }
+  .note, .sel-info { border-width: 19px; }
+  .sel-info .rec { grid-template-columns: 76px minmax(0, 1fr); gap: 10px; }
+  .prof > .wrap.narrow > .rec { border-width: 20px; grid-template-columns: 78px minmax(0, 1fr); gap: 12px 10px; }
+  body:not(.cover) main .tally.scroll { padding-inline: 5px; }
+  .tally::before { width: calc(100% + 10px); margin-left: -5px; }
+  body:not(.cover) main .tally th, body:not(.cover) main .tally td { padding-inline: 6px; }
+}
+
+/* 도판을 명부와 장부에서도 재사용한다. 텍스트는 실제 HTML 그대로 둔다. */
+.sel-side { container-name: roster-panel; container-type: inline-size; }
+.ro:has(.ro-portrait) {
+  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-content: center;
+  align-items: center;
+  gap: 3px 12px;
+  min-height: 80px;
+  padding: 11px 25px 11px 10px;
+}
+.ro-portrait {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  width: 42px;
+  height: 54px;
+  object-fit: cover;
+  object-position: 45% 20%;
+  border: 1px solid var(--gold);
+  outline: 2px solid rgb(246 236 214 / .8);
+  outline-offset: -3px;
+  box-shadow: 0 2px 4px rgb(58 41 29 / .15);
+}
+.ro:has(.ro-portrait) > b { grid-column: 2; grid-row: 1; align-self: end; }
+.ro:has(.ro-portrait) > small { grid-column: 2; grid-row: 2; align-self: start; }
+.ro.on .ro-portrait { border-color: var(--wax); }
+/* 원본 도판의 인물 위치만 따라 썸네일 초점을 맞춘다. */
+.ro#a .ro-portrait { object-position: 7% 20%; }
+.ro#b .ro-portrait, .ro#c .ro-portrait { object-position: 76% 20%; }
+.ro#d .ro-portrait { object-position: 100% 20%; }
+.ro#e .ro-portrait { object-position: 28% 20%; }
+.ro#f .ro-portrait { object-position: 26% 20%; }
+.ro#g .ro-portrait, .ro#i .ro-portrait { object-position: 18% 20%; }
+.ro#h .ro-portrait { object-position: 85% 20%; }
+.ro#j .ro-portrait { object-position: 13% 20%; }
+.ro#k .ro-portrait { object-position: 67% 20%; }
+.ro#l .ro-portrait { object-position: 65% 20%; }
+.stage-thumb {
+  display: block;
+  width: 100px;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  margin: 1px 0 9px;
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 3px rgb(58 41 29 / .09);
+}
+.faction-thumb {
+  display: block;
+  width: 30px;
+  max-width: 100%;
+  height: 57px;
+  object-fit: contain;
+  margin: 0 auto 8px;
+  filter: drop-shadow(0 2px 2px rgb(58 41 29 / .17));
+}
+td:has(.faction-thumb) { min-width: 65px; text-align: center; }
+.season-thumb {
+  display: block;
+  width: 58px;
+  height: 58px;
+  object-fit: cover;
+  border: 1px solid var(--gold);
+  box-shadow: 0 2px 5px rgb(58 41 29 / .1);
+}
+dt:has(.season-thumb) { display: flex; align-items: center; gap: 15px; margin: 22px 0 12px; }
+dt:has(.season-thumb) + dd { margin-left: 73px; min-height: 32px; }
+.plate h1 {
+  margin: 0;
+  color: #f8ebc9;
+  font: 800 1rem / 1.4 "Nanum Myeongjo", serif;
+  text-align: center;
+}
+.plate.big h1 { font-size: clamp(1.375rem, 3vw, 2rem); }
+@container roster-panel (max-width: 430px) {
+  .roster:has(.ro-portrait) { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+  .ro:has(.ro-portrait) { grid-template-columns: 42px minmax(0, 1fr); gap: 4px 15px; min-height: 79px; }
+  .ro:has(.ro-portrait) > b { font-size: 1rem; }
+  .ro:has(.ro-portrait) > small { font-size: .75rem; }
+}
+@media (max-width: 720px) {
+  .stage-thumb { width: 65px; margin-bottom: 7px; }
+  .faction-thumb { width: 26px; height: 49px; }
+  td:has(.faction-thumb) { min-width: 55px; }
+  .season-thumb { width: 54px; height: 54px; }
+  dt:has(.season-thumb) { gap: 13px; }
+  dt:has(.season-thumb) + dd { margin-left: 67px; }
+  .plate.big h1 { font-size: 1.35rem; }
+}
+@media (max-width: 480px) {
+  .roster:has(.ro-portrait) { grid-template-columns: minmax(0, 1fr); }
+}

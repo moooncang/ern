@@ -130,6 +130,7 @@
   const getName = () => (store.get('ern-domain') || '').trim().slice(0, 12);
   function paintName() {
     const nm = getName();
+    root.style.setProperty('--domain-length', Array.from(nm || DEF).length);
     $$('[data-domain]').forEach(el => { el.textContent = nm || DEF; });
     $$('[data-domain-or]').forEach(el => { el.textContent = nm ? `${nm}의 장부는 아직 비어 있습니다.` : el.dataset.domainOr; });
     root.classList.toggle('named', !!nm);
@@ -170,63 +171,70 @@
     if (e.key === 'm' || e.key === 'M') sfx.toggle();
   });
 
-  /* ── 입장: 밀랍 → 봉투 덮개 → 서임장. 입력과 이동은 명시적으로 한다. ── */
+  /* ── 입장: 봉투를 고정하고 밀랍, 덮개, 편지 꺼내기를 차례로 보여 준다. ── */
   const writ = $('[data-writ]');
   if (writ) {
     const seal = $('[data-seal]', writ), inp = $('[data-domain-input]', writ);
     const enter = $('[data-enter]', writ), body = $('.writ-body', writ), lines = $$('.ln', writ);
+    const scene = $('.envelope-art', writ), paper = $('.letter-document', writ);
+    const title = $('.writ-title', writ), titleSlot = $('.letter-title-slot', writ);
+    const destination = $('.reading-slot', writ), stationery = $('.stationery', writ);
+    const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const timing = { duration: 650, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' };
     let state = 'sealed';
+    const phase = value => { state = value; writ.dataset.state = value; };
     body.inert = true;
     const ready = () => {
-      state = 'ready'; writ.dataset.state = state; body.inert = false;
-      $('.envelope-art', writ).removeAttribute('style'); seal.removeAttribute('style');
+      scene.hidden = true; stationery.append(scene); scene.removeAttribute('style');
+      phase('ready'); writ.removeAttribute('aria-busy'); body.inert = false;
       lines.forEach(line => line.classList.add('on'));
       inp.focus({ preventScroll: true });
       const box = inp.getBoundingClientRect();
-      if (box.top < 16 || box.bottom > innerHeight - 16) inp.scrollIntoView({ block: 'center', behavior: 'auto' });
+      if (box.top < 16 || box.bottom > innerHeight - 16) inp.scrollIntoView({ block: 'center', behavior: 'instant' });
     };
-    const open = () => {
+    const open = async () => {
       if (state !== 'sealed') return;
-      // Keep the physical envelope and seal at their original dimensions while
-      // the taller letter takes its place in the responsive document flow.
-      const envelope = $('.envelope-art', writ), stationery = $('.stationery', writ);
-      const paperBox = envelope.getBoundingClientRect(), sealBox = seal.getBoundingClientRect();
-      state = 'opening'; writ.dataset.state = state;
+      const box = scene.getBoundingClientRect();
+      phase('breaking'); writ.setAttribute('aria-busy', 'true');
       seal.setAttribute('aria-expanded', 'true'); seal.setAttribute('tabindex', '-1');
-      d.body.classList.add('open'); sfx.play('crack');
-      if (!reduce) {
-        const scene = stationery.getBoundingClientRect();
-        Object.assign(envelope.style, {
-          left: `${paperBox.left - scene.left}px`, top: `${paperBox.top - scene.top}px`,
-          width: `${paperBox.width}px`, height: `${paperBox.height}px`, right: 'auto', bottom: 'auto',
-        });
-        seal.style.left = `${sealBox.left + sealBox.width / 2 - scene.left}px`;
-        seal.style.top = `${sealBox.top + sealBox.height / 2 - scene.top}px`;
+      if (reduce) {
+        titleSlot.append(title); destination.append(paper); d.body.classList.add('open'); ready(); return;
       }
-      lines.forEach((line, i) => setTimeout(() => {
-        line.classList.add('on');
-        if (i < 2) sfx.play('quill', 0);
-      }, reduce ? 0 : 800 + i * 160));
-      if (reduce) ready(); else setTimeout(ready, 1600);
+      // A viewport overlay keeps the envelope still while the document below reflows.
+      d.body.append(scene);
+      Object.assign(scene.style, {position:'fixed',left:box.left+'px',top:box.top+'px',width:box.width+'px',height:box.height+'px',right:'auto',bottom:'auto',zIndex:'20'});
+      scene.classList.add('unsealed'); sfx.play('crack');
+      await pause(200);
+      phase('unfolding'); scene.classList.add('flap-open');
+      await pause(350); scene.classList.add('flap-behind');
+      await pause(250);
+      titleSlot.append(title); phase('extracting'); sfx.play('page');
+      const envelopeMotion = scene.animate([{transform:'translateY(0)'},{transform:'translateY('+box.height*.28+'px)'}],timing);
+      const extraction = paper.animate([{transform:'translateY(0)'},{transform:'translateY('+(-box.height*.55)+'px)'}],timing);
+      await Promise.all([envelopeMotion.finished, extraction.finished]);
+      const before = paper.getBoundingClientRect();
+      phase('presenting'); destination.append(paper); extraction.cancel(); d.body.classList.add('open');
+      const after = paper.getBoundingClientRect();
+      const from = 'translate('+(before.left-after.left)+'px,'+(before.top-after.top)+'px) scale('+(before.width/after.width)+','+(before.height/after.height)+')';
+      const presentation = paper.animate([{transform:from},{transform:'none'}],{duration:550,easing:'cubic-bezier(.2,.75,.25,1)',fill:'both'});
+      const exit = scene.animate([{transform:'translateY('+box.height*.28+'px)',opacity:1},{transform:'translateY('+box.height*.65+'px)',opacity:0}],{duration:450,easing:'ease-in',fill:'forwards'});
+      lines.forEach((line,i) => setTimeout(() => line.classList.add('on'),120+i*100));
+      await Promise.all([presentation.finished,exit.finished]);
+      presentation.cancel(); ready(); envelopeMotion.cancel(); exit.cancel();
     };
     const go = () => {
       if (state !== 'ready') return;
-      state = 'leaving'; writ.dataset.state = state;
-      sfx.play('stamp'); d.body.classList.add('go');
-      setTimeout(() => { location.href = enter.href; }, reduce ? 0 : 500);
+      phase('leaving'); sfx.play('stamp'); d.body.classList.add('go');
+      setTimeout(() => { location.href = enter.href; }, reduce ? 0 : 400);
     };
     seal.addEventListener('click', event => { event.preventDefault(); open(); });
-    seal.addEventListener('keydown', event => {
-      if (event.key === ' ' && !event.isComposing) { event.preventDefault(); open(); }
-    });
+    seal.addEventListener('keydown', event => { if (event.key === ' ' && !event.isComposing) { event.preventDefault(); open(); } });
     enter.addEventListener('click', event => { event.preventDefault(); go(); });
-    inp.addEventListener('keydown', event => {
-      if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); enter.focus(); }
-    });
+    inp.addEventListener('keydown', event => { if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); enter.focus(); } });
     addEventListener('pageshow', event => {
       if (!event.persisted) return;
       d.body.classList.remove('go');
-      if (state === 'leaving') { state = 'ready'; writ.dataset.state = state; body.inert = false; }
+      if (state === 'leaving') { phase('ready'); body.inert = false; }
     });
   }
 
