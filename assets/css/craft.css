@@ -1,0 +1,307 @@
+/* 봉토 칙서 — 기존 문서의 구도 위에 종이·금박·가죽 마감을 더한다. */
+:root { --craft-header: 76px; --leather-grain: none; }
+
+/* 머리띠: 제목, 네 메뉴, 개인 설정의 기준선을 맞춘다. */
+.top { border-bottom-color: var(--gold); background: rgb(246 236 214 / .96); box-shadow: 0 3px 0 var(--paper), 0 4px 0 rgb(168 132 63 / .35), 0 8px 24px rgb(58 41 29 / .05); }
+.top .wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; column-gap: 25px; min-height: var(--craft-header); padding-block: 12px; }
+.brand { gap: 10px; font-size: .98rem; line-height: 1.5; }
+.brand > span { text-wrap: balance; }
+.brand .mark { width: 32px; height: 32px; }
+.tabs { align-items: center; justify-content: center; gap: 2px; }
+.tabs a { display: flex; align-items: center; justify-content: center; min-height: 42px; padding: 8px 10px; white-space: nowrap; border-bottom-width: 1px; }
+.tabs a[aria-current] { box-shadow: 0 3px 0 -2px var(--wax); }
+.tabs kbd { margin-right: 5px; font-size: .72rem; }
+.tools { margin-left: 0; gap: 11px; justify-content: flex-end; }
+.fief { max-width: 7em; font-size: .82rem; line-height: 1.7; }
+.dial { gap: 0; padding-right: 10px; border-right: 1px solid var(--line); }
+.dial button, .top .snd { width: 34px; height: 34px; }
+.dial button[aria-pressed=true] { box-shadow: inset 0 0 0 1px var(--season), inset 0 0 0 3px var(--paper), 0 2px 4px rgb(58 41 29 / .1); }
+.top :focus-visible { outline-offset: 3px; }
+
+/* 한글 제목 — 금선 — 영문 라벨. 종이 여백과 구분선의 간격을 통일한다. */
+.hd { gap: clamp(12px, 2vw, 22px); margin-bottom: 30px; }
+.hd h1, .hd h2 { flex-shrink: 0; }
+.hd i { min-width: 22px; background: linear-gradient(90deg, var(--gold), var(--line)); position: relative; }
+.hd i::before, .hd i::after { content: ""; position: absolute; top: -2px; width: 5px; height: 5px; border: 1px solid var(--gold); background: var(--paper); rotate: 45deg; }
+.hd i::before { left: 0; }
+.hd i::after { right: 0; }
+.hd .en { flex: 0 1 auto; min-width: 0; max-width: 44%; font-size: .75rem; line-height: 1.6; text-wrap: balance; }
+.head { padding-top: clamp(48px, 6vw, 82px); padding-bottom: 38px; }
+.head .hd { margin-bottom: 23px; }
+.head .lead { line-height: 1.9; }
+.sec { padding-block: clamp(50px, 6.6vw, 88px); }
+.sec + .sec { border-top-color: rgb(168 132 63 / .3); }
+.say { position: relative; }
+.say .wrap { padding-block: 12px; }
+.say p { line-height: 1.95; }
+.say p:last-child { margin-bottom: 0; }
+.sec.end { padding-top: 75px; padding-bottom: 85px; }
+.closing { line-height: 1.7; }
+.foot { padding-top: 58px; padding-bottom: 54px; background: linear-gradient(transparent, rgb(227 208 166 / .2)); }
+.foot .mark { width: 48px; height: 48px; margin-top: -83px; margin-bottom: 22px; }
+.foot nav { gap: 27px; }
+.foot nav a { padding: 6px 0; font-size: .92rem; }
+
+/* 여섯 인물은 그대로, 표지의 제목과 금박 간격만 다듬는다. */
+.hero { min-height: calc(100svh - var(--craft-header)); }
+.hero-t { padding-top: clamp(42px, 7vh, 78px); padding-bottom: 18px; }
+.hero h1 { text-shadow: 0 2px 0 rgb(255 250 234 / .8); }
+.hero .en { margin-top: 22px; font-size: .85rem; }
+.genre { margin-top: 15px; margin-bottom: 22px; font-size: .95rem; }
+.frieze { isolation: auto; padding-top: 12px; }
+.fg .plate { z-index: 1; }
+
+/* 가죽 명패와 장부 상태 표식: 금박 테두리와 눌린 안쪽 모서리. */
+.plate, .g-win {
+  background-color: var(--leather);
+  background-image: linear-gradient(135deg, rgb(255 235 187 / .07), transparent 42%, rgb(0 0 0 / .2)), var(--leather-grain);
+  background-size: auto, 256px 256px;
+  box-shadow: inset 0 0 0 1px #261a12, inset 0 0 0 3px #5d422a, inset 0 0 0 4px #b19156, inset 0 0 0 6px #3a291d, 0 5px 10px rgb(58 41 29 / .2);
+  text-shadow: 0 1px 1px #170e08;
+}
+.plate { padding: 12px 25px 14px; gap: 3px; background-color: transparent; background-image: url(../../images/ui/leather-plate.webp); background-size: 100% 100%; background-repeat: no-repeat; box-shadow: 0 5px 10px rgb(58 41 29 / .16); }
+.plate small { color: #d9c08c; font-size: .68rem; line-height: 1.55; }
+.plate b { color: #f8ebc9; line-height: 1.4; }
+.plate.big { padding: 16px 30px 18px; gap: 6px; max-width: calc(100% - 48px); white-space: normal; text-align: center; }
+.plate.big small { font-size: .8rem; }
+.plate.big b { line-height: 1.4; }
+body:not(.cover) .btn { min-height: 48px; justify-content: center; gap: 12px; padding: 14px 25px; background-image: linear-gradient(rgb(255 230 198 / .05), transparent 55%, rgb(37 8 8 / .13)); border: 1px solid #6f1616; box-shadow: inset 0 0 0 3px var(--wax), inset 0 0 0 4px rgb(232 180 127 / .26), 0 3px 0 #641b18, 0 8px 15px rgb(58 20 20 / .16); line-height: 1.45; }
+body:not(.cover) .btn:hover { box-shadow: inset 0 0 0 3px #a02626, inset 0 0 0 4px rgb(232 180 127 / .4), 0 4px 0 #641b18, 0 10px 18px rgb(58 20 20 / .2); }
+
+/* 영지 전경은 펼친 도면, 슬라이더는 도면 아래의 단계 표식이다. */
+.grow { position: relative; padding: clamp(20px, 3vw, 35px); gap: 25px 32px; border: 1px solid var(--gold); background: linear-gradient(rgb(246 236 214 / .65), rgb(239 225 194 / .68)), url(../../images/ui/parchment.webp); background-size: auto, 512px 512px; box-shadow: inset 0 0 0 5px var(--paper), inset 0 0 0 6px var(--line), 0 12px 26px rgb(58 41 29 / .09); }
+.town { margin-top: 8px; padding-bottom: 12px; border-bottom: 1px solid rgb(168 132 63 / .25); }
+.g-info { grid-column: 1; grid-row: 2; }
+.g-name { font-size: clamp(2.2rem, 5.5vw, 3.7rem); }
+.g-pop { margin-top: 10px; font-size: 1rem; }
+.g-pop b { font-size: 1.55rem; }
+.g-fac { margin-top: 7px; color: var(--soft); font-size: .93rem; }
+.g-win { grid-column: 2; grid-row: 2; align-self: center; max-width: 100%; padding: 20px 25px; font-size: .75rem; line-height: 1.9; white-space: normal; background-color: transparent; background-image: url(../../images/ui/leather-plate.webp); background-size: 100% 100%; background-repeat: no-repeat; box-shadow: 0 5px 10px rgb(58 41 29 / .16); }
+.g-ctl { grid-row: 3; margin-top: 2px; }
+.g-ctl input { height: 36px; }
+.g-ctl input::-webkit-slider-thumb { width: 30px; height: 30px; background: url(../../images/ui/wax-seal.webp) center / contain no-repeat; box-shadow: 0 3px 6px rgb(58 20 20 / .22); }
+.g-ctl input::-moz-range-thumb { width: 30px; height: 30px; background: url(../../images/ui/wax-seal.webp) center / contain no-repeat; box-shadow: 0 3px 6px rgb(58 20 20 / .22); }
+.g-ticks button { min-height: 38px; font-size: .87rem; }
+.est { gap: 38px 48px; }
+.est-board { border: 1px solid var(--line); padding: 27px 18px 23px; background: linear-gradient(rgb(246 236 214 / .64), rgb(239 225 194 / .65)), url(../../images/ui/parchment.webp); background-size: auto, 512px 512px; box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px rgb(211 189 140 / .6); }
+.pennant { background-image: linear-gradient(90deg, rgb(0 0 0 / .15), rgb(255 240 199 / .07) 45%, rgb(0 0 0 / .12)); box-shadow: inset 3px 0 0 rgb(205 178 116 / .45), inset -3px 0 0 rgb(205 178 116 / .45); text-shadow: 0 1px 2px rgb(0 0 0 / .4); }
+.est-col .pennant, .est-col[data-dir] .pennant { background-image: linear-gradient(90deg, rgb(0 0 0 / .12), rgb(255 240 199 / .06) 45%, rgb(0 0 0 / .1)), url(../../images/ui/banner-cloth.webp); background-size: auto, 128px 128px; background-blend-mode: normal, soft-light; }
+.est-col small { margin-top: 17px; font-size: .74rem; }
+.est-col em { margin-top: 7px; font-size: .9rem; }
+.est-ctl { gap: 16px; }
+.edict { min-height: 48px; padding: 14px 22px; font-size: .97rem; line-height: 1.5; background: rgb(246 236 214 / .55); }
+.est-ctl > p { font-size: .95rem; line-height: 1.9; }
+.est-ctl .est-out { padding-top: 18px; margin-top: 3px; border-top: 1px solid var(--line); }
+
+/* 카드·계절·서류: 같은 금박 문법, 다른 내용과 기존 동작. */
+.deck { gap: 27px; padding-top: 18px; padding-bottom: 34px; scroll-padding-inline: 26px; }
+.tilt { flex-basis: min(84vw, 31rem); }
+.tilt img { outline: 1px solid rgb(168 132 63 / .7); outline-offset: 4px; box-shadow: 0 9px 19px rgb(58 41 29 / .2); }
+.seasons { gap: 20px; }
+.season { position: relative; align-content: start; padding: 31px 25px 29px; background: linear-gradient(rgb(246 236 214 / .76), rgb(239 225 194 / .8)), url(../../images/ui/parchment.webp); background-size: auto, 512px 512px; box-shadow: inset 0 0 0 1px var(--line), inset 0 0 0 6px var(--paper), inset 0 0 0 7px rgb(211 189 140 / .55), 0 5px 12px rgb(58 41 29 / .06); }
+.season .ico { width: 45px; height: 45px; margin-bottom: 17px; filter: drop-shadow(0 1px 0 #fff7df); }
+.season b { margin-bottom: 5px; }
+.season .en { font-size: .72rem; }
+.season .s-d { margin-top: 13px; line-height: 1.9; font-size: .88rem; }
+.season[aria-pressed=true] { box-shadow: inset 0 0 0 1px var(--season), inset 0 0 0 6px var(--paper), inset 0 0 0 7px var(--season), 0 11px 20px rgb(58 41 29 / .12); }
+.deeds, .slots { gap: 26px; }
+.deed { min-height: 255px; grid-template-rows: auto auto 1fr; align-content: start; padding: 40px 28px 48px; }
+.deed h3 { font-size: 1.55rem; }
+.deed p { margin-top: 15px; font-size: .92rem; line-height: 1.9; }
+.deed .en { margin-top: 4px; font-size: .72rem; }
+.deed .mark, .slot .mark { width: 54px; height: 54px; margin-left: -27px; bottom: -24px; }
+.deed, .slot { background-image: linear-gradient(118deg, rgb(255 249 228 / .35), transparent 44%, rgb(185 143 72 / .09)), linear-gradient(rgb(246 236 214 / .8), rgb(239 225 194 / .83)), url(../../images/ui/parchment.webp); background-size: auto, auto, 512px 512px; box-shadow: inset 0 0 0 1px var(--gold), inset 0 0 0 6px var(--paper), inset 0 0 0 7px var(--line), 0 9px 17px rgb(58 41 29 / .1); }
+.slot { min-height: 170px; padding: 38px 20px 48px; align-content: center; gap: 12px; }
+.slot b { font-size: 1.7rem; }
+.slot .en { font-size: .74rem; }
+.slot[aria-selected=true] { box-shadow: inset 0 0 0 1px var(--gold-ink), inset 0 0 0 6px var(--paper), inset 0 0 0 7px var(--gold), 0 14px 26px rgb(58 41 29 / .16); }
+.mode-pane { margin-top: 62px; }
+.mode-pane p { line-height: 1.95; }
+.mode-pane .lv { line-height: 1.95; }
+
+/* 지도와 지역 기록은 한 장의 약도 옆에 두는 원래 배치를 따른다. */
+.atlas .wrap { align-items: stretch; gap: 34px; }
+.map-wrap { position: relative; padding: 12px; align-self: start; border: 1px solid var(--gold); background: linear-gradient(rgb(246 236 214 / .72), rgb(239 225 194 / .8)), url(../../images/ui/parchment.webp); background-size: auto, 512px 512px; box-shadow: inset 0 0 0 5px var(--paper), inset 0 0 0 6px var(--line), 0 12px 25px rgb(58 41 29 / .12); }
+.atlas-side { min-width: 0; padding-top: 1px; }
+.rg-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 27px; }
+.rg-list button { width: 100%; min-height: 66px; padding: 12px 14px; gap: 6px; background: rgb(246 236 214 / .6); box-shadow: inset 0 0 0 1px var(--line), inset 0 0 0 3px var(--paper), inset 0 0 0 4px rgb(211 189 140 / .4); }
+.rg-list b { font-size: .89rem; }
+.rg-list small { font-size: .7rem; }
+.rg-list button[aria-current] { background-image: linear-gradient(rgb(255 235 199 / .08), transparent); box-shadow: inset 0 0 0 1px var(--wax2), inset 0 0 0 3px var(--wax), inset 0 0 0 4px rgb(227 184 124 / .36); }
+.rg-info h2 { margin-bottom: 8px; }
+.rg-info .dir { font-size: .86rem; margin-bottom: 18px; }
+.rg-info > p:not(.dir) { font-size: .96rem; line-height: 1.9; }
+.rep { margin-top: 13px; }
+
+/* 인물 명부: 이미지/기록의 원래 분할을 유지하며 사진과 표를 정돈한다. */
+.sel-stage { top: var(--craft-header); height: calc(100svh - var(--craft-header)); }
+.sel-stage::after, .prof-hero::after { box-shadow: inset 0 0 0 8px rgb(58 41 29 / .62), inset 0 0 0 9px #ba9859, inset 0 0 0 12px rgb(58 41 29 / .48), inset 0 -120px 100px -40px rgb(30 18 8 / .52); }
+.sel-side { padding-top: 43px; padding-bottom: 55px; }
+.sel-side .lead { margin: -4px 0 27px; font-size: 1rem; line-height: 1.9; }
+.sel-f { gap: 3px 16px; margin-bottom: 18px; }
+.sel-f button { min-height: 44px; padding-block: 10px; font-size: .87rem; }
+.roster { gap: 6px 10px; margin-bottom: 30px; }
+.ro { padding: 13px 25px 13px 12px; gap: 5px; min-height: 73px; }
+.ro b { font-size: 1rem; line-height: 1.5; }
+.ro small { font-size: .73rem; line-height: 1.7; }
+.ro.on { box-shadow: inset 0 0 0 1px var(--line), inset 0 0 0 3px rgb(246 236 214 / .65); }
+.ro::after { width: 15px; height: 15px; right: 7px; margin-top: -7.5px; background: url(../../images/ui/wax-seal.webp) center / contain no-repeat; box-shadow: none; border-radius: 0; }
+.sel-info > p { font-size: .97rem; line-height: 1.9; }
+.rec { padding: 23px 0; gap: 11px 20px; }
+.rec dt { font-size: .79rem; line-height: 1.9; }
+.rec dd { font-size: .95rem; line-height: 1.9; }
+.sel-info .btn { width: 100%; justify-content: space-between; }
+.prof-hero img { max-height: calc(100svh - var(--craft-header)); }
+.prof-nav { padding-block: 23px; gap: 14px; }
+.prof-nav a { min-height: 38px; font-size: .92rem; }
+.prof-lead { line-height: 1.95; }
+.face-stage { box-shadow: 0 12px 25px rgb(58 41 29 / .18); }
+.face-stage::after { box-shadow: inset 0 0 0 5px rgb(58 41 29 / .54), inset 0 0 0 6px var(--gold), inset 0 0 0 9px rgb(58 41 29 / .28); }
+.face-tabs { gap: 9px; margin-top: 24px; }
+.face-tabs button { min-height: 42px; padding: 10px 18px; background: rgb(246 236 214 / .7); box-shadow: inset 0 0 0 1px var(--line), inset 0 0 0 3px var(--paper), inset 0 0 0 4px rgb(211 189 140 / .45); font-size: .9rem; }
+.face-tabs button[aria-pressed=true] { background: var(--wax); box-shadow: inset 0 0 0 1px var(--wax2), inset 0 0 0 3px var(--wax), inset 0 0 0 4px rgb(227 184 124 / .36); }
+
+/* 장부/초안은 선과 행간으로 읽고 쓰는 리듬을 만든다. */
+body:not(.cover) main .scroll { border-top: 1px solid var(--gold); }
+th, td { padding: 14px 13px; line-height: 1.85; }
+thead th { background: rgb(227 208 166 / .2); font-size: .88rem; }
+tbody tr:nth-child(even) { background: rgb(239 225 194 / .3); }
+.tally tr.has { background: rgb(227 208 166 / .55); }
+.qty button { width: 35px; height: 35px; box-shadow: inset 0 0 0 1px var(--gold), inset 0 0 0 3px var(--paper), inset 0 0 0 4px var(--line); }
+.tally tfoot td, .tally tfoot th { padding-top: 24px; padding-bottom: 12px; }
+body:not(.cover) pre { padding: 25px 27px; line-height: 1.95; background-image: linear-gradient(120deg, rgb(255 235 187 / .04), transparent 60%), var(--leather-grain); background-size: auto, 256px 256px; }
+.note { margin-top: 28px; gap: 23px; }
+.note label { align-items: center; gap: 18px; }
+.note label span { font-size: .93rem; }
+.note input { min-height: 46px; padding: 10px 12px; border-bottom-color: var(--gold); background: linear-gradient(transparent, rgb(255 248 223 / .48)); font-size: 1rem; }
+.note input:focus { background: rgb(255 248 223 / .7); outline: 1px solid var(--gold); outline-offset: 3px; }
+.note pre { margin-top: 7px; min-height: 124px; word-break: break-word; }
+.note > p { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; }
+.note .copied { margin-left: 0; font-size: .87rem; }
+
+@media (max-width: 1120px) and (min-width: 721px) {
+  :root { --craft-header: 116px; }
+  .top .wrap { grid-template-columns: minmax(0, 1fr) auto; column-gap: 20px; row-gap: 2px; padding-block: 9px; }
+  .brand { grid-column: 1; grid-row: 1; }
+  .tools { grid-column: 2; grid-row: 1; }
+  .tabs { grid-column: 1 / -1; grid-row: 2; gap: 12px; border-top: 1px solid rgb(211 189 140 / .6); padding-top: 3px; }
+  .tabs a { padding-inline: 20px; }
+  .g-win { font-size: .71rem; padding-inline: 15px; max-width: 270px; }
+}
+@media (max-width: 960px) {
+  .est { gap: 30px; }
+  .est-ctl { justify-items: stretch; }
+  .est-ctl .edict { text-align: left; }
+  .sel-stage { position: relative; top: 0; height: auto; aspect-ratio: 1600 / 1103; z-index: 0; }
+  .sel-side { padding-inline: clamp(22px, 5vw, 48px); }
+  .atlas .wrap { gap: 30px; }
+  .atlas-side { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
+  .rg-list { margin-bottom: 0; }
+}
+@media (max-width: 720px) {
+  :root { --craft-header: 106px; }
+  .top { position: static; }
+  .top .wrap { grid-template-columns: minmax(0, 1fr) auto; row-gap: 4px; column-gap: 7px; padding-block: 10px; }
+  .brand { grid-column: 1 / -1; grid-row: 1; justify-self: center; font-size: .94rem; margin-bottom: 2px; }
+  .brand .mark { width: 29px; height: 29px; }
+  .tabs { grid-column: 1; grid-row: 2; gap: 0; justify-content: flex-start; margin-left: -7px; }
+  .tabs a { padding: 8px 9px; min-height: 40px; font-size: .91rem; }
+  .tools { grid-column: 2; grid-row: 2; gap: 6px; }
+  .dial { padding-right: 6px; }
+  .dial button, .top .snd { width: 30px; height: 34px; }
+  .top .fief { display: none; }
+  .hd { gap: 12px; margin-bottom: 25px; }
+  .hd .en { font-size: .66rem; letter-spacing: .18em; }
+  .hd i { min-width: 15px; }
+  .head { padding-top: 43px; padding-bottom: 29px; }
+  .head .hd { margin-bottom: 20px; }
+  .head .lead { font-size: 1rem; }
+  .hero { min-height: 0; }
+  .hero-t { padding: 39px 20px 8px; }
+  .hero h1 { font-size: clamp(2.2rem, 7.1vw, 3.6rem); line-height: 1.35; }
+  .hero .en { margin-top: 16px; font-size: .72rem; letter-spacing: .35em; }
+  .genre { font-size: .8rem; line-height: 1.9; margin-top: 12px; margin-bottom: 16px; }
+  .frieze { padding-top: 8px; }
+  .fg .plate { padding: 5px 9px 6px; }
+  .fg .plate b { font-size: .7rem; }
+  .say p { font-size: 1.12rem; line-height: 1.95; }
+  .grow { padding: 20px 18px 18px; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .town { margin-top: 0; padding-bottom: 8px; }
+  .g-info { grid-column: 1; grid-row: 2; }
+  .g-name { font-size: 2.6rem; }
+  .g-win { grid-column: 1; grid-row: 4; font-size: .76rem; padding: 14px 17px; }
+  .g-ctl { grid-row: 3; }
+  .g-ticks button { font-size: .72rem; min-height: 35px; }
+  .g-fac { font-size: .85rem; }
+  .est-board { padding: 24px 12px 20px; gap: 0 10px; }
+  .est-rows { font-size: .75rem; }
+  .est-col small { font-size: .65rem; }
+  .est-col em { font-size: .84rem; }
+  .pennant { font-size: .86rem; width: min(100%, 4.2rem); }
+  .seasons { gap: 18px 14px; }
+  .season { padding: 24px 20px; }
+  .season b { font-size: 1.6rem; }
+  .season .ico { width: 38px; height: 38px; margin-bottom: 12px; }
+  .season .s-d { font-size: .82rem; }
+  .deeds { gap: 40px; }
+  .deed { min-height: 0; padding: 33px 28px 45px; }
+  .slots { gap: 10px; }
+  .slot { min-height: 142px; padding: 28px 7px 37px; gap: 10px; }
+  .slot b { font-size: 1.15rem; }
+  .slot .en { font-size: .59rem; letter-spacing: .12em; }
+  .slot .mark { width: 43px; height: 43px; margin-left: -21.5px; bottom: -20px; }
+  .mode-pane { margin-top: 50px; }
+  .mode-pane p { font-size: 1.07rem; }
+  .mode-pane .lv { font-size: .92rem; }
+  .atlas-side { display: block; }
+  .rg-list { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 27px; gap: 7px; }
+  .rg-list button { padding: 12px 9px; min-height: 68px; }
+  .rg-list b { font-size: .81rem; }
+  .rg-list small { font-size: .65rem; }
+  .map-wrap { padding: 7px; }
+  .sel-side { padding: 33px 20px 45px; }
+  .sel-f { gap: 3px 12px; }
+  .sel-f button { font-size: .82rem; }
+  .sel-stage .plate { left: 20px; bottom: 20px; }
+  .plate.big { padding: 13px 23px 15px; max-width: calc(100% - 40px); }
+  .plate.big small { font-size: .68rem; }
+  .plate.big b { font-size: 1.35rem; }
+  .roster { gap: 5px 6px; }
+  .ro { padding: 11px 23px 11px 10px; min-height: 72px; }
+  .ro b { font-size: .92rem; }
+  .ro small { font-size: .68rem; }
+  .rec { grid-template-columns: 94px minmax(0, 1fr); gap: 10px 15px; }
+  .rec dt { font-size: .73rem; }
+  .rec dd { font-size: .87rem; }
+  .prof-nav { gap: 8px; }
+  .prof-nav a { font-size: .77rem; gap: 6px; }
+  .prof-nav .ico { width: 16px; }
+  .prof-nav > a:nth-child(2) { white-space: nowrap; }
+  .prof-hero .plate { left: 20px; bottom: 20px; }
+  .prof-lead { font-size: 1.13rem; }
+  .face-tabs { gap: 8px; }
+  .face-tabs button { padding: 11px 13px; min-height: 43px; font-size: .82rem; }
+  th, td { padding: 12px 9px; font-size: .86rem; }
+  thead th { font-size: .8rem; }
+  .qty button { width: 32px; height: 35px; }
+  .qty output { min-width: 2.1em; font-size: .96rem; }
+  .tally tfoot th, .tally tfoot td { font-size: 1.1rem; }
+  .note { gap: 21px; }
+  .note label { gap: 7px; }
+  .note input { font-size: 1rem; }
+  body:not(.cover) pre { padding: 22px 21px; font-size: .81rem; }
+  .note .btn { width: 100%; font-size: .93rem; padding-inline: 13px; }
+}
+@media (max-width: 380px) {
+  .top .wrap { padding-inline: 12px; }
+  .tabs a { padding-inline: 7px; font-size: .85rem; }
+  .dial button, .top .snd { width: 27px; }
+  .tools { gap: 4px; }
+  .dial { padding-right: 4px; }
+  .hd .en { font-size: .59rem; letter-spacing: .12em; }
+  .js .hd.in .en { letter-spacing: .12em; }
+  .hd { gap: 10px; }
+  .hd h2 { font-size: 1.4rem; }
+  .ro b { font-size: .85rem; }
+  .g-ticks button { font-size: .65rem; }
+}

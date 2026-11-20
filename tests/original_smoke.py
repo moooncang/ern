@@ -7,6 +7,7 @@ Run a server in the repository, then:
 """
 import argparse
 from pathlib import Path
+import re
 import shutil
 from urllib.parse import urljoin, urlsplit
 from urllib.request import urlopen
@@ -20,6 +21,8 @@ PAGES = ["index.html", "home.html", "world.html", "domain.html", "characters.htm
 FIGURES = ["j", "f", "a", "b", "g", "l"]
 REGIONS = ["home", "seril", "kardun", "waste", "reibek", "haster"]
 FILTER_LABELS = ["전체", "가신 · 영지", "변경 너머", "바깥"]
+ENTRY_VIEWPORTS = [(903, 1195), (1440, 900), (390, 844), (320, 640), (844, 390)]
+MOTION_VIEWPORTS = [(1280, 900), (390, 844), (320, 640), (844, 390)]
 
 
 def check_http(base):
@@ -65,9 +68,10 @@ def check_browser(browser, base, mobile=False):
     passed("all 18 original pages load without horizontal overflow")
 
     go("index.html")
-    expect(page.locator("body")).to_have_class("cover")
+    assert page.locator("body").evaluate("el => el.classList.contains('cover')")
     expect(page.locator("[data-seal]")).to_be_visible()
-    assert page.locator("[data-seal]").get_attribute("href") == "home.html"
+    if page.locator("[data-seal]").evaluate("el => el.tagName") == "A":
+        assert page.locator("[data-seal]").get_attribute("href") == "home.html"
     page.locator("[data-seal]").click()
     page.locator("[data-domain-input]").fill("검증영지")
     page.locator("[data-enter]").click()
@@ -168,38 +172,139 @@ def check_browser(browser, base, mobile=False):
     context.close()
 
 
-def normal_motion(browser, base):
-    context = browser.new_context(reduced_motion="no-preference", viewport={"width": 1280, "height": 900})
+def normal_motion(browser, base, viewport=(1280, 900)):
+    width, height = viewport
+    context = browser.new_context(reduced_motion="no-preference", viewport={"width": width, "height": height})
     page = context.new_page()
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.goto(urljoin(base, "index.html"), wait_until="load")
+    page.evaluate("""() => {
+        window.__envelopeOpeningSamples = [];
+        const sample = () => {
+            const writ = document.querySelector('[data-writ]');
+            if (writ.dataset.state === 'opening') {
+                const box = document.querySelector('.envelope-art').getBoundingClientRect();
+                window.__envelopeOpeningSamples.push({
+                    ratio: box.width / box.height,
+                    overflow: document.documentElement.scrollWidth > innerWidth + 1,
+                });
+            }
+            if (writ.dataset.state !== 'ready') requestAnimationFrame(sample);
+        };
+        requestAnimationFrame(sample);
+    }""")
     page.locator("[data-seal]").click()
+    page.wait_for_function("!document.querySelector('[data-domain-input]').closest('[inert]')")
+    samples = page.evaluate("window.__envelopeOpeningSamples")
+    assert len(samples) >= 3, f"{width}×{height}: opening animation was not sampled"
+    assert all(abs(sample["ratio"] - 1.5) < .005 for sample in samples), f"{width}×{height}: envelope stretched during opening"
+    assert not any(sample["overflow"] for sample in samples), f"{width}×{height}: horizontal overflow during opening"
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), f"{width}×{height}: horizontal overflow after opening"
+
+    for selector in ("[data-domain-input]", "[data-enter]"):
+        control = page.locator(selector)
+        control.scroll_into_view_if_needed()
+        expect(control).to_be_in_viewport(ratio=1)
+        assert control.evaluate("el => {const r=el.getBoundingClientRect(); const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2); return hit === el || el.contains(hit);}"), f"{width}×{height}: {selector} obstructed"
     page.locator("[data-domain-input]").fill("연출검증")
+    expect(page.locator("[data-domain-input]")).to_have_value("연출검증")
     page.locator("[data-enter]").click()
     page.wait_for_url("**/home.html")
     expect(page.locator("[data-domain]").first).to_have_text("연출검증")
     assert not errors, errors
-    print("PASS [normal motion]: original animated seal and entry", flush=True)
+    print(f"PASS [normal motion {width}×{height}]: envelope stays 3:2, no horizontal overflow, controls reachable, name/entry work", flush=True)
     context.close()
+
+
+def entry_accessibility(browser, base):
+    """Exercise the approved envelope layout and keyboard flow at edge sizes."""
+    for index, (width, height) in enumerate(ENTRY_VIEWPORTS):
+        context = browser.new_context(viewport={"width": width, "height": height}, reduced_motion="reduce")
+        page = context.new_page()
+        page.set_default_timeout(10000)
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(urljoin(base, "index.html"), wait_until="load")
+        page.evaluate("document.fonts.ready")
+        writ = page.locator("[data-writ]")
+        seal = page.locator("[data-seal]")
+        name = page.locator("[data-domain-input]")
+        enter = page.locator("[data-enter]")
+        box = writ.bounding_box()
+        assert box, "Missing envelope bounds"
+        horizontal_delta = abs(box["x"] + box["width"] / 2 - width / 2)
+        assert horizontal_delta <= 1, f"{width}×{height}: envelope horizontal offset {horizontal_delta:.2f}px"
+        if box["height"] + 32 <= height:
+            vertical_delta = abs(box["y"] + box["height"] / 2 - height / 2)
+            assert vertical_delta <= 2, f"{width}×{height}: entry group vertical offset {vertical_delta:.2f}px"
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), f"{width}×{height}: horizontal overflow"
+
+        # Closed letter controls must not steal Tab focus through a clipped panel.
+        for _ in range(6):
+            page.keyboard.press("Tab")
+            assert not page.evaluate("document.activeElement.matches('[data-domain-input], [data-enter]')"), "Closed letter control received focus"
+        page.evaluate("document.activeElement.blur()")
+        for key in ("x", "ArrowDown", "Escape"):
+            page.keyboard.press(key)
+        assert not page.locator("body").evaluate("el => el.classList.contains('open')"), "Unrelated key opened the envelope"
+        expect(page).to_have_url(re.compile(r"/index\.html$"))
+
+        seal.focus()
+        page.keyboard.press("Enter" if index % 2 == 0 else "Space")
+        expect(name).to_be_editable()
+        page.wait_for_function("!document.querySelector('[data-domain-input]').closest('[inert]')")
+        name.scroll_into_view_if_needed()
+        expect(name).to_be_visible()
+        name.fill("중앙검증")
+
+        def reachable(locator, description):
+            locator.scroll_into_view_if_needed()
+            bounds = locator.bounding_box()
+            assert bounds and bounds["width"] > 0 and bounds["height"] > 0, description
+            assert bounds["x"] >= -1 and bounds["x"] + bounds["width"] <= width + 1, description
+            assert bounds["y"] >= -1 and bounds["y"] + bounds["height"] <= height + 1, description
+            assert locator.evaluate("el => { const r=el.getBoundingClientRect(); const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2); return hit === el || el.contains(hit); }"), f"{description} is covered by another layer"
+
+        reachable(name, f"{width}×{height} name input")
+        name.focus()
+        page.keyboard.press("Enter")
+        assert not page.locator("body").evaluate("el => el.classList.contains('go')"), "Input Enter unexpectedly left the letter"
+        name.focus()
+        name.dispatch_event("keydown", {"key": "Enter", "code": "Enter", "isComposing": True, "bubbles": True})
+        assert not page.locator("body").evaluate("el => el.classList.contains('go')"), "IME composition Enter unexpectedly left the letter"
+        expect(page).to_have_url(re.compile(r"/index\.html$"))
+        reachable(enter, f"{width}×{height} entry link")
+        enter.focus()
+        page.keyboard.press("Enter")
+        page.wait_for_url("**/home.html")
+        expect(page.locator("[data-domain]").first).to_have_text("중앙검증")
+        assert not errors, errors
+        print(f"PASS [entry {width}×{height}]: centered envelope, reachable name/CTA, Tab/Enter/Space/IME safety", flush=True)
+        context.close()
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8766/")
     parser.add_argument("--chromium", default=shutil.which("chromium"))
+    parser.add_argument("--entry-only", action="store_true", help="Run only the five-size envelope accessibility checks")
     args = parser.parse_args()
     base = args.base_url.rstrip("/") + "/"
-    check_http(base)
+    if not args.entry_only:
+        check_http(base)
     with sync_playwright() as p:
         options = {"headless": True}
         if args.chromium:
             options["executable_path"] = args.chromium
         browser = p.chromium.launch(**options)
         try:
-            check_browser(browser, base)
-            check_browser(browser, base, mobile=True)
-            normal_motion(browser, base)
+            if not args.entry_only:
+                check_browser(browser, base)
+                check_browser(browser, base, mobile=True)
+                for viewport in MOTION_VIEWPORTS:
+                    normal_motion(browser, base, viewport)
+            entry_accessibility(browser, base)
         finally:
             browser.close()
     print("All original-site browser checks passed.", flush=True)

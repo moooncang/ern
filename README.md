@@ -47,11 +47,17 @@ python -m http.server 8765
 
 브라우저에서 `http://localhost:8765/`를 연다.
 
-## 원래 기획을 유지한 재질 보강
+## 원래 기획을 유지한 디자인 보강
 
-문구와 쪽 구성, 인물 구도는 `PLAN.md`를 기준으로 유지한다. 재질 표현만 `assets/css/materials.css`에서 보강한다.
+문구와 쪽 구성, 인물 구도는 `PLAN.md`를 기준으로 유지한다. `assets/css/materials.css`는 기본 재질, `craft.css`는 내부 화면의 마감·정렬·반응형 배치, `entry.css`는 봉투와 서임장의 표현을 담당한다.
 
-- `images/ui/wax-seal.webp`: 기존 참나무잎 문양으로 제작한 투명 밀랍 에셋. 원래 인장 위치와 갈라지는 동작에 사용한다.
+- `images/ui/wax-seal.webp`: 기존 참나무잎 문양으로 제작한 투명 밀랍 에셋. 봉투 봉인과 명부·문서의 인장에 사용한다.
+- `images/ui/envelope.webp`, `letter-sheet.webp`: 접힌 덮개·금박·종이 두께를 표현한 봉투와 서임장 이미지. 봉인을 떼면 덮개가 열리고 서임장이 나타난다.
+- `images/ui/leather-plate.webp`, `banner-cloth.webp`: 인물·영지 명패와 세력 깃발에 사용하는 가죽·직물 이미지.
 - `images/ui/parchment.webp`: 기존 양피지 색 위에 약하게 적용하는 종이결.
 - `_build/engraving.py`: 기존 지도·영지 SVG에 더하는 세부 판화선. 설정·지역·성장 단계는 바꾸지 않는다.
 - `assets/css/fonts.css`, `assets/fonts/`: 원래 세 글꼴과 두께를 그대로 자체 호스팅한다. OFL 라이선스와 출처는 해당 폴더에 있다.
+
+입장 화면은 320px 모바일부터 가로 화면까지 중앙에 정렬하며, 열린 서임장이 화면보다 길면 세로로 스크롤된다. 키보드로 봉인을 열 수 있고, 이름 입력 중 Enter를 누르면 확인 버튼으로 이동한다. 동작 줄이기 설정도 따른다.
+
+원문·기획 보존 검사는 `python3 tests/preserve_plan.py`로 실행한다. 미리 보기 서버와 Playwright·Chromium을 준비하면 `python3 tests/original_smoke.py --base-url http://127.0.0.1:8766/`으로 18쪽의 기능과 입장 화면의 정렬·키보드 동작을 확인할 수 있다.

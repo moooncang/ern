@@ -170,30 +170,64 @@
     if (e.key === 'm' || e.key === 'M') sfx.toggle();
   });
 
-  /* ── 입장: 봉인을 떼면 서임장이 펼쳐지고, 한 줄씩 적힌다 ── */
+  /* ── 입장: 밀랍 → 봉투 덮개 → 서임장. 입력과 이동은 명시적으로 한다. ── */
   const writ = $('[data-writ]');
   if (writ) {
-    const seal = $('[data-seal]'), inp = $('[data-domain-input]', writ), enter = $('[data-enter]', writ), lines = $$('.ln', writ);
-    let state = 'idle';
+    const seal = $('[data-seal]', writ), inp = $('[data-domain-input]', writ);
+    const enter = $('[data-enter]', writ), body = $('.writ-body', writ), lines = $$('.ln', writ);
+    let state = 'sealed';
+    body.inert = true;
+    const ready = () => {
+      state = 'ready'; writ.dataset.state = state; body.inert = false;
+      $('.envelope-art', writ).removeAttribute('style'); seal.removeAttribute('style');
+      lines.forEach(line => line.classList.add('on'));
+      inp.focus({ preventScroll: true });
+      const box = inp.getBoundingClientRect();
+      if (box.top < 16 || box.bottom > innerHeight - 16) inp.scrollIntoView({ block: 'center', behavior: 'auto' });
+    };
     const open = () => {
-      if (state !== 'idle') return;
-      state = 'open'; d.body.classList.add('open'); sfx.play('crack');
-      lines.forEach((ln, i) => setTimeout(() => { ln.classList.add('on'); if (i < 2) sfx.play('quill', 0); }, reduce ? 0 : 900 + i * 850));
-      setTimeout(() => { if (state === 'open') state = 'ready'; if (fine) inp.focus({ preventScroll: true }); }, reduce ? 0 : 900 + lines.length * 850);
+      if (state !== 'sealed') return;
+      // Keep the physical envelope and seal at their original dimensions while
+      // the taller letter takes its place in the responsive document flow.
+      const envelope = $('.envelope-art', writ), stationery = $('.stationery', writ);
+      const paperBox = envelope.getBoundingClientRect(), sealBox = seal.getBoundingClientRect();
+      state = 'opening'; writ.dataset.state = state;
+      seal.setAttribute('aria-expanded', 'true'); seal.setAttribute('tabindex', '-1');
+      d.body.classList.add('open'); sfx.play('crack');
+      if (!reduce) {
+        const scene = stationery.getBoundingClientRect();
+        Object.assign(envelope.style, {
+          left: `${paperBox.left - scene.left}px`, top: `${paperBox.top - scene.top}px`,
+          width: `${paperBox.width}px`, height: `${paperBox.height}px`, right: 'auto', bottom: 'auto',
+        });
+        seal.style.left = `${sealBox.left + sealBox.width / 2 - scene.left}px`;
+        seal.style.top = `${sealBox.top + sealBox.height / 2 - scene.top}px`;
+      }
+      lines.forEach((line, i) => setTimeout(() => {
+        line.classList.add('on');
+        if (i < 2) sfx.play('quill', 0);
+      }, reduce ? 0 : 800 + i * 160));
+      if (reduce) ready(); else setTimeout(ready, 1600);
     };
     const go = () => {
-      if (state === 'go' || state === 'idle') return;
-      state = 'go'; sfx.play('stamp'); d.body.classList.add('go');
-      setTimeout(() => { location.href = enter.href; }, reduce ? 0 : 650);
+      if (state !== 'ready') return;
+      state = 'leaving'; writ.dataset.state = state;
+      sfx.play('stamp'); d.body.classList.add('go');
+      setTimeout(() => { location.href = enter.href; }, reduce ? 0 : 500);
     };
-    seal.addEventListener('click', e => { e.preventDefault(); open(); });
-    enter.addEventListener('click', e => { e.preventDefault(); go(); });
-    d.addEventListener('keydown', e => {
-      if (e.metaKey || e.ctrlKey || e.altKey || e.key === 'Tab' || e.key === 'Shift') return;
-      if (state === 'idle') { if (e.target !== seal && !e.target.closest('.snd')) { e.preventDefault(); open(); } }
-      else if (e.key === 'Enter' && e.target !== enter) { e.preventDefault(); go(); }
+    seal.addEventListener('click', event => { event.preventDefault(); open(); });
+    seal.addEventListener('keydown', event => {
+      if (event.key === ' ' && !event.isComposing) { event.preventDefault(); open(); }
     });
-    addEventListener('pageshow', e => { if (e.persisted) { d.body.classList.remove('go'); state = 'ready'; } });
+    enter.addEventListener('click', event => { event.preventDefault(); go(); });
+    inp.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); enter.focus(); }
+    });
+    addEventListener('pageshow', event => {
+      if (!event.persisted) return;
+      d.body.classList.remove('go');
+      if (state === 'leaving') { state = 'ready'; writ.dataset.state = state; body.inert = false; }
+    });
   }
 
   /* ── home: 첫 화면 인물 띠가 마우스를 따라 살짝 움직인다 ── */

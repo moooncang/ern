@@ -1,0 +1,86 @@
+/* The same royal writ, rendered as actual folded stationery. */
+.cover{
+  min-height:100svh;height:auto;display:grid;place-items:center;
+  padding:clamp(24px,4vh,48px) 20px;overflow:visible;overflow-x:clip;
+}
+.cover>main{width:min(100%,760px);min-width:0;display:grid;place-items:center}
+.cover-tools{top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right))}
+.cover-tools .snd{width:42px;height:42px;background:rgb(246 236 214/.6);box-shadow:0 0 0 1px rgb(168 132 63/.2)}
+.cover .writ{
+  width:100%;max-width:760px;min-width:0;margin-inline:auto;padding:0;
+  text-align:center;background:none;box-shadow:none;animation:settle 1.2s var(--ease) both;
+  transition:transform .5s var(--ease),opacity .5s;
+}
+.stationery{position:relative;isolation:isolate;aspect-ratio:3/2;perspective:1600px}
+.envelope-art{position:absolute;inset:0;filter:drop-shadow(0 22px 20px rgb(77 49 21/.19));transition:transform 1.1s var(--ease),opacity .65s .7s}
+.envelope-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
+.envelope-lining{position:absolute;inset:5% 2.3% 5%;background:var(--paper2) url(../../images/ui/parchment.webp) center/512px;box-shadow:inset 0 12px 25px rgb(98 66 26/.17);clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+.envelope-pocket{clip-path:polygon(1.8% 16.7%,50% 75.5%,98.2% 16.7%,100% 100%,0 100%);z-index:2}
+.envelope-flap{clip-path:polygon(0 0,100% 0,100% 17%,50% 75.6%,0 17%);transform-origin:50% 5%;z-index:3;backface-visibility:hidden;transition:transform 1.1s var(--ease) .15s,filter .8s}
+.letter-sheet{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:0;z-index:1;pointer-events:none;filter:drop-shadow(0 17px 24px rgb(77 49 21/.2));transform:translateY(40px) scale(.94);transition:opacity .65s .45s,transform 1s var(--ease) .35s}
+.writ-content{position:absolute;top:24%;left:10%;width:80%;z-index:4}
+.cover .writ h1{font-size:clamp(1.35rem,3.65vw,2.25rem);line-height:1.5;letter-spacing:-.025em;text-shadow:0 1px 0 rgb(255 255 255/.25)}
+.cover .writ .en{font-size:clamp(.55rem,1.15vw,.8125rem);letter-spacing:.25em;line-height:1.6;margin-top:15px}
+.cover .writ-body{visibility:hidden;grid-template-rows:0fr;transition:none}
+.cover .writ-body>div{min-height:0}
+.cover .hint{margin:18px 0 0;font-size:.875rem;line-height:1.7;letter-spacing:.04em;color:var(--soft)}
+.cover .seal{
+  width:clamp(74px,13vw,118px);height:auto;aspect-ratio:1;left:50%;top:75%;bottom:auto;
+  margin:0;translate:-50% -50%;z-index:6;
+  filter:drop-shadow(1px 6px 5px rgb(64 23 12/.38));animation:seal-breathe 4s ease-in-out 1.2s infinite;
+}
+.cover .seal:focus-visible{outline:2px solid var(--wax);outline-offset:8px;border-radius:50%}
+.cover .seal:hover{animation-play-state:paused;transform:scale(1.045)}
+.cover:not(.open) .seal .l,.cover:not(.open) .seal .r{visibility:hidden}
+.cover.open .seal .whole{visibility:hidden}
+@keyframes seal-breathe{50%{filter:drop-shadow(1px 8px 8px rgb(64 23 12/.43))}}
+.cover.open .writ{max-width:620px;animation:none}
+.cover.open .stationery{aspect-ratio:3/4;padding:24% 13.5% 16%;}
+.cover.open .envelope-art{transform:translateY(70px) scale(.93);opacity:0}
+.cover.open .envelope-flap{transform:rotateX(160deg);filter:brightness(.8)}
+.cover.open .letter-sheet{opacity:1;transform:none}
+.cover.open .writ-content{position:relative;top:auto;left:auto;width:100%;animation:ink-in .8s .6s both}
+.cover.open .writ h1{font-size:clamp(1.45rem,3vw,1.9rem);line-height:1.6}
+.cover.open .writ .en{font-size:.625rem;letter-spacing:.19em;margin-top:12px}
+.cover.open .writ-body{visibility:visible;grid-template-rows:1fr}
+.cover.open .writ-body>div{overflow:visible}
+.cover.open .hint{display:none}
+.cover.open .seal{animation:none;pointer-events:none;outline:none}
+.cover.open .seal .l{transform:translate(-60px,40px) rotate(-35deg);opacity:0}
+.cover.open .seal .r{transform:translate(60px,45px) rotate(30deg);opacity:0}
+.cover .writ[data-state=ready] .envelope-art,.cover .writ[data-state=ready] .seal{visibility:hidden}
+.cover .ln{font-size:clamp(.875rem,1.5vw,1rem);line-height:2;clip-path:none;opacity:0;translate:0 8px;transition:opacity .45s,translate .45s;margin-top:24px}
+.cover .ln.on{opacity:1;translate:0 0}
+.cover .sign{display:grid;justify-items:center;gap:10px;padding-top:10px}
+.cover .sign label{font-size:.8125rem;letter-spacing:.08em}
+.cover .sign input{margin:0;width:min(100%,13em);max-width:100%;padding:8px 8px 10px;font-size:1.25rem;line-height:1.5;border-bottom-color:var(--gold-ink);background:linear-gradient(transparent,rgb(255 251 232/.3))}
+.cover .sign input:focus-visible{outline:2px solid var(--gold);outline-offset:5px;border-bottom:1px solid var(--wax)}
+.cover .writ .btn{padding:14px 30px;min-height:48px;font-size:.9375rem}
+.cover.go .writ{transform:translateY(-10px) scale(1.02);filter:none;opacity:0}
+@keyframes ink-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media(max-width:600px){
+  .cover{padding:32px 14px}
+  .cover .writ h1{font-size:clamp(1.2rem,4.5vw,1.6rem);line-height:1.6}
+  .writ-content{top:23%;left:9%;width:82%}
+  .cover .writ .en{font-size:clamp(.48rem,1.6vw,.65rem);letter-spacing:.12em;margin-top:10px}
+  .cover .hint{font-size:.75rem;margin-top:14px}
+  .cover .seal{width:clamp(64px,19vw,90px)}
+  .cover.open .stationery{padding:27% 10% 20%;aspect-ratio:auto;min-height:calc((100vw - 28px)*1.4)}
+  .cover.open .writ h1{font-size:clamp(1.3rem,5vw,1.6rem);line-height:1.65}
+  .cover.open .writ .en{font-size:.53rem;letter-spacing:.14em;line-height:1.8;margin-top:10px}
+  .cover .ln{font-size:.875rem;line-height:1.9;margin-top:22px}
+  .cover .sign{padding-top:4px;gap:8px}
+  .cover .sign input{font-size:1.15rem}
+  .cover .writ .btn{font-size:.875rem;padding:13px 24px}
+}
+@media(max-height:540px) and (min-width:601px){
+  .cover{padding:20px}
+  .cover:not(.open)>main{width:min(100%,600px)}
+  .cover:not(.open) .hint{margin-top:6px}
+  .cover:not(.open) .writ h1{font-size:1.8rem}
+}
+@media(prefers-reduced-motion:reduce){
+  .cover .writ-content,.cover .seal{animation:none!important}
+  .cover .ln{translate:none}
+  .cover .letter-sheet,.cover .envelope-art,.cover .envelope-flap{transition:none}
+}

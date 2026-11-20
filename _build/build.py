@@ -73,6 +73,8 @@ def shell(파일, 머리제목, 본문, cover=False, pre=""):
 <link rel="stylesheet" href="{pre}assets/css/fonts.css">
 <link rel="stylesheet" href="{pre}assets/css/style.css">
 <link rel="stylesheet" href="{pre}assets/css/materials.css">
+<link rel="stylesheet" href="{pre}assets/css/craft.css">
+<link rel="stylesheet" href="{pre}assets/css/entry.css">
 </head>
 <body{' class="cover"' if cover else ''} data-default-domain="{e(d.기본_영지명)}">
 {SPRITE.replace("@@ASSET_ROOT@@", pre)}
@@ -280,14 +282,25 @@ def index():
                    [(8, 78, .9), (52, 96, .6), (97, 70, 1), (141, 104, .7), (186, 82, .8),
                     (228, 98, .6), (263, 74, 1), (312, 90, .7), (338, 110, .5)])
     return shell("index.html", "", f"""
-<div class="writ" data-writ>
-  <h1>{e(d.제목)}</h1>
-  <p class="en">{e(d.칙서_라벨)}</p>
-  <div class="writ-body"><div>{lines}
-    <p class="ln sign"><label for="dn">영지의 이름</label><input id="dn" data-domain-input maxlength="12" placeholder="{e(d.기본_영지명)}" autocomplete="off" spellcheck="false" enterkeyhint="go"></p>
-    <p class="ln"><a class="btn" href="home.html" data-enter>봉토를 받는다</a></p></div></div>
+<div class="writ" data-writ data-state="sealed">
+  <div class="stationery">
+    <div class="envelope-art" aria-hidden="true">
+      <div class="envelope-lining"></div>
+      <img class="envelope-pocket" src="images/ui/envelope.webp" alt="" width="1536" height="1024" fetchpriority="high">
+      <img class="envelope-flap" src="images/ui/envelope.webp" alt="" width="1536" height="1024">
+    </div>
+    <img class="letter-sheet" src="images/ui/letter-sheet.webp" alt="" aria-hidden="true" width="1086" height="1448">
+    <div class="writ-content">
+      <h1>{e(d.제목)}</h1>
+      <p class="en">{e(d.칙서_라벨)}</p>
+      <div class="writ-body" id="writ-body" inert><div>{lines}
+        <p class="ln sign"><label for="dn">영지의 이름</label><input id="dn" data-domain-input maxlength="12" placeholder="{e(d.기본_영지명)}" autocomplete="off" spellcheck="false" enterkeyhint="next"></p>
+        <p class="ln"><a class="btn" href="home.html" data-enter>봉토를 받는다</a></p>
+      </div></div>
+    </div>
+    <a class="seal" href="home.html" role="button" data-seal aria-label="봉인을 떼고 서임장 펼치기" aria-controls="writ-body" aria-expanded="false"><span class="bits" aria-hidden="true">{bits}</span><svg class="l" aria-hidden="true"><use href="#wax"/></svg><svg class="r" aria-hidden="true"><use href="#wax"/></svg><svg class="whole" aria-hidden="true"><use href="#wax"/></svg></a>
+  </div>
   <p class="hint">인장을 눌러 봉인을 뗍니다</p>
-  <a class="seal" href="home.html" data-seal aria-label="봉인을 떼고 서임장 펼치기"><span class="bits" aria-hidden="true">{bits}</span><svg class="l" aria-hidden="true"><use href="#wax"/></svg><svg class="r" aria-hidden="true"><use href="#wax"/></svg></a>
 </div>""", cover=True)
 
 

@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Verify that material polish preserves the original site and its content.
+"""Preserve the original story/site while allowing the approved envelope design.
 
 Baselines were captured from commit bceb51b. No Git history, packages, or server
-are needed to run this check. Only SVG interior artwork, head configuration,
-and inline script bodies are excluded; outer SVG attributes still fix bounds.
+are needed to run this check. The entry may change wrappers, classes and layout,
+but keeps its original copy and seal/name/home semantics. The other 17 pages
+keep their original body structure. SVG artwork and head wiring are excluded.
 """
 from hashlib import sha256
 from html.parser import HTMLParser
 import json
 from pathlib import Path
+import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -77,6 +79,7 @@ BASELINE = {
             "text": "7c9cddda820bf89493d924eab5e75dadaf23105511ac6d768432d18996927538"
         },
         "index.html": {
+            "content": "ef4f7d94851a72f3e8fe8e1efb953c1f2301b61a4954a58cd0ebcef5d463bfda",
             "structure": "b873050a5ef53b189e6068cd30639fcb6515d6bb0a3f65e2256956378c0a8abe",
             "text": "f3c89b1ff35fafb4223ebf5087b3d11cc7ae012a3d20fdfe523db99473df0a3b"
         },
@@ -105,6 +108,7 @@ class BodySignature(HTMLParser):
         self.script_depth = 0
         self.structure = []
         self.words = []
+        self.elements = []
 
     def handle_starttag(self, tag, attrs):
         if tag == "body":
@@ -115,6 +119,7 @@ class BodySignature(HTMLParser):
             if tag == "svg":
                 self.svg_depth += 1
             return
+        self.elements.append((tag, dict(attrs)))
         self.structure.append(["start", tag, sorted(attrs)])
         if tag == "svg":
             self.svg_depth = 1
@@ -138,6 +143,7 @@ class BodySignature(HTMLParser):
 
     def handle_startendtag(self, tag, attrs):
         if self.in_body and not self.svg_depth:
+            self.elements.append((tag, dict(attrs)))
             self.structure.append(["empty", tag, sorted(attrs)])
 
     def handle_data(self, data):
@@ -153,7 +159,41 @@ def signatures(html):
     return {
         "structure": sha256(structure.encode()).hexdigest(),
         "text": sha256(text.encode()).hexdigest(),
+        "content": sha256(json.dumps(sorted(re.findall(r"\S+", text)), ensure_ascii=False).encode()).hexdigest(),
     }
+
+
+def entry_contracts(html):
+    """Check the entry's user-facing contract without prescribing its geometry."""
+    parser = BodySignature()
+    parser.feed(html)
+    errors = []
+    elements = parser.elements
+
+    def marked(attribute):
+        return [(tag, attrs) for tag, attrs in elements if attribute in attrs]
+
+    for attribute in ("data-writ", "data-seal", "data-domain-input", "data-enter"):
+        if len(marked(attribute)) != 1:
+            errors.append(f"entry requires exactly one [{attribute}]")
+    if sum(tag == "main" for tag, _ in elements) != 1:
+        errors.append("entry requires one main landmark")
+    names = marked("data-domain-input")
+    if len(names) == 1:
+        tag, attrs = names[0]
+        if tag != "input" or attrs.get("maxlength") != "12":
+            errors.append("entry name must remain a 12-character input")
+        if not attrs.get("id") or not any(t == "label" and a.get("for") == attrs["id"] for t, a in elements):
+            errors.append("entry name input requires its visible label")
+    enters = marked("data-enter")
+    if len(enters) == 1 and (enters[0][0] != "a" or enters[0][1].get("href") != "home.html"):
+        errors.append("entry CTA must retain its home.html destination")
+    seals = marked("data-seal")
+    if len(seals) == 1:
+        tag, attrs = seals[0]
+        if tag not in ("a", "button") or not attrs.get("aria-label"):
+            errors.append("seal must remain a named keyboard-operable control")
+    return errors
 
 
 def main():
@@ -163,10 +203,14 @@ def main():
         if not path.is_file():
             failures.append(f"{name}: original page missing")
             continue
-        actual = signatures(path.read_text(encoding="utf-8"))
-        for part in ("structure", "text"):
+        html = path.read_text(encoding="utf-8")
+        actual = signatures(html)
+        parts = ("content",) if name == "index.html" else ("structure", "text")
+        for part in parts:
             if actual[part] != expected[part]:
                 failures.append(f"{name}: original body {part} changed")
+        if name == "index.html":
+            failures.extend(f"index.html: {message}" for message in entry_contracts(html))
     actual_pages = {p.relative_to(ROOT).as_posix() for p in ROOT.glob("*.html")} | {
         p.relative_to(ROOT).as_posix() for p in (ROOT / "char").glob("*.html")
     }
@@ -182,7 +226,8 @@ def main():
         for failure in failures:
             print(f"  - {failure}", file=sys.stderr)
         return 1
-    print(f"PASS: {len(BASELINE['pages'])} original pages preserve body text and structure, including image locations, classes, order, and SVG bounds.")
+    print("PASS: entry preserves original copy and seal/name/home semantics while allowing its new envelope layout.")
+    print("PASS: other 17 pages preserve original text, image locations, structure, and order.")
     print("PASS: original PLAN.md, _build/data.py, and assets/css/style.css are byte-for-byte unchanged.")
     return 0
 

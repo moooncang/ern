@@ -13,6 +13,8 @@
 <link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="assets/css/materials.css">
+<link rel="stylesheet" href="assets/css/craft.css">
+<link rel="stylesheet" href="assets/css/entry.css">
 </head>
 <body class="cover" data-default-domain="에른">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -32,14 +34,25 @@
 <div class="cover-tools"><button class="snd" type="button" aria-pressed="true" aria-label="효과음 (M)" title="효과음 (M)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3l4-3.5v12l-4-3.5H4z"/><path class="w" d="M14.5 9a4 4 0 0 1 0 6M17 6.5a7.5 7.5 0 0 1 0 11"/><path class="x" d="M15 9.5l5 5m0-5l-5 5"/></svg></button></div>
 <main>
 
-<div class="writ" data-writ>
-  <h1>변경의 신임 영주가 되었다</h1>
-  <p class="en">ROYAL WRIT · KINGDOM OF ORTEN</p>
-  <div class="writ-body"><div><p class="ln">오르텐의 왕은 이 문서를 지닌 자에게 왕국 동쪽 끝, 에른 변경의 땅을 봉토로 내린다.</p><p class="ln">받은 자는 가을 수확 뒤 공납을 바치고, 소집이 있으면 병력을 낸다.</p>
-    <p class="ln sign"><label for="dn">영지의 이름</label><input id="dn" data-domain-input maxlength="12" placeholder="에른" autocomplete="off" spellcheck="false" enterkeyhint="go"></p>
-    <p class="ln"><a class="btn" href="home.html" data-enter>봉토를 받는다</a></p></div></div>
+<div class="writ" data-writ data-state="sealed">
+  <div class="stationery">
+    <div class="envelope-art" aria-hidden="true">
+      <div class="envelope-lining"></div>
+      <img class="envelope-pocket" src="images/ui/envelope.webp" alt="" width="1536" height="1024" fetchpriority="high">
+      <img class="envelope-flap" src="images/ui/envelope.webp" alt="" width="1536" height="1024">
+    </div>
+    <img class="letter-sheet" src="images/ui/letter-sheet.webp" alt="" aria-hidden="true" width="1086" height="1448">
+    <div class="writ-content">
+      <h1>변경의 신임 영주가 되었다</h1>
+      <p class="en">ROYAL WRIT · KINGDOM OF ORTEN</p>
+      <div class="writ-body" id="writ-body" inert><div><p class="ln">오르텐의 왕은 이 문서를 지닌 자에게 왕국 동쪽 끝, 에른 변경의 땅을 봉토로 내린다.</p><p class="ln">받은 자는 가을 수확 뒤 공납을 바치고, 소집이 있으면 병력을 낸다.</p>
+        <p class="ln sign"><label for="dn">영지의 이름</label><input id="dn" data-domain-input maxlength="12" placeholder="에른" autocomplete="off" spellcheck="false" enterkeyhint="next"></p>
+        <p class="ln"><a class="btn" href="home.html" data-enter>봉토를 받는다</a></p>
+      </div></div>
+    </div>
+    <a class="seal" href="home.html" role="button" data-seal aria-label="봉인을 떼고 서임장 펼치기" aria-controls="writ-body" aria-expanded="false"><span class="bits" aria-hidden="true"><i style="--a:8deg;--r:78px;--s:0.9"></i><i style="--a:52deg;--r:96px;--s:0.6"></i><i style="--a:97deg;--r:70px;--s:1"></i><i style="--a:141deg;--r:104px;--s:0.7"></i><i style="--a:186deg;--r:82px;--s:0.8"></i><i style="--a:228deg;--r:98px;--s:0.6"></i><i style="--a:263deg;--r:74px;--s:1"></i><i style="--a:312deg;--r:90px;--s:0.7"></i><i style="--a:338deg;--r:110px;--s:0.5"></i></span><svg class="l" aria-hidden="true"><use href="#wax"/></svg><svg class="r" aria-hidden="true"><use href="#wax"/></svg><svg class="whole" aria-hidden="true"><use href="#wax"/></svg></a>
+  </div>
   <p class="hint">인장을 눌러 봉인을 뗍니다</p>
-  <a class="seal" href="home.html" data-seal aria-label="봉인을 떼고 서임장 펼치기"><span class="bits" aria-hidden="true"><i style="--a:8deg;--r:78px;--s:0.9"></i><i style="--a:52deg;--r:96px;--s:0.6"></i><i style="--a:97deg;--r:70px;--s:1"></i><i style="--a:141deg;--r:104px;--s:0.7"></i><i style="--a:186deg;--r:82px;--s:0.8"></i><i style="--a:228deg;--r:98px;--s:0.6"></i><i style="--a:263deg;--r:74px;--s:1"></i><i style="--a:312deg;--r:90px;--s:0.7"></i><i style="--a:338deg;--r:110px;--s:0.5"></i></span><svg class="l" aria-hidden="true"><use href="#wax"/></svg><svg class="r" aria-hidden="true"><use href="#wax"/></svg></a>
 </div>
 </main>
 
